@@ -76,7 +76,7 @@ def pre_data():
 		line1 = json.loads(line)
 		all_cart.append(line1)
 
-	for i in xrange(len(all_cart)):
+	for i in range(len(all_cart)):
 		item_train = []
 		item_test = []
 		weekday_train = []
@@ -117,7 +117,7 @@ def train(user_cart, weekday_cart, month_cart, interval_cart):
 	dhlist = []							# bpr中对h的导数
 	hiddenlist = []						# 记录[1,T]状态hidden layer (不包括1的上一个状态的hidden layer)
 	midlist = []						# BPTT中传到第一层的导数 sigmoid(bi)*(1-sigmoid(bi))
-	hl = np.copy(H_ZERO)				# 初始化last hidden layer	
+	hl = np.copy(H_ZERO)				# 初始化last hidden layer
 	sumdUW = [] 						# 记录对于每一个用户BPTT中u、w总	更新量
 	sumdUM = []
 	sumdV = []
@@ -131,8 +131,8 @@ def train(user_cart, weekday_cart, month_cart, interval_cart):
 
 	# BPR
 	dh1 = np.copy(H_ZERO)				# dh for the back process
-	
-	for i in xrange(len(user_cart)-1):
+
+	for i in range(len(user_cart)-1):
 		# 对于要预测的item进行负采样
 		neg = random.randint(1, ITEM_SIZE)
 		while (user_cart[i+1]) == neg:
@@ -167,7 +167,7 @@ def train(user_cart, weekday_cart, month_cart, interval_cart):
 
 		hiddenlist.append(h)
 		mid = h * (1 - h)
-		midlist.append(mid)	
+		midlist.append(mid)
 		dhlist.append(tmp * np.dot(item_pos - item_neg, (uw_next.T + um_next.T + v_next.T)))		# save the dh for each bpr step
 
 		# 计算对于负样本的导数 并更新负样本的vector
@@ -213,7 +213,7 @@ def train(user_cart, weekday_cart, month_cart, interval_cart):
 		X[user_cart[i]-1, :] += -LEARNING_RATE*(dx.reshape(HIDDEN_SIZE, ) + LAMBDA * X[user_cart[i]-1, :])
 
 		dh1 = np.dot(dh * midlist[i], v_now.T)
-		
+
 	for month in range(3):
 		UMF[month] += -LEARNING_RATE * (sumdUM[month] + LAMBDA * UMF[month])
 	for weekday in range(7):
@@ -228,11 +228,11 @@ def predict():
 	hit = {}				# 第n个位置所命中的个数
 	recall = {}				# 前n个位置所命中的总数
 	recallatx = {}			# RecallAtN/relevant
-	
+
 	for i in range(TOP):
 		hit[i+1] = 0
 		recall[i+1] = 0
-	
+
 	for n in ITEM_TEST.keys():
 		item_train = ITEM_TRAIN[n]
 		item_test = ITEM_TEST[n]
@@ -258,7 +258,7 @@ def predict():
 			h = sigmoid(b)
 			hl = h
 		# 预测
-		for j in xrange(len(item_test)):
+		for j in range(len(item_test)):
 			month_now = month_test[j]
 			weekday_now = weekday_test[j]
 			interval_now = interval_test[j]
@@ -290,15 +290,15 @@ def predict():
 	for i in range(20):
 		recallatx[i+1] = recall[i+1]/relevant
 
-	print relevant
-	print recall
-	print recallatx
+	print(relevant)
+	print(recall)
+	print(recallatx)
 	return recall, recallatx
 
 
 def basic_info():
-	print "LEARNING_RATE = %f" % LEARNING_RATE
-	print "LAMBDA = %f" % LAMBDA
+	print("LEARNING_RATE = %f" % LEARNING_RATE)
+	print("LAMBDA = %f" % LAMBDA)
 
 def save_max(result, n, iter):
 	'''
@@ -310,16 +310,16 @@ def save_max(result, n, iter):
 		RECALL_MAX = result
 		ITER_MAX = iter
 
-	print "Best Result At Iter %i" %ITER_MAX
-	print RECALL_MAX
+	print("Best Result At Iter %i" %ITER_MAX)
+	print(RECALL_MAX)
 
 def learn():
 	ite = 0
 	while (ite<=800):
 		f_handler = open('result/Input+Transition.txt','a')
 		sys.stdout=f_handler
-		print "Iter %d" % ite
-		print "Training..."
+		print("Iter %d" % ite)
+		print("Training...")
 		sumloss = 0
 		for i in ITEM_TRAIN.keys():
 			user_cart = ITEM_TRAIN[i]
@@ -329,8 +329,8 @@ def learn():
 			loss = train(user_cart, weekday_cart, month_cart, interval_cart)
 			sumloss += loss
 
-		print "begin predict"
-		print sumloss
+		print("begin predict")
+		print(sumloss)
 
 		recall, recallatx = predict()
 		save_max(recallatx, 10, ite)
