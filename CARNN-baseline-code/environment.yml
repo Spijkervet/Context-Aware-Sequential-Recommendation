@@ -1,0 +1,5 @@
+name: ir2
+channels:
+  - defaults
+prefix: C:\Users\Kim\Anaconda3\envs\ir2
+
