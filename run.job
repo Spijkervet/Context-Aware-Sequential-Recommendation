@@ -1,9 +1,14 @@
 #!/bin/sh
-module load python
+# module load python
 
 pip3 install virtualenv
 python3 -m venv ir2
 
-. ir2/bin/activate
+# virtualenv ir2
+
+# . ir2/bin/activate
+
 pip3 install -r requirements.txt
+
+sh download_data.sh
 python3 main.py
