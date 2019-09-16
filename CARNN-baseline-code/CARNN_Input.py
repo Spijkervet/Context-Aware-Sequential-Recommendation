@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*
 
+'''
+CA-RNN Input: with only input contexts
+'''
+
 import numpy as np
 import random
 import json
@@ -7,24 +11,41 @@ import pickle
 import sys
 
 
-USER_SIZE = 1904			# 总用户数
-ITEM_SIZE = 1157			# 总商品种数
-HIDDEN_SIZE = 10			# hidden layer的维度
-LEARNING_RATE = 0.01 		# 学习速率
-LAMBDA = 0.001 				# 惩罚系数
-TOP = 20 					# recall取前Top个
+# total number of users and items  in data
+USER_SIZE = 1904
+ITEM_SIZE = 1157
+
+# dimensionality of hidden layer
+HIDDEN_SIZE = 10
+
+LEARNING_RATE = 0.01
+
+# penalty rate
+LAMBDA = 0.001
+
+# recall calculated at top 20
+TOP = 20
 
 H_ZERO = np.zeros((1, HIDDEN_SIZE))
 X = np.random.randn(ITEM_SIZE, HIDDEN_SIZE)*0.5
 W = np.random.randn(HIDDEN_SIZE, HIDDEN_SIZE)*0.5
-UWF = []		# 第一个weekday转移矩阵
-UWS = []		# 第二个weekday转移矩阵
-UMF = []		# 第一个month转移矩阵
-UMS = []		# 第二个month转移矩阵
-RECALL_MAX = {}		# 最优
-ITER_MAX = 0
+
+# first and second transfer matrices for weekday and month
+UWF = []
+UWS = []
+UMF = []
+UMS = []
+
+# for storing optimal recalls at TOP positions - initialize as zeroes
+RECALL_MAX = {}
 for i in range(TOP):
 	RECALL_MAX[i+1] = 0
+
+# stores the iteration at which optimal results were obtained
+ITER_MAX = 0
+
+# initialize weekday and month transfer matrices randomly
+# 7 dim for weekdays, 3 for month(?)
 for i in range (7):
 	uw = np.random.randn(HIDDEN_SIZE, HIDDEN_SIZE)*0.5
 	UWF.append(uw)
@@ -33,7 +54,9 @@ for i in range (3):
 	um = np.random.randn(HIDDEN_SIZE, HIDDEN_SIZE)*0.5
 	UMF.append(um)
 	UMS.append(um)
-DATAFILE = 'user_cart_input.json'		# 路径文件名
+
+# path file name
+DATAFILE = 'user_cart_input.json'
 
 ITEM_TRAIN = {}
 ITEM_TEST = {}
@@ -42,10 +65,8 @@ WEEKDAY_TEST = {}
 MONTH_TRAIN = {}
 MONTH_TEST = {}
 
+# train test split
 SPLIT = 0.9
-
-
-
 
 def sigmoid(x):
 	output = 1.0/(1.0+np.exp(-x))
@@ -54,7 +75,10 @@ def sigmoid(x):
 
 def pre_data():
 	"""
-	读取数据 初始化ITEM_TRAIN ITEM_TEST
+
+	Read data initialization
+
+	ITEM_TRAIN ITEM_TEST
 	"""
 
 	global ITEM_TRAIN
@@ -62,6 +86,7 @@ def pre_data():
 	global SPLIT
 	global DATAFILE
 
+	# store data from file in list all_cart
 	all_cart = []
 	data = open(DATAFILE, 'r')
 	lines = data.readlines()
@@ -70,25 +95,31 @@ def pre_data():
 		all_cart.append(line1)
 
 	for i in range(len(all_cart)):
+
 		item_train = []
 		item_test = []
 		weekday_train = []
 		weekday_test = []
 		month_train = []
 		month_test = []
+
+		# split behaviors into train and test
 		behavior_list = all_cart[i]
 		behavior_train = behavior_list[0:int(SPLIT*len(behavior_list))]
 		behavior_test = behavior_list[int(SPLIT*len(behavior_list)):]
+
 		for behavior in behavior_train:
-			item_train.append(behavior[0])		# behavior中第一个位置为商品编号
+			# at index 0 in behavior the item number is stored
+			item_train.append(behavior[0])
 			weekday_train.append(behavior[1])
 			month_train.append(behavior[2])
+
 		for behavior in behavior_test:
 			item_test.append(behavior[0])
 			weekday_test.append(behavior[1])
 			month_test.append(behavior[2])
 
-
+		# split cart items into different segments and store in dictionaries
 		ITEM_TRAIN[i] = item_train
 		ITEM_TEST[i] = item_test
 		WEEKDAY_TRAIN[i] = weekday_train
@@ -100,11 +131,20 @@ def pre_data():
 def train(user_cart, weekday_cart, month_cart):
 	global U, W, X
 
-	dhlist = []							# bpr中对h的导数
-	hiddenlist = []						# 记录[1,T]状态hidden layer (不包括1的上一个状态的hidden layer)
-	midlist = []						# BPTT中传到第一层的导数 sigmoid(bi)*(1-sigmoid(bi))
-	hl = np.copy(H_ZERO)				# 初始化last hidden layer
-	sumdUW = [] 						# 记录对于每一个用户BPTT中u、w总	更新量
+	# derivative of h in BPR
+	dhlist = []
+
+	# Record [1,T] status hidden layer (hidden layer not including the previous state of 1)
+	hiddenlist = []
+
+	# BPTT The derivative that is passed to the first layer sigmoid(bi)*(1-sigmoid(bi))
+	midlist = []
+
+	# initialize last hidden layer
+	hl = np.copy(H_ZERO)
+
+	# Record the total update amount of u and w in each user BPTT
+	sumdUW = []
 	sumdUM = []
 	sumdw = 0
 	loss = 0
