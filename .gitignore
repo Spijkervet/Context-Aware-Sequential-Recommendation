@@ -1,4 +1,5 @@
 *.csv
 *.json.gz
+*.json
 ir2/
 __pycache__/
