@@ -13,18 +13,18 @@ class DummyModel(torch.nn.Module):
         self.vocabulary_size = vocabulary_size
         self.device = device
 
-        self.lstm = torch.nn.LSTM(
-            input_size=vocabulary_size,
-            hidden_size=lstm_num_hidden,
-            num_layers=lstm_num_layers,
-            dropout=dropout
-        )
+        # self.lstm = torch.nn.LSTM(
+        #     input_size=vocabulary_size,
+        #     hidden_size=lstm_num_hidden,
+        #     num_layers=lstm_num_layers,
+        #     dropout=dropout
+        # )
 
-        self.linear = torch.nn.Linear(lstm_num_hidden, vocabulary_size)
-        self.softmax = torch.nn.Softmax(dim=0)
+        # self.linear = torch.nn.Linear(lstm_num_hidden, vocabulary_size)
+        # self.softmax = torch.nn.Softmax(dim=0)
 
-        self.h = torch.zeros((lstm_num_hidden, 1)).to(device)
-        self.c = torch.zeros((lstm_num_hidden, 1)).to(device)
+        # self.h = torch.zeros((lstm_num_hidden, 1)).to(device)
+        # self.c = torch.zeros((lstm_num_hidden, 1)).to(device)
 
     def one_hot(self, x):
         t = torch.zeros((x.shape[0], x.shape[1], self.vocabulary_size)).to(self.device)

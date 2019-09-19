@@ -1,6 +1,16 @@
 # information_retrieval_2
 IR2 course UvA
 
+## Pulling this repository
+You can either pull the main repository or with all submodules to run the baselines:
+```
+git pull
+```
+or
+```
+git pull --recurse-submodules
+```
+
 ## Installation
 Run the following command to initialize the environment:
 ```
