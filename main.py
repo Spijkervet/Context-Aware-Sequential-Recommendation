@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 import numpy as np
 
+
 # Deep Learning lib
 import torch
 from torch.utils.data import DataLoader
@@ -55,25 +56,25 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # DATASET PARAMETERS
-    parser.add_argument('--raw_dataset')
-    parser.add_argument('--dataset', required=True)
-    parser.add_argument('--preprocess', action='store_true')
-    parser.add_argument('--limit', default=None, type=int)
+    parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
+    parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
+    parser.add_argument('--preprocess', action='store_true', help='Preprocess the raw dataset')
+    parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
     parser.add_argument('--train_dir', required=True)
 
     # TRAIN PARAMETERS
-    parser.add_argument('--batch_size', default=128, type=int)
+    parser.add_argument('--batch_size', default=128, type=int, help='Batch size')
     parser.add_argument('--learning_rate', type=float, default=2e-3, help='Learning rate')
-    parser.add_argument('--train_steps', default=100, type=int)
+    parser.add_argument('--train_steps', default=100, type=int, help='Number of training steps')
     parser.add_argument('--max_norm', type=float, default=5.0, help='--')
 
     # MODEL PARAMETERS
-    parser.add_argument('--seq_length', default=3, type=int)
-    parser.add_argument('--dropout_keep_prob', default=1.0, type=float)
+    parser.add_argument('--seq_length', default=3, type=int, help='Sequence length')
+    parser.add_argument('--dropout_keep_prob', default=1.0, type=float, help='Dropout')
 
     # MISC.
-    parser.add_argument('--saved_model', default='model.pt', type=str)
-    parser.add_argument('--device', default='cpu', type=str) #TODO: GPU
+    parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
+    parser.add_argument('--device', default='cpu', type=str, help='Device to run model on') #TODO: GPU
 
     config = parser.parse_args()
 
