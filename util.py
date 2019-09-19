@@ -7,7 +7,7 @@ from collections import defaultdict
 
 def data_partition(fpath):
     '''
-    Temporarily aken from https://github.com/kang205/SASRec/blob/master/util.py
+    Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
     '''
 
     usernum = 0
@@ -26,6 +26,7 @@ def data_partition(fpath):
         itemnum = max(i, itemnum)
         User[u].append(i)
 
+    # Partition data into three parts: train, valid, test.
     for user in User:
         nfeedback = len(User[user])
         if nfeedback < 3:

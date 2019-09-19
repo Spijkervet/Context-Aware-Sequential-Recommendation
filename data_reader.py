@@ -2,7 +2,6 @@ import gzip
 import json
 import os
 from tqdm import tqdm
-from data import Data
 import datetime
 from collections import defaultdict
 
