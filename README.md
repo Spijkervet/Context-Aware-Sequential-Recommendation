@@ -29,7 +29,7 @@ sh download_data.sh
 ## Run the program:
 The program accepts dataset/train/model parameters. An example:
 ```
-python3 main.py --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --preprocess --train_dir data/train --batch_size 128
+python3 main.py --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --preprocess --batch_size 128
 ```
 
 ## Parameters:

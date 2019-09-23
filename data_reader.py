@@ -24,13 +24,14 @@ class DataReader():
     }
     """
 
-    def __init__(self, path, dataset_fp, limit=None):
+    def __init__(self, path, dataset_fp, type, limit=None):
         self.path = path
         self.limit = limit
         self.dataset_fp = dataset_fp
+        self.type = type
         self.logger = logging.getLogger('ir2')
 
-    def parse(self):
+    def parse_amazon(self):
         g = gzip.open(self.path, 'rb')
         for i, l in enumerate(g):
             if self.limit and i > self.limit:
@@ -38,13 +39,31 @@ class DataReader():
             yield eval(l)
 
     def preprocess(self):
+        assert type(self.type) == str
+        if self.type == 'amazon':
+            self.preprocess_amazon()
+        elif self.type == 'movielens':
+            self.preprocess_movielens()
+
+    def parse_movielens(self):
+        f = open(self.path, 'r')
+        for l in f:
+            yield l.rstrip()
+
+    def preprocess_movielens(self):
+        f = open(self.dataset_fp, 'w')
+        for l in tqdm(self.parse_movielens(), total=1000000):
+            user, item, rating, timestamp = l.split('::')
+            f.write('{} {} {}\n'.format(user, item, timestamp))
+
+    def preprocess_amazon(self):
         countU = defaultdict(lambda: 0)
         countP = defaultdict(lambda: 0)
         total = 8898041 if not self.limit else self.limit
 
         logging.info('Reading and processing {}'.format(self.path))
         f = open(self.dataset_fp, 'w')
-        for l in tqdm(self.parse(), total=total):
+        for l in tqdm(self.parse_amazon(), total=total):
             f.write(" ".join([l['reviewerID'], l['asin'], str(l['overall']), str(l['unixReviewTime'])]) + ' \n')
             asin = l['asin']
             rev = l['reviewerID']
@@ -52,7 +71,6 @@ class DataReader():
             countU[rev] += 1
             countP[asin] += 1
         f.close()
-
 
         logging.info('Creating user map dictionary')
         usermap = dict()
@@ -92,7 +110,7 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
             for i in User[user]:
-                f.write('%d %d\n' % (user, i[1]))
+                f.write('%d %d %d\n' % (user, i[1], i[0]))
         f.close()
 
         # product map

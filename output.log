@@ -249,3 +249,27 @@
 2019-09-19 20:44:51,162 [MainThread  ] [INFO ]  Average sequence length: 6.98
 2019-09-19 20:44:57,466 [MainThread  ] [INFO ]  Average sequence length: 6.98
 2019-09-19 20:46:02,155 [MainThread  ] [INFO ]  Average sequence length: 6.98
+2019-09-20 21:40:25,179 [MainThread  ] [INFO ]  Average sequence length: 6.98
+2019-09-23 13:42:01,584 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 13:44:15,024 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 13:44:32,092 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 13:52:05,325 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-23 14:01:05,568 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-23 14:01:20,144 [MainThread  ] [INFO ]  Writing product item map
+2019-09-23 14:01:38,236 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-23 16:14:44,384 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 16:22:15,086 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-23 16:29:53,297 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-23 16:30:08,107 [MainThread  ] [INFO ]  Writing product item map
+2019-09-23 16:33:17,491 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-23 16:41:53,690 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 16:42:08,470 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 16:42:34,868 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:42:40,211 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:42:43,137 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:42:52,743 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:42:57,529 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:43:28,265 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-23 16:47:14,969 [MainThread  ] [INFO ]  Average sequence length: 163.60
+2019-09-23 16:49:02,092 [MainThread  ] [INFO ]  Average sequence length: 163.60
+2019-09-23 16:49:54,426 [MainThread  ] [INFO ]  Average sequence length: 163.60
