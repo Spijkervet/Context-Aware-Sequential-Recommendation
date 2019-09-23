@@ -20,11 +20,10 @@ USER_SIZE = None
 ITEM_SIZE = None			
 HIDDEN_SIZE = 40			
 LEARNING_RATE = 0.001 		
-TOP = 10 					
+TOP = 10 # top 10 statistics nDCG@10, HIT@10
+BEST_NDCG = 0
 OUTPUT_PATH = None
 OUTPUT_FILE = None
-
-BEST_F1_AT_10 = 0
 
 DATAFILE = None
 MODEL_FILE = None
@@ -112,18 +111,15 @@ def pre_data():
 		INTERVAL_TEST[i] = interval_test
 		
 def predict(model):
-	relevant = 0.0 			# The total number of predictions
-	hit = {}				# the number of hits in the nth position
+	relevant = 0.0 					# The total number of predictions
+	hit = {}						# the number of hits in the nth position
 	true_positives = {}				# The total number of hits in the first n positions (TP aka true positives)
-	recallatx = {}			# true_positives/relevant
-	precisionatx = {}	# true_positives/(revelant*k) for precision at k 
-	# NOTE: (relevant*k) represents selected items
-	f1atx = {} # F1 score = 2* (precision*recall)/(precision+recall)
 	# nDCG where grade for each item is 1
 	# nDCG  = DCG/IDCG where IDCG = 1/1
 	# because in ideal case, item should be in first position
 	nDCG = 0
 	nDCG_full = 0
+	hit_at_10 = 0
 
 	numUsers = 0 # num of users
 	numTestItem = 0
@@ -152,8 +148,6 @@ def predict(model):
 		h3 = None
 		logits = None
 
-		#User metrics 
-		usrHits = {}
 		# n represents each user cart, we increment user count
 		numUsers +=1
 
@@ -178,17 +172,17 @@ def predict(model):
 				probOfItems = F.softmax(logits,dim=0)
 			# topK returns tuple in the form (sorted values,sorted by index)
 
-
-			rankTuple = torch.topk(probOfItems,TOP)
+			rankTuple = torch.topk(probOfItems, TOP)
 			rank_index_list = rankTuple[1]
 
 			if item_test[j] in rank_index_list:
 				index = ((rank_index_list == item_test[j]).nonzero())
 				index = index[0][0].item()
-				hit[index+1] += 1
 				# Remember index starts at 0 so +1 to get actual index
 				# +1 more because of nDCG formula
 				nDCG+= 1/getLog2AtK((index+1)+1)
+				if index+1 < TOP:
+					hit_at_10 += 1
 	
 			rankFullTuple = torch.topk(probOfItems,ITEM_SIZE)
 			indexList = rankFullTuple[1]
@@ -200,39 +194,22 @@ def predict(model):
 
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
-	# Fill up true_positives with hits accordingly
-	# If the nth position has a hit of 1, then 
-	# n+k positions have 1 additional hit (CUMULATIVE)
-	for i in range(TOP):
-		for j in range(TOP-i):
-			true_positives[TOP-j] += hit[i+1]
-	for i in range(TOP):
-		recallatx[i+1] = true_positives[i+1]/relevant
-		precisionatx[i+1] = true_positives[i+1]/(relevant*(i+1))
-		if precisionatx[i+1] == 0 and recallatx[i+1] == 0:
-			f1atx[i+1] = 0
-		else:
-			f1atx[i+1] = 2*(precisionatx[i+1]*recallatx[i+1]/(precisionatx[i+1]+recallatx[i+1]))
-
 	#average over number of queries
 
 	nDCG = nDCG/relevant
 	nDCG_full = nDCG_full/relevant
+	hit_at_10 = hit_at_10/relevant
 	
-
-	print("recallatx: ",recallatx)
-	print('precisionatx: '+str(precisionatx))
-	print('f1atx: '+str(f1atx))
-	print('nDCG: '+str(nDCG))
+	print('hit@10' + str(hit_at_10))
+	print('nDCG@10: '+ str(nDCG))
 	print('nDCG_full: '+str(nDCG_full))
 
-	print('true_positives: '+str(true_positives))
 	print('ITEM_SIZE: '+str(ITEM_SIZE))
 	print('numUsers: '+str(numUsers))
 	print('relevant(number of test item): '+str(relevant))
 
 
-	return f1atx,predictionStr
+	return hit_at_10, nDCG, predictionStr
 	# return true_positives
 
 def learn():
@@ -299,13 +276,13 @@ def learn():
 
 		print ("begin predict")
 		print('sumloss: '+str(float(sumloss)))
-		f1atx,predictionStr = predict(model)
-		if(f1atx[10] > BEST_F1_AT_10):
+		hit_at_10, nDCG, predictionStr = predict(model)
+		if(nDCG > BEST_NDCG):
 			saveCheckpoint({
 				'hiddenSize':HIDDEN_SIZE,
 				'mode':model.mode,
 				'DATANAME':DATANAME,
-				'BEST_F1_AT_10':BEST_F1_AT_10,
+				'BEST_NDCG':BEST_NDCG,
 				'epoch':epoch,
 				'optim':optimizer.state_dict(),
 				'model':model.state_dict()
