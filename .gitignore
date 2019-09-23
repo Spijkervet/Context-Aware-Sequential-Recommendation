@@ -3,3 +3,5 @@
 *.json
 ir2/
 __pycache__/
+.idea
+baselines/STAR/output
