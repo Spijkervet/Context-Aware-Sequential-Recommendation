@@ -19,9 +19,10 @@ def data_partition(fpath):
     # assume user/item index starting from 1
     f = open(fpath, 'r')
     for line in f:
-        u, i = line.rstrip().split(' ')
+        u, i, t = line.rstrip().split(' ')
         u = int(u)
         i = int(i)
+        t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)
         User[u].append(i)

@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     # DATASET PARAMETERS
     parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
+    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens)')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
     parser.add_argument('--preprocess', action='store_true', help='Preprocess the raw dataset')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
@@ -82,6 +83,12 @@ if __name__ == '__main__':
 
     config = parser.parse_args()
 
+      
+    # Start the data reader and read the dataset
+    dr = DataReader(config.raw_dataset, config.dataset, config.type, limit=config.limit)
+    if config.preprocess:
+        dr.preprocess()
+
     # Check if dataset exists
     if not os.path.exists(config.dataset):
         logger.info('Pre-process the data first using the --preprocess flag')
@@ -90,11 +97,6 @@ if __name__ == '__main__':
     # Check if training directory structure exists
     # if not os.path.exists(config.train_dir):
     #     os.makedirs(config.train_dir)
-  
-    # Start the data reader and read the dataset
-    dr = DataReader(config.raw_dataset, config.dataset, limit=config.limit)
-    if config.preprocess:
-        dr.preprocess()
 
 
     # Partition data
@@ -150,7 +152,6 @@ if __name__ == '__main__':
             """
 
             # Break, since the below code needs to be adjusted.
-            break
 
             # Time measurement
             t1 = time.time()
