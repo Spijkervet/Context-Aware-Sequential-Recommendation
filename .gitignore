@@ -17,3 +17,4 @@ baselines/STAR/output
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+*.txt
