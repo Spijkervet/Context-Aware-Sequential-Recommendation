@@ -31,19 +31,19 @@ class DataReader():
         self.type = type
         self.logger = logging.getLogger('ir2')
 
-    def parse_amazon(self):
-        g = gzip.open(self.path, 'rb')
-        for i, l in enumerate(g):
-            if self.limit and i > self.limit:
-                break
-            yield eval(l)
-
     def preprocess(self):
         assert type(self.type) == str
         if self.type == 'amazon':
             self.preprocess_amazon()
         elif self.type == 'movielens':
             self.preprocess_movielens()
+
+    def parse_amazon(self):
+        g = gzip.open(self.path, 'rb')
+        for i, l in enumerate(g):
+            if self.limit and i > self.limit:
+                break
+            yield eval(l)
 
     def parse_movielens(self):
         f = open(self.path, 'r')
@@ -78,7 +78,7 @@ class DataReader():
         itemmap = dict()
         itemnum = 0
         User = dict()
-        for l in tqdm(self.parse(), total=total):
+        for l in tqdm(self.parse_amazon(), total=total):
             asin = l['asin']
             rev = l['reviewerID']
             time = l['unixReviewTime']

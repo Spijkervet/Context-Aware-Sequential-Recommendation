@@ -45,7 +45,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             idx -= 1
             if idx == -1: break
 
-
+        # print('user_id', user)
         # print('sequence', seq)
         # print('positive examples (incl. recent)', pos)
         # print('negative examples', neg)
@@ -75,7 +75,7 @@ class WarpSampler(object):
     The batches consist of four tuples of size :batch_size: rows with :maxlen: columns, which are zero-padded vectors.
     These vectors are: seq, pos and neg. The userid is also returned.
     The seq vector has :maxlen: items, filled at the end with the most recent product ids (except the most recent).
-    The pos vector has :maxlen: items, filled at the end with the most recent product ids (including the most recent).
+    The pos vector has :maxlen: items, filled at the end with the most recent product ids (including the most recent, excluding oldest).
     The neg vector has :maxlen: items, filled at the end with 'negative' samples, i.e. randomly drawn product ids that do not exist in the current interaction data.
     """
     def __init__(self, User, usernum, itemnum, batch_size=64, maxlen=10, n_workers=1):

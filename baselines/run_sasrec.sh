@@ -10,4 +10,5 @@ python2 -m virtualenv sasrec
 pip2 install -r sasrec_requirements.txt
 
 cd SASRec
-python main.py --dataset=ml-1m --train_dir=default --maxlen=200 --dropout_rate=0.2 
+# python main.py --dataset=ml-1m --train_dir=default --maxlen=200 --dropout_rate=0.2 
+python main.py --dataset=Books --train_dir=default --maxlen=50 --dropout_rate=0.2 

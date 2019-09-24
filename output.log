@@ -273,3 +273,13 @@
 2019-09-23 16:47:14,969 [MainThread  ] [INFO ]  Average sequence length: 163.60
 2019-09-23 16:49:02,092 [MainThread  ] [INFO ]  Average sequence length: 163.60
 2019-09-23 16:49:54,426 [MainThread  ] [INFO ]  Average sequence length: 163.60
+2019-09-23 18:17:39,354 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-23 18:24:38,430 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 11:07:43,403 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-24 11:14:50,512 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 11:22:22,145 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 11:22:35,741 [MainThread  ] [INFO ]  Writing product item map
+2019-09-24 11:22:53,672 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-24 11:35:19,297 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-24 11:35:54,255 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-24 11:37:10,653 [MainThread  ] [INFO ]  Average sequence length: 12.74
