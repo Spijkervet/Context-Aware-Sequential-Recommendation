@@ -1,3 +1,0 @@
-[submodule "baselines/SASRec"]
-	path = baselines/SASRec
-	url = https://github.com/kang205/SASRec
