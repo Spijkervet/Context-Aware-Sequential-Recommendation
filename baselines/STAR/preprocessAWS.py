@@ -82,9 +82,7 @@ def writePreprocessedData(inputFile,finalCart):
 
 def writeAWSData(inputFile,finalCart):
 	# Clear file
-	outputFile = inputFile.replace('./rawData/','')
-	# outputFile = outputFile.replace('../../AWS/','')
-	outputFile = outputFile.replace('csv','json')
+	outputFile = "output.txt"
 	idConverterFile = "./data/idConv_"+outputFile
 	outputFile = "./data/"+outputFile
 	with open(outputFile, 'w') as the_file:
@@ -105,7 +103,7 @@ def addToDict(input,diction):
 	else:
 		diction[input]=1
 
-def isDuplicate(user,item,rating,timestamp):
+def isDuplicate(item,user,rating,timestamp):
 	if(user in dupChecker):
 		curObj = dupChecker[user]
 		if(curObj[ITEM_STR]==item
@@ -133,7 +131,7 @@ def convertItemToID(item):
 	# assert(itemIdConverter[item] > len(itemIdConverter))
 	return itemIdConverter[item]
 
-def addToCart(user,item,timestamp):
+def addToCart(item,user,timestamp):
 	global fullUserCarts
 	if(user not in fullUserCarts):
 		fullUserCarts[user] = []
@@ -147,7 +145,7 @@ def addToCart(user,item,timestamp):
 
 def processCart(cart):
 	# print(cart)
-	cart = sorted(cart, key=operator.itemgetter(TIMESTAMP_STR)) 
+	cart = sorted(cart, key=operator.itemgetter(TIMESTAMP_STR))
 	processedCart = []
 	for i in range(len(cart)):
 		curSet = cart[i]
@@ -156,13 +154,13 @@ def processCart(cart):
 		day = dayDict[(time.strftime('%A', time.localtime(curSet[TIMESTAMP_STR])))]
 		# Hours context (24hr)
 		hour = int(time.strftime('%H', time.localtime(curSet[TIMESTAMP_STR])))
-		# Interval context (30 or greater) (32 in total) 
+		# Interval context (30 or greater) (32 in total)
 		# Note we start interval context with 1 (do this model code, here just start with 0)
 		interval = None
 		if i == 0:
 			interval = 0
 			# checkNAdd(temporalFreqDist,0)
-		else: 
+		else:
 			prevTimeStamp = cart[i-1][TIMESTAMP_STR]
 			prevDate = datetime.fromtimestamp(prevTimeStamp)
 			# print('prevDate: '+str(prevDate.strftime('%Y-%m-%d %H:%M:%S')))
@@ -176,7 +174,7 @@ def processCart(cart):
 			secDiff = curSet[TIMESTAMP_STR]-prevTimeStamp
 
 		processedCart.append([int(curSet[ITEM_STR]),int(day),int(hour),int(interval)])
-	
+
 	return processedCart
 
 def initialProcessFile(inputFile): 
@@ -186,8 +184,8 @@ def initialProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
-			isDup = isDuplicate(user,item,rating,timestamp)
+			item,user,rating,timestamp, _ = line.split(',')
+			isDup = isDuplicate(item,user,rating,timestamp)
 			if(not isDup):
 				addToDict(item,originalItemFreq)
 			else:
@@ -202,13 +200,13 @@ def processFile(inputFile):
 		for line in infile:
 			LineCount+=1
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
-			isDup = isDuplicate(user,item,rating,timestamp)
+			item,user,rating,timestamp, _ = line.split(',')
+			isDup = isDuplicate(item,user,rating,timestamp)
 			if(originalItemFreq[item] >= ITEM_LIMIT):
 				addToDict(user,originalUserFreq)
 				originalRatingCount+=1
 				addToDict(user,globalUserFreq)
-				# addToCart(user,item,timestamp)
+				# addToCart(item,user,timestamp)
 			else:
 				print('low freq item: '+str(item))
 				print('originalItemFreq[item]: '+str(originalItemFreq[item]))
@@ -221,12 +219,12 @@ def reProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
+			item,user,rating,timestamp, _ = line.split(',')
 			if(user in originalUserFreq and 
 				originalUserFreq[user]>=LIMIT):
 				addToDict(item,itemFreq)
 				ratingCount +=1
-				addToCart(user,item,timestamp)
+				addToCart(item,user,timestamp)
 			else:
 				print('low freq user: '+str(user))
 
@@ -281,7 +279,7 @@ def n_initProcess(inputFile,userRate,itemRate):
 		p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
+			item,user,rating,timestamp, _ = line.split(' ')
 			addToDict(user,userRate)
 			addToDict(item,itemRate)
 			totalRating+=1
@@ -292,6 +290,7 @@ def n_removeUserNItem(userRate,itemRate):
 	rmItemList = []
 	for key in userRate:
 		if userRate[key] < LIMIT:
+			print( userRate[key], 'gets removed')
 			# del userRate[key]
 			rmUserList.append(key)
 	for key in itemRate:
@@ -314,7 +313,7 @@ def n_reprocess(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
+			item,user,rating,timestamp, _= line.split(' ')
 			if user in userRate and item in itemRate:
 				if(userRate[user] < LIMIT):
 					print('user: '+str(user))
@@ -336,7 +335,7 @@ def n_finalRun(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,rating,timestamp = line.split(',')
+			item,user,rating,timestamp, _ = line.split(' ')
 			if user in userRate and item in itemRate:
 				if user not in userData:
 					userData[user] = []
@@ -357,9 +356,9 @@ def run(inputFile):
 	totalRating = 0
 	userRate,itemRate,totalRating = n_initProcess(inputFile,userRate,itemRate)
 
-	p('original user count: '+str(len(userRate)))
-	p('original user count: '+str(len(itemRate)))
-	p('totalRating: '+str(totalRating))
+	print('original user count: '+str(len(userRate)))
+	print('original user count: '+str(len(itemRate)))
+	print('totalRating: '+str(totalRating))
 	step = 1
 	while(True):
 		print('step: '+str(step))
@@ -396,7 +395,8 @@ gStart = time.time()
 for i in range(len(inputFileList)):
 	# analyseFile('../../AWS/'+str(inputFileList[i]))
 	start_time = time.time()
-	run('./rawData/'+str(inputFileList[i]))
+	# run('./rawData/'+str(inputFileList[i]))
+	run('../../data/Books.txt')
 	e = time.time() - start_time
 	print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
 	p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
