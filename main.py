@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     # DATASET PARAMETERS
     parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
-    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens)')
+    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
     parser.add_argument('--preprocess', action='store_true', help='Preprocess the raw dataset')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')

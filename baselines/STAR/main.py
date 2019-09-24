@@ -126,14 +126,17 @@ def predict(model):
 
 	predictionStr = ''
 	
-	
 	for i in range(TOP):
 		hit[i+1] = 0
 		true_positives[i+1] = 0
-	
+
+	# iteration = 0
 	for n in ITEM_TEST.keys():
 		# print('n in test: '+str(n))
-		
+		# iteration += 1
+		# if iteration > 10:
+		# 	break
+
 		item_train = ITEM_TRAIN[n]
 		item_test = ITEM_TEST[n]
 		hour_train = HOUR_TRAIN[n]
@@ -217,22 +220,20 @@ def learn():
 
 	epoch = 0
 		
-	model = srnn.SRNNModel(mode=MODE_TYPE,hidden_size=HIDDEN_SIZE,
+	model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
 			weekday_size=WEEKDAY_SIZE,hour_size=HOUR_SIZE,num_class=ITEM_SIZE,isCuda=usingCuda())
 	if CUSTOM_LOSS == BPR_LOSS or CUSTOM_LOSS == BPR_LOSS_R:
 		criterion = torch.nn.LogSigmoid()
 	else:
 		criterion = torch.nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
+	print("starting learning")
+	print("MODEL", model)
 
-	print(model)
-	print(model.mode)
-
-
+	temp = sys.stdout
 	f_handler = open(OUTPUT_FILE,'a')
 	sys.stdout=f_handler
 	print(model)
-	print(model.mode)
 
 	f_handler.close()
 
@@ -240,13 +241,19 @@ def learn():
 		model.cuda()
 		# cudnn.benchmark = True
 
-	while (epoch<=125):
+	while (epoch<=10):
+		sys.stdout=temp
+		print ("Epoch %d" % epoch)
 		f_handler = open(OUTPUT_FILE,'a')
 		sys.stdout=f_handler
 		print ("Epoch %d" % epoch)
 		print ("Training...")
 		sumloss = 0
+		# iteration = 0
 		for i in ITEM_TRAIN.keys():
+			iteration += 1
+			# if iteration > 10:
+			# 	break
 			user_cart = ITEM_TRAIN[i]
 			hour_cart = HOUR_TRAIN[i]
 			weekday_cart = WEEKDAY_TRAIN[i]
@@ -255,11 +262,15 @@ def learn():
 			h = None
 			h2 = None
 			h3 = None
+
+			# PRINT
+			# sys.stdout=temp
+			# print("iteration", iteration, "len user cart", len(user_cart))
+
 			# We do not need to input the last item
 			optimizer.zero_grad()
 
 			for j in range(len(user_cart)-1):
-				
 				inputX = user_cart[j]
 				hourX = hour_cart[j]
 				weekdayX = weekday_cart[j]
@@ -274,13 +285,14 @@ def learn():
 			# print('loss: '+str(loss))
 			sumloss += loss
 
+		print ("begin predict, number of test items", len(ITEM_TEST))
+		sys.stdout=f_handler
 		print ("begin predict")
 		print('sumloss: '+str(float(sumloss)))
 		hit_at_10, nDCG, predictionStr = predict(model)
 		if(nDCG > BEST_NDCG):
 			saveCheckpoint({
 				'hiddenSize':HIDDEN_SIZE,
-				'mode':model.mode,
 				'DATANAME':DATANAME,
 				'BEST_NDCG':BEST_NDCG,
 				'epoch':epoch,
@@ -395,10 +407,10 @@ if __name__ == '__main__':
 		DATAFILE = './data/miniData.json'
 		DATANAME = 'miniData'
 	elif len(sys.argv)>2 and sys.argv[2] == 'movielens':
-		DATAFILE = './data/movielens.json'
+		DATAFILE = '../../data/STAR_ml-1m.txt'
 		DATANAME = 'movielens'
 	elif len(sys.argv)>2 and sys.argv[2] == 'Books':
-		DATAFILE = './data/Books.json'
+		DATAFILE = '../../data/STAR_Books.txt'
 		DATANAME = 'Books'
 	
 	OUTPUT_PATH = './output/results/'
