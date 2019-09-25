@@ -250,7 +250,6 @@ def learn():
 
 	if(usingCuda()):
 		model.cuda()
-		print("using cuda")
 		# cudnn.benchmark = True
 
 	while (epoch<=100):
@@ -321,7 +320,8 @@ def saveCheckpoint(state):
 	torch.save(state, MODEL_FILE)
 
 def loadCheckpoint(filename):
-	return torch.load(filename)
+        device = "cuda" if usingCuda() else "cpu"
+	return torch.load(filename, map_location=device)
 
 TENSOR_FOR_EMB = {}
 def getTensorForEmb(id):
@@ -336,9 +336,9 @@ def initLogOfIndexes():
 	sizeOfArr = ITEM_SIZE+2
 	if isCuda:
 		cuda_str = 'cuda:'+str(torch.cuda.current_device())
-		LOG_OF_INDEXES = torch.log2(torch.arange(1,sizeOfArr, device=cuda_str))
+		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, device=cuda_str))
 	else:
-		LOG_OF_INDEXES = torch.log2(torch.arange(1,sizeOfArr, dtype=torch.float64))
+		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, dtype=torch.float64))
 
 def getLog2AtK(k):
 	global LOG_OF_INDEXES
