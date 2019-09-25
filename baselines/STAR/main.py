@@ -130,7 +130,7 @@ def predict(model):
 		hit[i+1] = 0
 		true_positives[i+1] = 0
 
-	# iteration = 0
+	iteration = 0
 	for n in ITEM_TEST.keys():
 		# print('n in test: '+str(n))
 		# iteration += 1
@@ -249,7 +249,7 @@ def learn():
 		print ("Epoch %d" % epoch)
 		print ("Training...")
 		sumloss = 0
-		# iteration = 0
+		iteration = 0
 		for i in ITEM_TRAIN.keys():
 			iteration += 1
 			# if iteration > 10:
