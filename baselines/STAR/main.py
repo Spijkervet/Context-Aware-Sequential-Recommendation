@@ -234,8 +234,8 @@ def learn():
 	if os.path.exists(MODEL_FILE):
 		print("loading model to continue training")
 		checkpoint = loadCheckpoint(MODEL_FILE)
-		model.load_state_dict(checkpoint[model])
-		optimizer.load_state_dict(checkpoint[optimizer])
+		model.load_state_dict(checkpoint["model"])
+		optimizer.load_state_dict(checkpoint["optim"])
 		model.train()
 
 	print("starting learning")
