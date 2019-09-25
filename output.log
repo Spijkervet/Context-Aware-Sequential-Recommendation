@@ -283,3 +283,34 @@
 2019-09-24 11:35:19,297 [MainThread  ] [INFO ]  Average sequence length: 12.74
 2019-09-24 11:35:54,255 [MainThread  ] [INFO ]  Average sequence length: 12.74
 2019-09-24 11:37:10,653 [MainThread  ] [INFO ]  Average sequence length: 12.74
+2019-09-24 13:48:30,795 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-24 13:49:00,327 [MainThread  ] [INFO ]  Reading and processing ~/Downloads/ratings_Books.csv
+2019-09-24 13:49:29,174 [MainThread  ] [INFO ]  Reading and processing ~/Downloads/ratings_Books.csv
+2019-09-24 13:49:53,056 [MainThread  ] [INFO ]  Reading and processing /Users/anton/Downloads/ratings_Books.csv
+2019-09-24 13:50:49,084 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 13:51:47,403 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 13:58:36,271 [MainThread  ] [INFO ]  Reading and processing data/sample_Books.csv
+2019-09-24 13:58:50,024 [MainThread  ] [INFO ]  Reading and processing data/sample_Books.csv
+2019-09-24 13:58:50,027 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 13:58:50,027 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 13:58:50,033 [MainThread  ] [INFO ]  Writing product item map
+2019-09-24 13:59:21,234 [MainThread  ] [INFO ]  Reading and processing data/sample_Books.csv
+2019-09-24 13:59:21,237 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 13:59:21,238 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 13:59:21,243 [MainThread  ] [INFO ]  Writing product item map
+2019-09-24 14:00:26,819 [MainThread  ] [INFO ]  Reading and processing data/sample_Books.csv
+2019-09-24 14:00:26,823 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 14:00:26,824 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 14:00:50,155 [MainThread  ] [INFO ]  Reading and processing data/sample_Books.csv
+2019-09-24 14:00:50,159 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 14:00:50,160 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 14:00:50,163 [MainThread  ] [INFO ]  Writing product item map
+2019-09-24 14:00:50,165 [MainThread  ] [INFO ]  Average sequence length: 10.00
+2019-09-24 14:06:47,435 [MainThread  ] [INFO ]  Reading and processing /Users/anton/Downloads/ratings_Books.csv
+2019-09-24 14:07:43,891 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 14:08:45,577 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 14:09:22,891 [MainThread  ] [INFO ]  Reading and processing /Users/anton/Downloads/ratings_Books.csv
+2019-09-24 14:10:17,510 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-24 14:11:19,280 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-24 14:11:37,719 [MainThread  ] [INFO ]  Writing product item map
+2019-09-24 14:12:01,664 [MainThread  ] [INFO ]  Average sequence length: 10.92

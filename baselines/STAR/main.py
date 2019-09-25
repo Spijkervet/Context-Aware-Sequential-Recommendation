@@ -223,15 +223,21 @@ def learn():
 	model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
 			weekday_size=WEEKDAY_SIZE,hour_size=HOUR_SIZE,num_class=ITEM_SIZE,isCuda=usingCuda())
 
-	if os.path.exists(MODEL_FILE):
-		model.load_state_dict(loadCheckpoint(MODEL_FILE))
-		model.train()
+
 
 	if CUSTOM_LOSS == BPR_LOSS or CUSTOM_LOSS == BPR_LOSS_R:
 		criterion = torch.nn.LogSigmoid()
 	else:
 		criterion = torch.nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
+
+	if os.path.exists(MODEL_FILE):
+		print("loading model to continue training")
+		checkpoint = loadCheckpoint(MODEL_FILE)
+		model.load_state_dict(checkpoint[model])
+		optimizer.load_state_dict(checkpoint[optimizer])
+		model.train()
+
 	print("starting learning")
 	print("MODEL", model)
 
@@ -312,7 +318,7 @@ def learn():
 	sys.stdout = original_stdout
 
 def saveCheckpoint(state):
-	torch.save(state,MODEL_FILE)
+	torch.save(state, MODEL_FILE)
 
 def loadCheckpoint(filename):
 	return torch.load(filename)
