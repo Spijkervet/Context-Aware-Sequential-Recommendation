@@ -222,6 +222,11 @@ def learn():
 		
 	model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
 			weekday_size=WEEKDAY_SIZE,hour_size=HOUR_SIZE,num_class=ITEM_SIZE,isCuda=usingCuda())
+
+	if os.path.exists(MODEL_FILE):
+		model.load_state_dict(loadCheckpoint(MODEL_FILE))
+		model.train()
+
 	if CUSTOM_LOSS == BPR_LOSS or CUSTOM_LOSS == BPR_LOSS_R:
 		criterion = torch.nn.LogSigmoid()
 	else:
@@ -239,9 +244,10 @@ def learn():
 
 	if(usingCuda()):
 		model.cuda()
+		print("using cuda")
 		# cudnn.benchmark = True
 
-	while (epoch<=10):
+	while (epoch<=100):
 		sys.stdout=temp
 		print ("Epoch %d" % epoch)
 		f_handler = open(OUTPUT_FILE,'a')
