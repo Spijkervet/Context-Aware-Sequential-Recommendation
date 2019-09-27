@@ -1,65 +1,67 @@
-# SASRec: Self-Attentive Sequential Recommendation
+# information_retrieval_2
+IR2 course UvA
 
-This is our TensorFlow implementation for the paper:
-
-[Wang-Cheng Kang](http://kwc-oliver.com), [Julian McAuley](http://cseweb.ucsd.edu/~jmcauley/) (2018). *[Self-Attentive Sequential Recommendation.](https://cseweb.ucsd.edu/~jmcauley/pdfs/icdm18.pdf)* In Proceedings of IEEE International Conference on Data Mining (ICDM'18)
-
-Please cite our paper if you use the code or datasets.
-
-The code is tested under a Linux desktop (w/ GTX 1080 Ti GPU) with TensorFlow 1.12 and Python 2.
-
-## Datasets
-
-The preprocessed datasets are included in the repo (`e.g. data/Video.txt`), where each line contains an `user id` and 
-`item id` (starting from 1) meaning an interaction (sorted by timestamp).
-
-The data pre-processing script is also included. For example, you could download Amazon review data from *[here.](http://jmcauley.ucsd.edu/data/amazon/index.html)*, and run the script to produce the `txt` format data.
-
-### Steam Dataset
-
-We crawled reviews and game information from Steam. The dataset contains 7,793,069 reviews, 2,567,538 users, and 32,135 games. In addition to the review text, the data also includes the users' play hours in each review.     
-
-* Download: [reviews (1.3G)](http://cseweb.ucsd.edu/~wckang/steam_reviews.json.gz), [game info (2.7M)](http://cseweb.ucsd.edu/~wckang/steam_games.json.gz)
-* Example (game info):
-```json
-{
-    "app_name": "Portal 2", 
-    "developer": "Valve", 
-    "early_access": false, 
-    "genres": ["Action", "Adventure"], 
-    "id": "620", 
-    "metascore": 95, 
-    "price": 19.99, 
-    "publisher": "Valve", 
-    "release_date": "2011-04-18", 
-    "reviews_url": "http://steamcommunity.com/app/620/reviews/?browsefilter=mostrecent&p=1", 
-    "sentiment": "Overwhelmingly Positive", 
-    "specs": ["Single-player", "Co-op", "Steam Achievements", "Full controller support", "Steam Trading Cards", "Captions available", "Steam Workshop", "Steam Cloud", "Stats", "Includes level editor", "Commentary available"], 
-    "tags": ["Puzzle", "Co-op", "First-Person", "Sci-fi", "Comedy", "Singleplayer", "Adventure", "Online Co-Op", "Funny", "Science", "Female Protagonist", "Action", "Story Rich", "Multiplayer", "Atmospheric", "Local Co-Op", "FPS", "Strategy", "Space", "Platformer"], 
-    "title": "Portal 2", 
-    "url": "http://store.steampowered.com/app/620/Portal_2/"
-}
+## Pulling this repository
+You can either pull the main repository or with all submodules to run the baselines:
 ```
-  
-
-## Model Training
-
-To train our model on `Video` (with default hyper-parameters): 
-
+git pull
 ```
-python main.py --dataset=Video --train_dir=default 
+or
+```
+git pull --recurse-submodules
 ```
 
-or on `ml-1m`:
-
+## Installation
+Run the following command to initialize the environment:
 ```
-python main.py --dataset=ml-1m --train_dir=default --maxlen=200 --dropout_rate=0.2 
-``` 
+pip3 install virtualenv
+python3 -m venv ir2
+source ir2/bin/activate
+pip3 install -r requirements.txt
+```
 
-## Misc
+## Download the data
+You can download the data by invoking:
+```
+sh download_data.sh
+```
 
-The implemention of self attention is modified based on *[this](https://github.com/Kyubyong/transformer)*
+## Run the program:
+The program accepts dataset/train/model parameters. An example:
+```
+python3 main.py --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --preprocess --batch_size 128
+```
 
-The convergence curve on `ml-1m`, compared with CNN/RNN based approaches:  
+## Parameters:
+```
+usage: main.py [-h] [--raw_dataset RAW_DATASET] --dataset DATASET
+               [--preprocess] [--limit LIMIT] --train_dir TRAIN_DIR
+               [--batch_size BATCH_SIZE] [--learning_rate LEARNING_RATE]
+               [--train_steps TRAIN_STEPS] [--max_norm MAX_NORM]
+               [--seq_length SEQ_LENGTH]
+               [--dropout_keep_prob DROPOUT_KEEP_PROB]
+               [--saved_model SAVED_MODEL] [--device DEVICE]
 
-<img src="curve.png" width="400">
+optional arguments:
+  -h, --help            show this help message and exit
+  --raw_dataset RAW_DATASET
+                        Raw gzip dataset, Amazon Product Review data
+  --dataset DATASET     Location of pre-processed dataset
+  --preprocess          Preprocess the raw dataset
+  --limit LIMIT         Limit the number of datapoints
+  --train_dir TRAIN_DIR
+  --batch_size BATCH_SIZE
+                        Batch size
+  --learning_rate LEARNING_RATE
+                        Learning rate
+  --train_steps TRAIN_STEPS
+                        Number of training steps
+  --max_norm MAX_NORM   --
+  --seq_length SEQ_LENGTH
+                        Sequence length
+  --dropout_keep_prob DROPOUT_KEEP_PROB
+                        Dropout
+  --saved_model SAVED_MODEL
+                        File to save model checkpoints
+  --device DEVICE       Device to run model on
+  ```
