@@ -314,3 +314,10 @@
 2019-09-24 14:11:19,280 [MainThread  ] [INFO ]  Sorting reviews for every user on time
 2019-09-24 14:11:37,719 [MainThread  ] [INFO ]  Writing product item map
 2019-09-24 14:12:01,664 [MainThread  ] [INFO ]  Average sequence length: 10.92
+2019-09-26 12:34:02,060 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-26 12:35:18,104 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-26 12:50:51,051 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-26 13:04:10,435 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-26 13:17:21,023 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-26 13:17:42,493 [MainThread  ] [INFO ]  Writing product item map
+2019-09-26 13:18:23,356 [MainThread  ] [INFO ]  Average sequence length: 12.74
