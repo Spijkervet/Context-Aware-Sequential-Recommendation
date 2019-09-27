@@ -1,92 +1,124 @@
-<<<<<<< HEAD
+import sys
 import os
-import time
 import argparse
-import tensorflow as tf
-from sampler import WarpSampler
-from model import Model
+import logging
+import time
+from datetime import datetime
+import numpy as np
 from tqdm import tqdm
-from util import *
+
+# Deep Learning lib
+# import torch
+# from torch.utils.data import DataLoader
+
+# Model-specific imports
+from data_reader import DataReader
+from util import data_partition
+from data import AmazonDataset
+from model import DummyModel
+from sampler import WarpSampler
+
+def load_dataset(config, data):
+    # Initialize the dataset and data loader (note the +1)
+    dataset = AmazonDataset(data, config.seq_length)
+    data_loader = DataLoader(dataset, config.batch_size, num_workers=1)
+    return dataset, data_loader
+
+def create_model(config, dataset):
+    # Initialize the model that we are going to use
+    model = DummyModel(
+        batch_size=config.batch_size,
+        seq_length=config.seq_length,
+        vocabulary_size=dataset.vocab_size,
+        # lstm_num_hidden=config.lstm_num_hidden,
+        # lstm_num_layers=config.lstm_num_layers,
+        dropout=(1-config.dropout_keep_prob),
+        device=config.device
+    )
+
+    if os.path.isfile(config.saved_model):
+        print("### LOADING MODEL ###")
+        model.load_state_dict(torch.load(config.saved_model, map_location=config.device))
+
+    model.to(config.device)
+    return model
 
 
-def str2bool(s):
-    if s not in {'False', 'True'}:
-        raise ValueError('Not a valid boolean string')
-    return s == 'True'
+if __name__ == '__main__':
+    logger = logging.getLogger('ir2')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
+        handlers=[
+            logging.FileHandler("{0}/{1}.log".format('.', 'output')),
+            logging.StreamHandler()
+    ])
+    
+    parser = argparse.ArgumentParser()
+
+    # DATASET PARAMETERS
+    parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
+    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
+    parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
+    parser.add_argument('--preprocess', action='store_true', help='Preprocess the raw dataset')
+    parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
+    parser.add_argument('--maxlen', default=50, type=int, help='Maximum length of user item sequence, for zero-padding')
+
+    # parser.add_argument('--train_dir', required=True)
+
+    # TRAIN PARAMETERS
+    parser.add_argument('--batch_size', default=64, type=int, help='Batch size')
+    parser.add_argument('--learning_rate', type=float, default=2e-3, help='Learning rate')
+    parser.add_argument('--num_epochs', type=int, default=1, help='Number of epochs')
+    # parser.add_argument('--train_steps', default=100, type=int, help='Number of training steps')
+    parser.add_argument('--max_norm', type=float, default=5.0, help='--')
+
+    # MODEL PARAMETERS
+    parser.add_argument('--seq_length', default=3, type=int, help='Sequence length')
+    parser.add_argument('--dropout_keep_prob', default=1.0, type=float, help='Dropout')
+
+    # MISC.
+    parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
+    parser.add_argument('--device', default='cpu', type=str, help='Device to run model on') #TODO: GPU
+
+    config = parser.parse_args()
+
+      
+    # Start the data reader and read the dataset
+    dr = DataReader(config.raw_dataset, config.dataset, config.type, limit=config.limit)
+    if config.preprocess:
+        dr.preprocess()
+
+    # Check if dataset exists
+    if not os.path.exists(config.dataset):
+        logger.info('Pre-process the data first using the --preprocess flag')
+        sys.exit()
+
+    # Check if training directory structure exists
+    # if not os.path.exists(config.train_dir):
+    #     os.makedirs(config.train_dir)
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--dataset', required=True)
-parser.add_argument('--train_dir', required=True)
-parser.add_argument('--batch_size', default=128, type=int)
-parser.add_argument('--lr', default=0.001, type=float)
-parser.add_argument('--maxlen', default=50, type=int)
-parser.add_argument('--hidden_units', default=50, type=int)
-parser.add_argument('--num_blocks', default=2, type=int)
-parser.add_argument('--num_epochs', default=201, type=int)
-parser.add_argument('--num_heads', default=1, type=int)
-parser.add_argument('--dropout_rate', default=0.5, type=float)
-parser.add_argument('--l2_emb', default=0.0, type=float)
+    # Partition data
+    """
+    NOTE: Important - the timestamps are sorted ASCENDING, 
+    so train[-1] is the most recent product in the sequence
+    """
 
-args = parser.parse_args()
-if not os.path.isdir(args.dataset + '_' + args.train_dir):
-    os.makedirs(args.dataset + '_' + args.train_dir)
-with open(os.path.join(args.dataset + '_' + args.train_dir, 'args.txt'), 'w') as f:
-    f.write('\n'.join([str(k) + ',' + str(v) for k, v in sorted(vars(args).items(), key=lambda x: x[0])]))
-f.close()
+    dataset = data_partition(config.dataset)
+    [train, valid, test, usernum, itemnum] = dataset
+    num_batch = round(len(train) / config.batch_size)
 
-dataset = data_partition(args.dataset)
-[user_train, user_valid, user_test, usernum, itemnum] = dataset
-num_batch = len(user_train) / args.batch_size
-cc = 0.0
-for u in user_train:
-    cc += len(user_train[u])
-print 'average sequence length: %.2f' % (cc / len(user_train))
+    cc = sum([len(v) for v in train.values()])        
+    logging.info('Average sequence length: {:.2f}'.format(cc / len(train)))
 
-f = open(os.path.join(args.dataset + '_' + args.train_dir, 'log.txt'), 'w')
+    # DONE: Understand WarpSampler (see explanation in Class)
+    print('usernum', usernum, 'itemnum', itemnum)
+    sampler = WarpSampler(train, usernum, itemnum, batch_size=config.batch_size, maxlen=config.maxlen, n_workers=1)
 
-
-with tf.device('/device/GPU'):
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    config.allow_soft_placement = True
-    config.log_device_placement = True
-    sess = tf.Session(config=config)
-
-    sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
-    model = Model(usernum, itemnum, args)
-    sess.run(tf.initialize_all_variables())
-
-    T = 0.0
-    t0 = time.time()
-
-    try:
-        for epoch in range(1, args.num_epochs + 1):
-
-            for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-                u, seq, pos, neg = sampler.next_batch()
-                auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
-                                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
-                                        model.is_training: True})
-
-            if epoch % 20 == 0:
-                t1 = time.time() - t0
-                T += t1
-                print 'Evaluating',
-                t_test = evaluate(model, dataset, args, sess)
-                t_valid = evaluate_valid(model, dataset, args, sess)
-                print ''
-                print 'epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
-                epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1])
-
-                f.write(str(t_valid) + ' ' + str(t_test) + '\n')
-                f.flush()
-                t0 = time.time()
-    except:
-        sampler.close()
-        f.close()
-        exit(1)
-
-    f.close()
-    sampler.close()
-    print("Done")
+    # Understand partitioning of train / validation / test data:
+    # first_user = list(train.keys())[0]
+    # print('first user train data', train[first_user])
+    # print('first user valid data', valid[first_user])
+    # print('first user valid data', test[first_user])
+    # # print(u)
