@@ -15,7 +15,12 @@ def data_partition(fname):
     # assume user/item index starting from 1
     f = open('data/%s.txt' % fname, 'r')
     for line in f:
-        u, i = line.rstrip().split(' ')
+        try:
+            u, i, t = line.rstrip().split(' ')
+        except:
+            u, i = line.rstrip().split(' ')
+            pass
+        
         u = int(u)
         i = int(i)
         usernum = max(u, usernum)

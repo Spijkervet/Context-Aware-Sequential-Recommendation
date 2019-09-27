@@ -43,45 +43,49 @@ for u in user_train:
 print 'average sequence length: %.2f' % (cc / len(user_train))
 
 f = open(os.path.join(args.dataset + '_' + args.train_dir, 'log.txt'), 'w')
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-config.allow_soft_placement = True
-sess = tf.Session(config=config)
 
-sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
-model = Model(usernum, itemnum, args)
-sess.run(tf.initialize_all_variables())
 
-T = 0.0
-t0 = time.time()
+with tf.device('/device/GPU'):
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    config.allow_soft_placement = True
+    config.log_device_placement = True
+    sess = tf.Session(config=config)
 
-try:
-    for epoch in range(1, args.num_epochs + 1):
+    sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
+    model = Model(usernum, itemnum, args)
+    sess.run(tf.initialize_all_variables())
 
-        for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-            u, seq, pos, neg = sampler.next_batch()
-            auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
-                                    {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
-                                     model.is_training: True})
+    T = 0.0
+    t0 = time.time()
 
-        if epoch % 20 == 0:
-            t1 = time.time() - t0
-            T += t1
-            print 'Evaluating',
-            t_test = evaluate(model, dataset, args, sess)
-            t_valid = evaluate_valid(model, dataset, args, sess)
-            print ''
-            print 'epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
-            epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1])
+    try:
+        for epoch in range(1, args.num_epochs + 1):
 
-            f.write(str(t_valid) + ' ' + str(t_test) + '\n')
-            f.flush()
-            t0 = time.time()
-except:
-    sampler.close()
+            for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
+                u, seq, pos, neg = sampler.next_batch()
+                auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
+                                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
+                                        model.is_training: True})
+
+            if epoch % 20 == 0:
+                t1 = time.time() - t0
+                T += t1
+                print 'Evaluating',
+                t_test = evaluate(model, dataset, args, sess)
+                t_valid = evaluate_valid(model, dataset, args, sess)
+                print ''
+                print 'epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
+                epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1])
+
+                f.write(str(t_valid) + ' ' + str(t_test) + '\n')
+                f.flush()
+                t0 = time.time()
+    except:
+        sampler.close()
+        f.close()
+        exit(1)
+
     f.close()
-    exit(1)
-
-f.close()
-sampler.close()
-print("Done")
+    sampler.close()
+    print("Done")
