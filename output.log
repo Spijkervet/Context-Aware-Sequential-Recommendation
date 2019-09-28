@@ -324,3 +324,6 @@
 2019-09-27 15:19:33,472 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
 2019-09-27 15:26:31,944 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
 2019-09-27 15:44:35,492 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-27 15:57:54,696 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-27 15:59:52,276 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz
+2019-09-27 16:02:36,181 [MainThread  ] [INFO ]  Reading and processing data/reviews_Books_5.json.gz

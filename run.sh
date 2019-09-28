@@ -22,4 +22,6 @@ export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64
 pip3 install -r requirements.txt --user
 
 sh download_data.sh
-python3 main.py --type amazon --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --preprocess --batch_size 128
+
+python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books2.txt
+python3 main.py --type amazon --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --batch_size 128
