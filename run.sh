@@ -21,11 +21,17 @@ export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64
 # Mail
 echo "[IR2] Job $SLURM_JOBID started at `date`" | mail $USER -s "Job $SLURM_JOBID"
 
-pip3 install -r requirements.txt --user --upgrade
+pip3 install virtualenv 
+python3 -m virtualenv ir2
+
+. ir2/bin/activate
+
+pip3 install -r requirements.txt
+
+python3 main.py --help
 
 # DOWNLOAD DATA
 sh download_data.sh
-
 
 ### PREPROCESSING ###
 # AMAZON BOOKS
@@ -38,3 +44,4 @@ python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --da
 ### PROGRAM ###
 python3 main.py --dataset data/ml-1m.txt --train_dir maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
 echo "[IR2] Job $SLURM_JOBID finished at `date`" | mail $USER -s "Job $SLURM_JOBID"
+
