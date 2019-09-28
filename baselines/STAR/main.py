@@ -307,10 +307,10 @@ def learn():
 					interval_cart.append(tmp_interval_cart.tolist())
 
 			# process
-			user_cart = torch.tensor(user_cart)
-			hour_cart = torch.tensor(hour_cart)
-			weekday_cart = torch.tensor(weekday_cart)
-			interval_cart = torch.tensor(interval_cart)
+			user_cart = torch.tensor(user_cart).to(device)
+			hour_cart = torch.tensor(hour_cart).to(device)
+			weekday_cart = torch.tensor(weekday_cart).to(device)
+			interval_cart = torch.tensor(interval_cart).to(device)
 
 			# print("user_cart", user_cart.shape)
 			# print("hour_cart", user_cart.shape)
@@ -455,8 +455,11 @@ if __name__ == '__main__':
 	torch.set_printoptions(threshold=5000)
 
 	HIDDEN_SIZE = 40
+	device='cpu'
+
 	if len(sys.argv) > 1 and sys.argv[1] == 'cuda':
 		RUN_CUDA = True
+		device='cuda'
 	if len(sys.argv)>2 and sys.argv[2] == 'miniData':
 		DATAFILE = './data/miniData.json'
 		DATANAME = 'miniData'
