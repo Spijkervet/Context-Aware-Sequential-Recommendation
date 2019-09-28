@@ -71,3 +71,118 @@
 2019-09-28 17:41:04,179 [MainThread  ] [INFO ]  Average sequence length: 163.50
 2019-09-28 17:41:09,580 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
 2019-09-28 17:41:09,620 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:24:03,648 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 19:24:10,808 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 19:24:16,185 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 19:24:17,815 [MainThread  ] [INFO ]  Writing product item map
+2019-09-28 19:24:24,159 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 19:24:32,508 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:24:32,549 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:25:02,500 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 19:25:09,158 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:25:09,208 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:47:06,979 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 19:47:20,085 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 19:47:20,126 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 20:16:44,606 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 20:17:25,091 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 20:17:25,136 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 20:48:06,613 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:48:12,428 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:48:17,833 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:48:19,568 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:49:03,166 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:49:09,031 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:49:14,470 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:49:16,165 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:49:32,704 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:49:38,523 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:49:43,923 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:49:50,848 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:51:14,382 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:51:20,204 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:51:25,710 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:51:27,416 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:52:16,931 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:52:22,776 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:52:28,198 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:52:29,874 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:53:05,184 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:53:10,972 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:53:16,318 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:53:17,956 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:53:45,709 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:53:51,643 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:53:57,107 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:53:58,797 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:54:09,454 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:54:15,242 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:54:20,605 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:54:22,346 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:55:23,800 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:55:29,591 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:55:35,032 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:55:36,739 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:55:56,235 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:56:02,080 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:56:07,444 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:56:09,200 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:57:29,125 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:57:34,946 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:57:40,338 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:57:42,037 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:57:54,421 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:58:00,160 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:58:05,529 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:58:07,187 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:58:29,510 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:58:35,382 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:58:40,903 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:58:46,190 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:59:13,638 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:59:19,455 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:59:24,893 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 20:59:26,598 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 20:59:45,681 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 20:59:52,037 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 20:59:57,520 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 21:00:02,798 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 21:57:09,096 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 21:57:17,293 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 21:57:17,335 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 21:57:47,037 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 21:57:55,108 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 21:57:55,148 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 21:58:23,635 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 21:58:31,854 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 21:58:31,893 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:07:52,800 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:07:58,592 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 22:08:04,050 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 22:08:05,754 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 22:08:12,136 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 22:08:20,402 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:08:20,443 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:09:50,403 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:10:12,301 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 22:10:17,756 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 22:10:36,849 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 22:10:43,215 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 22:10:51,245 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:10:51,285 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:12:09,431 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:12:15,266 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 22:12:20,696 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 22:12:29,755 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 22:12:36,034 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 22:12:44,130 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:12:44,169 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:19:20,212 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:20:13,927 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:20:44,390 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-28 22:20:50,173 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-28 22:20:55,497 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-28 22:20:57,156 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-28 22:21:04,520 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-28 22:21:12,197 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-28 22:21:12,238 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.

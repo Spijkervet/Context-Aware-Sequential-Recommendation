@@ -41,13 +41,12 @@ if __name__ == '__main__':
     parser.add_argument('--train_dir', required=True)
     
     # TRAIN PARAMETERS
-    parser.add_argument('--batch_size', default=64, type=int, help='Batch size')
+    parser.add_argument('--batch_size', default=128, type=int, help='Batch size')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--num_epochs', type=int, default=201, help='Number of epochs')
     parser.add_argument('--max_norm', type=float, default=5.0, help='--')
 
     # MODEL PARAMETERS
-    parser.add_argument('--seq_length', default=3, type=int, help='Sequence length')
     parser.add_argument('--hidden_units', default=50, type=int)
     parser.add_argument('--num_blocks', default=2, type=int)
     parser.add_argument('--num_heads', default=1, type=int)
@@ -56,10 +55,9 @@ if __name__ == '__main__':
 
     # MISC.
     parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
-    parser.add_argument('--device', default='cpu', type=str, help='Device to run model on') #TODO: GPU
+    # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
-
 
     # Check if dataset exists
     if not os.path.exists(args.dataset):
@@ -97,6 +95,9 @@ if __name__ == '__main__':
     # # print(u)
 
 
+    # RESET GRAPH
+    tf.reset_default_graph()
+    
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()

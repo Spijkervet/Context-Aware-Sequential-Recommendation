@@ -108,14 +108,25 @@ class DataReader():
                 f.write('%d %d %d\n' % (user, i[1], i[0]))
         f.close()
 
-        # product map
-        logging.info('Writing product item map')
+        # tsv metadata file (index/label)
+        logging.info('Writing tsv metadata file (index/label)')
         d = os.path.dirname(self.dataset_fp)
         bn = os.path.basename(self.dataset_fp)
-        metadata_fp = os.path.join(d, bn + '_product_map.txt')
+
+        movies_dict = {}
+        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.dat')
+        with open(movies_labels_path, 'r', encoding='ISO-8859-1') as f:
+            for l in f:
+                key, movie, genre, = tuple(l.rstrip().split('::'))
+                movies_dict[int(key)] = [movie, genre]
+
+        metadata_fp = os.path.join(d, bn + '_metadata.tsv')
+        genre_fp = open(os.path.join(d, bn + '_metadata_genres.tsv'), 'w')
         with open(metadata_fp, 'w') as f:
             for k, v in tqdm(itemmap.items()):
-                f.write('{} {}\n'.format(k, v))
+                # asin=k, index=v
+                f.write('{} {}\n'.format(v, movies_dict[k][0])) # movie
+                genre_fp.write('{} {}\n'.format(v, movies_dict[k][1])) #genre
 
     def preprocess_amazon_ratings(self):
         countU = defaultdict(lambda: 0)

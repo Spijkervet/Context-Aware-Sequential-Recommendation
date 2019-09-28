@@ -1,13 +1,13 @@
 #!/bin/sh
 
-#SBATCH --job-name=sasrec
+#SBATCH --job-name=ir2
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=24:00:00
-#SBATCH --mem=60000M
+#SBATCH --time=6:00:00
+#SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 
 module purge
@@ -18,15 +18,23 @@ module load cuDNN/7.0.5-CUDA-9.0.176
 module load NCCL/2.0.5-CUDA-9.0.176
 export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64:$LD_LIBRARY_PATH
 
+# Mail
+echo "[IR2] Job $SLURM_JOBID started at `date`" | mail $USER -s "Job $SLURM_JOBID"
+
 pip3 install -r requirements.txt --user
 
 # DOWNLOAD DATA
-# sh download_data.sh
+sh download_data.sh
 
+
+### PREPROCESSING ###
 # AMAZON BOOKS
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
 
 # MOVIELENS 1-M
-# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
 
-python3 main.py --dataset data/ml-1m.txt --train_dir sandbox --batch_size 128
+
+### PROGRAM ###
+python3 main.py --dataset data/ml-1m.txt --train_dir maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
+echo "[IR2] Job $SLURM_JOBID finished at `date`" | mail $USER -s "Job $SLURM_JOBID"
