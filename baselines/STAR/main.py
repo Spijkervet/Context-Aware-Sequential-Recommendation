@@ -217,7 +217,7 @@ def predict(model):
 	nDCG_full = nDCG_full/relevant
 	hit_at_10 = hit_at_10/relevant
 	
-	print('hit@10' + str(hit_at_10))
+	print('hit@10: ' + str(hit_at_10))
 	print('nDCG@10: '+ str(nDCG))
 	print('nDCG_full: '+str(nDCG_full))
 
