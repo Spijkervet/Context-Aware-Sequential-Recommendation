@@ -24,7 +24,8 @@ class SRNNModel(nn.Module):
 		self.batch_size = 1
 
 		# (inputSize which is size of dictionary,embedding vector size)
-		self.inputEmbedding = nn.Embedding(self.num_class, self.hidden_size)
+		# ADDED THE PADDING INDEX
+		self.inputEmbedding = nn.Embedding(self.num_class, self.hidden_size, padding_idx=0)
 		# 1st layer params for interval context rnn
 		# use hiddenLayer contains weights and bias for temporal hidden layer (h3)
 		self.LinearH3 = nn.Linear(self.hidden_size,self.hidden_size)
@@ -51,20 +52,36 @@ class SRNNModel(nn.Module):
 		if h is None:
 			# h = torch.zeros(self.hidden_size,requires_grad=True)
 			# h3 = torch.zeros(self.hidden_size,requires_grad=True)
-			h = self.genGradZeroTensor(self.hidden_size)
-			h3 = self.genGradZeroTensor(self.hidden_size)
+			h = self.genGradZeroTensor((len(inputX), self.hidden_size))
+			h3 = self.genGradZeroTensor((len(inputX), self.hidden_size))
+		# inputX = inputX.unsqueeze(1)
+		# print("inputX.shape", inputX.shape)
+		# print("self.num_class", self.num_class)
+		# print("max input", torch.max(inputX))
+		# print("h3.shape", h3.shape)
 
 		xEmbedded = self.inputEmbedding(inputX)
 		# NOTE: h3 has a size of (1*D) and is the output of the first layer of context rnn
-		h3 = actFunc(F.linear(intervalX.unsqueeze(0),self.WIntervalX,self.BIntervalX)
+		h3 = actFunc(F.linear(intervalX.unsqueeze(1),self.WIntervalX,self.BIntervalX)
 					+self.LinearH3(h3))
+		# print("h3.shape", h3.shape)
 		# NOTE: we pass h3 into 2nd layer of context rnn to generate weight matrix of size (D,D)
-		intervalContext = actFunc(self.Linear2ndIntervalLayer(h3)).reshape(self.hidden_size,self.hidden_size)
+		context_rnn_output = actFunc(self.Linear2ndIntervalLayer(h3))
+		# print("context_rnn_output.shape", context_rnn_output.shape)
+		intervalContext = context_rnn_output.reshape(-1, self.hidden_size,self.hidden_size)
+		# print("intervalContext.shape", intervalContext.shape)
+		# print("xEmbedded.shape", xEmbedded.shape)
+		part1 = F.linear(xEmbedded, self.Wx, self.Bx)
+		# print("BIntervalContext.shape", self.BIntervalContext.shape)
+		# print("h.shape", h.shape)
+		part2 = torch.einsum('bi,bij->bj', h, intervalContext) + self.BIntervalContext
+		# part2 = F.linear(h, intervalContext, self.BIntervalContext)
+		# print("part1.shape", part1.shape)
+		# print("part2.shape", part2.shape)
 
-		h = actFunc(F.linear(xEmbedded,self.Wx,self.Bx)\
-				+F.linear(h,intervalContext,self.BIntervalContext))
+		h = actFunc(part1+part2)
 
-		logits =  self.fc(h)
+		logits = self.fc(h)
 		return logits,h,h2,h3
 
 	def genGradZeroTensor(self,size,tensorType=None,requires_grad=True):
@@ -72,8 +89,8 @@ class SRNNModel(nn.Module):
 		if(tensorType==None and self.isCuda):
 			# return torch.cuda.FloatTensor(size,requires_grad = requires_grad).fill_(0)
 			# return torch.cuda.FloatTensor(size).fill_(0)
-			return torch.zeros(self.hidden_size,requires_grad =requires_grad).cuda()
+			return torch.zeros(size,requires_grad =requires_grad).cuda()
 		elif tensorType == None:
-			return torch.zeros(self.hidden_size,requires_grad =requires_grad)
+			return torch.zeros(size,requires_grad =requires_grad)
 			# return torch.zeros(size)
 

@@ -14,7 +14,7 @@ from torch.autograd import Variable
 import random
 import torch.nn.functional as F
 import models as srnn
-
+from sampler import get_dataloader
 
 USER_SIZE = None			
 ITEM_SIZE = None			
@@ -64,7 +64,6 @@ FLOAT_STR = 'Float'
 LOG_OF_INDEXES = None
 
 def pre_data():
-
 	global ITEM_TRAIN
 	global ITEM_TEST
 	global SPLIT
@@ -109,7 +108,13 @@ def pre_data():
 		HOUR_TEST[i] = hour_test
 		INTERVAL_TRAIN[i] = interval_train
 		INTERVAL_TEST[i] = interval_test
-		
+
+	print("done loading data")
+	# print("ITEM_TRAIN", ITEM_TRAIN)
+	# print("WEEKDAY_TRAIN", WEEKDAY_TRAIN)
+	# print("HOUR_TRAIN", HOUR_TRAIN)
+	# print("INTERVAL_TRAIN", INTERVAL_TRAIN)
+
 def predict(model):
 	relevant = 0.0 					# The total number of predictions
 	hit = {}						# the number of hits in the nth position
@@ -160,6 +165,11 @@ def predict(model):
 			hourX = hour_train[i]
 			weekdayX = weekday_train[i]
 			intervalX = interval_train[i]
+			inputX = inputX.unsqueeze(0)
+			hourX = hourX.unsqueeze(0)
+			weekdayX = weekdayX.unsqueeze(0)
+			intervalX = intervalX.unsqueeze(0)
+
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
 		# Forecast
@@ -194,7 +204,11 @@ def predict(model):
 			# Remember index starts at 0 so +1 to get actual index
 			# +1 more because of nDCG formula
 			nDCG_full+=1/getLog2AtK((matchPosition+1)+1)
-
+			inputX = inputX.unsqueeze(0)
+			hourX = hourX.unsqueeze(0)
+			weekdayX = weekdayX.unsqueeze(0)
+			intervalX = intervalX.unsqueeze(0)
+			# print("inputX.shape", inputX.shape)
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
 	#average over number of queries
@@ -231,6 +245,9 @@ def learn():
 		criterion = torch.nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
 
+	if(usingCuda()):
+		model.cuda()
+
 	if os.path.exists(MODEL_FILE):
 		print("loading model to continue training")
 		checkpoint = loadCheckpoint(MODEL_FILE)
@@ -247,10 +264,7 @@ def learn():
 	print(model)
 
 	f_handler.close()
-
-	if(usingCuda()):
-		model.cuda()
-		# cudnn.benchmark = True
+	data_loader = get_dataloader(ITEM_TRAIN,HOUR_TRAIN,WEEKDAY_TRAIN,INTERVAL_TRAIN)
 
 	while (epoch<=100):
 		sys.stdout=temp
@@ -260,45 +274,73 @@ def learn():
 		print ("Epoch %d" % epoch)
 		print ("Training...")
 		sumloss = 0
-		iteration = 0
-		for i in ITEM_TRAIN.keys():
-			iteration += 1
-			# if iteration > 10:
-			# 	break
-			user_cart = ITEM_TRAIN[i]
-			hour_cart = HOUR_TRAIN[i]
-			weekday_cart = WEEKDAY_TRAIN[i]
-			interval_cart = INTERVAL_TRAIN[i]
+		for iteration, batch_inputs in enumerate(data_loader):
+			max_length = 0
+			for id in batch_inputs:
+				id = id.item()
+				if len(ITEM_TRAIN[id]) > max_length:
+					max_length = len(ITEM_TRAIN[id])
+
+			user_cart = []
+			hour_cart = []
+			weekday_cart = []
+			interval_cart = []
+
+			# pad the inputs to the longest boy
+			for i, id in enumerate(batch_inputs):
+				id = id.item()
+				tmp_user_cart = ITEM_TRAIN[id]
+				tmp_hour_cart = HOUR_TRAIN[id]
+				tmp_weekday_cart = WEEKDAY_TRAIN[id]
+				tmp_interval_cart = INTERVAL_TRAIN[id]
+
+				if len(tmp_user_cart) < max_length:
+					difference = max_length - len(tmp_user_cart)
+					user_cart.append([0]*difference + tmp_user_cart.tolist())
+					hour_cart.append([0]*difference + tmp_hour_cart.tolist())
+					weekday_cart.append([0]*difference + tmp_weekday_cart.tolist())
+					interval_cart.append([0]*difference + tmp_interval_cart.tolist())
+				else:
+					user_cart.append(tmp_user_cart.tolist())
+					hour_cart.append(tmp_hour_cart.tolist())
+					weekday_cart.append(tmp_weekday_cart.tolist())
+					interval_cart.append(tmp_interval_cart.tolist())
+
+			# process
+			user_cart = torch.tensor(user_cart)
+			hour_cart = torch.tensor(hour_cart)
+			weekday_cart = torch.tensor(weekday_cart)
+			interval_cart = torch.tensor(interval_cart)
+
+			# print("user_cart", user_cart.shape)
+			# print("hour_cart", user_cart.shape)
+			# print("weekday_cart", user_cart.shape)
+			# print("interval_cart", user_cart.shape)
+
 			loss = 0
+			optimizer.zero_grad()
 			h = None
 			h2 = None
 			h3 = None
-
-			# PRINT
-			# sys.stdout=temp
-			# print("iteration", iteration, "len user cart", len(user_cart))
-
-			# We do not need to input the last item
-			optimizer.zero_grad()
-
-			for j in range(len(user_cart)-1):
-				inputX = user_cart[j]
-				hourX = hour_cart[j]
-				weekdayX = weekday_cart[j]
-				intervalX = interval_cart[j]
-				label = user_cart[j+1]
+			# print("user cart", user_cart.shape)
+			# We do not input the last item, as this is the target
+			for j in range(user_cart.shape[1]-1):
+				inputX = user_cart[:, j]
+				hourX = hour_cart[:, j]
+				weekdayX = weekday_cart[:, j]
+				intervalX = interval_cart[:, j]
+				label = user_cart[:, j+1]
 				logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
-				
-
-				loss+=criterion(logits.unsqueeze(0),label.unsqueeze(0))
+				# print("criterion shapes", logits.shape, label.shape)
+				loss += criterion(logits,label)
 			loss.backward()
 			optimizer.step()
 			# print('loss: '+str(loss))
 			sumloss += loss
 
+
 		print ("begin predict, number of test items", len(ITEM_TEST))
 		sys.stdout=f_handler
-		print ("begin predict")
 		print('sumloss: '+str(float(sumloss)))
 		hit_at_10, nDCG, predictionStr = predict(model)
 		if(nDCG > BEST_NDCG):
@@ -320,7 +362,7 @@ def saveCheckpoint(state):
 	torch.save(state, MODEL_FILE)
 
 def loadCheckpoint(filename):
-        device = "cuda" if usingCuda() else "cpu"
+	device = "cuda" if usingCuda() else "cpu"
 	return torch.load(filename, map_location=device)
 
 TENSOR_FOR_EMB = {}
@@ -424,6 +466,9 @@ if __name__ == '__main__':
 	elif len(sys.argv)>2 and sys.argv[2] == 'Books':
 		DATAFILE = '../../data/STAR_Books.txt'
 		DATANAME = 'Books'
+	elif len(sys.argv)>2 and sys.argv[2] == 'test':
+		DATAFILE = '../../data/sample_Books.txt'
+		DATANAME = 'test'
 	
 	OUTPUT_PATH = './output/results/'
 	MODEL_DIR= './output/model/'
@@ -441,6 +486,8 @@ if __name__ == '__main__':
 				itemFreq[curItem] = 1
 			
 	ITEM_SIZE = len(itemFreq)+1
+	# TODO: remove this
+	# ITEM_SIZE = 500
 	# We add one because we do not want to start id from 0
 	HOUR_SIZE = 24+1 #(hours)
 	WEEKDAY_SIZE = 7+1 #(day)

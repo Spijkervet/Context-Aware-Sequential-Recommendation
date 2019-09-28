@@ -8,8 +8,8 @@ import numpy as np
 from tqdm import tqdm
 
 # Deep Learning lib
-import torch
-from torch.utils.data import DataLoader
+# import torch
+# from torch.utils.data import DataLoader
 
 # Model-specific imports
 from data_reader import DataReader
@@ -122,75 +122,3 @@ if __name__ == '__main__':
     # print('first user valid data', valid[first_user])
     # print('first user valid data', test[first_user])
     # # print(u)
-
-    # dataset, data_loader = load_dataset(config, train)
-    
-    # model = create_model(config, dataset)
-    # criterion = torch.nn.CrossEntropyLoss()
-    # optimizer = torch.optim.RMSprop(model.parameters(), lr=config.learning_rate)
-    # for step, (batch_inputs, batch_targets) in enumerate(data_loader):
-
-    for epoch in range(1, config.num_epochs + 1):
-        for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-            u, seq, pos, neg = sampler.next_batch()
-
-            seq = torch.from_numpy(np.stack(seq))
-            pos = torch.from_numpy(np.stack(pos))
-            neg = torch.from_numpy(np.stack(neg))
-
-            print(seq.shape)
-
-            # print(u)
-            # print(seq) # -> Input sequence
-            # print(pos) # -> Pos
-            # print(neg) # -> Neg
-
-            """
-            Model
-            Lookup table embedding used for sequence/pos/neg (tf.nn.embedding_lookup)
-            In PyTorch: torch.nn.Embedding
-            """
-
-            # Break, since the below code needs to be adjusted.
-
-            # Time measurement
-            t1 = time.time()
-
-            """
-            In PyTorch, we need to set the gradients to zero before starting to do backpropragation because 
-            PyTorch accumulates the gradients on subsequent backward passes. https://stackoverflow.com/questions/48001598/why-do-we-need-to-call-zero-grad-in-pytorch
-            """
-            optimizer.zero_grad()
-
-            # Convert to Tensor
-            batch_inputs = torch.stack(batch_inputs).to(config.device)
-            batch_targets = torch.stack(batch_targets).to(config.device)
-
-
-            out = model(batch_inputs)
-
-            # Clip gradients
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=config.max_norm)
-
-            # Calculate loss, perform backpropagation and evaluate (calculate accuracy)
-            loss = criterion(out.permute(0,2,1), batch_targets)
-            loss.backward()
-            optimizer.step()
-
-            accuracy = (out.argmax(2) == batch_targets).float().mean()
-
-            # Time measurement
-            t2 = time.time()
-            examples_per_second = config.batch_size/float(t2-t1)
-            
-            # print("[{}] Train Step {:04d}/{:04d}, Batch Size = {}, Batch/Sec = {:.2f}, "
-            #                 "Accuracy = {:.2f}, Loss = {:.3f}".format(
-            #                     datetime.now().strftime("%Y-%m-%d %H:%M"), step,
-            #                     config.train_steps, config.batch_size, examples_per_second,
-            #                     accuracy, loss
-            # ))
-
-            # # Exit training
-            # if step == config.train_steps:
-            #     break
-
