@@ -53,10 +53,69 @@ class DataReader():
             yield l.rstrip()
 
     def preprocess_movielens(self):
+        logging.info('Reading and processing {}'.format(self.path))
+
+        countU = defaultdict(lambda: 0)
+        countP = defaultdict(lambda: 0)
+        total = 100000 if not self.limit else self.limit
         f = open(self.dataset_fp, 'w')
-        for l in tqdm(self.parse_movielens(), total=1000000):
-            user, item, rating, timestamp = l.split('::')
+        for l in tqdm(self.parse_movielens(), total=total):
+            user, item, rating, timestamp = tuple(map(int, l.split('::')))
             f.write('{} {} {}\n'.format(user, item, timestamp))
+            asin = item 
+            rev = user
+            time = timestamp 
+            countU[rev] += 1
+            countP[asin] += 1
+        f.close()
+
+        logging.info('Creating user map dictionary')
+        usermap = dict()
+        usernum = 0
+        itemmap = dict()
+        itemnum = 0
+        User = dict()
+        for l in tqdm(self.parse_movielens(), total=total):
+            rev, asin, rating, time = tuple(map(int, l.split('::')))
+
+            # Minimum of 5:
+            if countU[rev] < 5 or countP[asin] < 5:
+                continue
+
+            if rev in usermap:
+                userid = usermap[rev]
+            else:
+                usernum += 1
+                userid = usernum
+                usermap[rev] = userid
+                User[userid] = []
+            if asin in itemmap:
+                itemid = itemmap[asin]
+            else:
+                itemnum += 1
+                itemid = itemnum
+                itemmap[asin] = itemid
+            User[userid].append([time, itemid])
+
+        logging.info('Sorting reviews for every user on time')
+        # sort reviews in User according to time
+        for userid in User.keys():
+            User[userid].sort(key=lambda x: x[0])
+            
+        f = open(self.dataset_fp, 'w')
+        for user in tqdm(User.keys()):
+            for i in User[user]:
+                f.write('%d %d %d\n' % (user, i[1], i[0]))
+        f.close()
+
+        # product map
+        logging.info('Writing product item map')
+        d = os.path.dirname(self.dataset_fp)
+        bn = os.path.basename(self.dataset_fp)
+        metadata_fp = os.path.join(d, bn + '_product_map.txt')
+        with open(metadata_fp, 'w') as f:
+            for k, v in tqdm(itemmap.items()):
+                f.write('{} {}\n'.format(k, v))
 
     def preprocess_amazon_ratings(self):
         countU = defaultdict(lambda: 0)

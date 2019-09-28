@@ -18,10 +18,15 @@ module load cuDNN/7.0.5-CUDA-9.0.176
 module load NCCL/2.0.5-CUDA-9.0.176
 export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64:$LD_LIBRARY_PATH
 
-
 pip3 install -r requirements.txt --user
 
-sh download_data.sh
+# DOWNLOAD DATA
+# sh download_data.sh
 
-python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books2.txt
-python3 main.py --type amazon --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --batch_size 128
+# AMAZON BOOKS
+# python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
+
+# MOVIELENS 1-M
+# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
+
+python3 main.py --dataset data/ml-1m.txt --train_dir sandbox --batch_size 128

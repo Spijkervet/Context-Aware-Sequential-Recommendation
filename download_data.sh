@@ -6,4 +6,5 @@ wget -nc http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews
 
 # Movielens 1M
 wget -nc http://files.grouplens.org/datasets/movielens/ml-1m.zip
-unzip -f ml-1m.zip
+unzip ml-1m.zip
+rm ml-1m.zip

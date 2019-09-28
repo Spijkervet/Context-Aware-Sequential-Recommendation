@@ -1,2 +1,2 @@
-pandas
 tqdm
+tensorflow-gpu==1.12
