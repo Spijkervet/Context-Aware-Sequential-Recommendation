@@ -50,18 +50,23 @@ config.allow_soft_placement = True
 sess = tf.Session(config=config)
 
 sampler = WarpSampler(user_train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=3)
+
+
+# MODEL
 model = Model(usernum, itemnum, args)
 # sess.run(tf.initialize_all_variables())
 sess.run(tf.global_variables_initializer())
 
 # Add TensorBoard
-writer = tf.summary.FileWriter(args.train_dir, sess.graph) 
-# writer.add_summary(model.merged)
+writer = tf.summary.FileWriter(args.dataset + '_' + args.train_dir, sess.graph) 
 
 # Allow saving of model
+MODEL_PATH = '/tmp/' + args.dataset + '_' + 'model.ckpt' 
+print('MODEL_PATH', MODEL_PATH)
+ 
 saver = tf.train.Saver()
-if os.path.exists('/tmp/model_sasrec.ckpt'):
-    saver.restore(sess, '/tmp/model_sasrec.ckpt')
+if os.path.exists(MODEL_PATH):
+    saver.restore(sess, MODEL_PATH) 
 
 T = 0.0
 t0 = time.time()
@@ -71,13 +76,17 @@ try:
 
         for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
             u, seq, pos, neg = sampler.next_batch()
-            auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
+            # auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
+            #                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
+            #                          model.is_training: True})
+
+            auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
                                     {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
                                      model.is_training: True})
 
-
-        # writer.add_summary(model.merged, epoch)
-        save_path = saver.save(sess, '/tmp/model_sasrec.ckpt')
+        writer.add_summary(summary, epoch)
+        writer.flush()
+        save_path = saver.save(sess, MODEL_PATH)
         print('Model saved in path: %s' % save_path)
 
         if epoch % 20 == 0:
@@ -92,6 +101,13 @@ try:
 
             f.write(str(t_valid) + ' ' + str(t_test) + '\n')
             f.flush()
+
+            summary = tf.Summary()
+            summary.value.add(tag='VALID/NDCG@10', simple_value=float(t_valid[0]))
+            summary.value.add(tag='VALID/HR@10', simple_value=float(t_valid[1]))
+            summary.value.add(tag='TEST/NDCG@10', simple_value=float(t_test[0]))
+            summary.value.add(tag='TEST/HR@10', simple_value=float(t_test[1]))
+            writer.add_summary(summary, epoch)
             t0 = time.time()
 except:
     sampler.close()

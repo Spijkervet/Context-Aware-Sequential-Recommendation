@@ -92,18 +92,18 @@ class Model():
         reg_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         self.loss += sum(reg_losses)
 
-        tf.summary.scalar('loss', self.loss)
+        tf.summary.scalar('TRAIN/loss', self.loss)
         self.auc = tf.reduce_sum(
             ((tf.sign(self.pos_logits - self.neg_logits) + 1) / 2) * istarget
         ) / tf.reduce_sum(istarget)
 
         if reuse is None:
-            tf.summary.scalar('auc', self.auc)
+            tf.summary.scalar('TRAIN/auc', self.auc)
             self.global_step = tf.Variable(0, name='global_step', trainable=False)
             self.optimizer = tf.train.AdamOptimizer(learning_rate=args.lr, beta2=0.98)
             self.train_op = self.optimizer.minimize(self.loss, global_step=self.global_step)
         else:
-            tf.summary.scalar('test_auc', self.auc)
+            tf.summary.scalar('TEST/test_auc', self.auc)
 
         self.merged = tf.summary.merge_all()
 

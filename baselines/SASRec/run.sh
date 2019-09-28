@@ -28,7 +28,7 @@ python2 -m virtualenv sasrec
 
 pip2 install -r requirements.txt
 
-# python main.py --dataset=ml-1m --train_dir=default --maxlen=200 --dropout_rate=0.2 
-python2 main.py --dataset=Books --train_dir=default --maxlen=50 --dropout_rate=0.2 
+python2 main.py --dataset=ml-1m --train_dir=default --maxlen=200 --dropout_rate=0.2 
+# python2 main.py --dataset=Books --train_dir=default --maxlen=50 --dropout_rate=0.2 
 
 echo "[SASRec] Job $SLURM_JOBID finished at `date`" | mail $USER -s "Job $SLURM_JOBID"
