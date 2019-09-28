@@ -19,3 +19,4 @@ pyvenv.cfg
 pip-selfcheck.json
 *.txt
 *.out
+*.nfs*

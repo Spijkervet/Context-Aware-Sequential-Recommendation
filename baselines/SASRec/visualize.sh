@@ -9,4 +9,4 @@ export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64
 
 # pip3 install tensorflow --user
 
-python3 -m tensorboard.main --logdir default
+python3 -m tensorboard.main --logdir ml-1m_default 

@@ -48,10 +48,9 @@ class SRNNModel(nn.Module):
 	def forward(self, inputX,hourX,weekdayX,intervalX,h=None,h2=None,h3=None):
 		# We use sigmoid as activation function
 		actFunc = F.sigmoid
+
 		# First run so initialise hidden layer
 		if h is None:
-			# h = torch.zeros(self.hidden_size,requires_grad=True)
-			# h3 = torch.zeros(self.hidden_size,requires_grad=True)
 			h = self.genGradZeroTensor((len(inputX), self.hidden_size))
 			h3 = self.genGradZeroTensor((len(inputX), self.hidden_size))
 		# inputX = inputX.unsqueeze(1)
@@ -89,8 +88,8 @@ class SRNNModel(nn.Module):
 		if(tensorType==None and self.isCuda):
 			# return torch.cuda.FloatTensor(size,requires_grad = requires_grad).fill_(0)
 			# return torch.cuda.FloatTensor(size).fill_(0)
-			return torch.zeros(size,requires_grad =requires_grad).cuda()
+			return torch.zeros(size,requires_grad=requires_grad).cuda()
 		elif tensorType == None:
-			return torch.zeros(size,requires_grad =requires_grad)
+			return torch.zeros(size,requires_grad=requires_grad)
 			# return torch.zeros(size)
 
