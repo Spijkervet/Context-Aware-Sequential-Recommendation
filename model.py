@@ -11,6 +11,7 @@ class Model():
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
+        self.mask = mask
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -24,6 +25,8 @@ class Model():
                                                  with_t=True,
                                                  reuse=reuse
                                                  )
+
+            self.item_emb_table = item_emb_table
 
             # Positional Encoding
             t, pos_emb_table = embedding(
@@ -44,13 +47,16 @@ class Model():
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
             self.seq *= mask
+            
 
+            # Self-attention blocks
             # Build blocks
-
             for i in range(args.num_blocks):
                 with tf.variable_scope("num_blocks_%d" % i):
 
                     # Self-attention
+                    self.queries = normalize(self.seq)
+                    self.keys = self.seq
                     self.seq = multihead_attention(queries=normalize(self.seq),
                                                    keys=self.seq,
                                                    num_units=args.hidden_units,

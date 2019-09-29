@@ -5,6 +5,12 @@ import numpy as np
 from collections import defaultdict
 
 
+class UserItems():
+
+    def __init__(self, item, timestamp):
+        self.item = item
+        self.timestamp = timestamp
+
 def data_partition(fpath):
     '''
     Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
@@ -25,7 +31,7 @@ def data_partition(fpath):
         t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)
-        User[u].append(i)
+        User[u].append(UserItems(i, t))
 
     # Partition data into three parts: train, valid, test.
     for user in User:

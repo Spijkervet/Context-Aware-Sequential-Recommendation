@@ -24,7 +24,7 @@ if __name__ == '__main__':
     MODEL_PATH = os.path.abspath('models')
     logger = logging.getLogger('ir2')
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s",
         handlers=[
             logging.FileHandler("{0}/{1}.log".format('.', 'output')),
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     [train, valid, test, usernum, itemnum] = dataset
     num_batch = round(len(train) / args.batch_size)
 
-    cc = sum([len(v) for v in train.values()])        
+    cc = sum([len(v) for v in train.values()])
     logging.info('Average sequence length: {:.2f}'.format(cc / len(train)))
 
     # DONE: Understand WarpSampler (see explanation in Class)
@@ -128,14 +128,39 @@ if __name__ == '__main__':
         for epoch in range(1, args.num_epochs + 1):
 
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-                u, seq, pos, neg = sampler.next_batch()
-                # auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
+                u, seq, pos, neg, timeseq = sampler.next_batch()
+                # auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
                 #                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
-                #                          model.is_training: True})
+                #                         model.is_training: True})
 
-                auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
-                                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
-                                        model.is_training: True})
+
+                # print(u[0])
+                # print(seq[0])
+                # print(pos[0])
+                # print(neg[0])
+                # print(timeseq[0])
+
+                mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.mask, model.seq, model.item_emb_table,
+                        model.queries, model.keys],
+                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
+                        model.is_training: True})
+
+                ## Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
+                # print(u[0])
+                # print(seq[0][-1], seq[0].shape)
+                # print(mask[0][-1])
+
+                # print(seq_embedding[0][-1], seq_embedding.shape)
+
+                # print(item_emb_table[0][-1], itemnum, item_emb_table.shape)
+
+                # print('queries')
+                # print(queries[0][-1], queries.shape)
+
+                # print('keys')
+                # print(keys[0][-1], keys.shape)
+                # exit(0)
+
 
             writer.add_summary(summary, epoch)
             writer.flush()
@@ -162,9 +187,10 @@ if __name__ == '__main__':
                 summary.value.add(tag='TEST/HR@10', simple_value=float(t_test[1]))
                 writer.add_summary(summary, epoch)
                 t0 = time.time()
-    except:
+    except Exception as e:
         sampler.close()
         f.close()
+        logger.error(e)
         exit(1)
 
     f.close()
