@@ -503,3 +503,15 @@ InvalidArgumentError (see above for traceback): You must feed a value for placeh
 2019-09-29 23:23:23,338 [MainThread  ] [INFO ]  epoch:1, time: 4.477513(s), valid (NDCG@10: 0.0558, HR@10: 0.1257), test (NDCG@10: 0.0000, HR@10: 0.0000)
 2019-09-29 23:23:25,367 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
 2019-09-29 23:23:25,368 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:38:58,318 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:40:11,301 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:41:24,802 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:42:42,021 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:50:46,678 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:51:44,529 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:55:52,701 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:02:04,015 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:02:29,718 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:02:50,682 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:02:53,466 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:02:53,489 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.

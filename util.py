@@ -3,23 +3,22 @@ import copy
 import random
 import numpy as np
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 class TimeStamp():
     
     def __init__(self, timestamp):
-        self.day = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%-d")
-        self.hour = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%-H")
-        self.date = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%c")
+        self.day = timestamp.strftime("%-d")
+        self.hour = timestamp.strftime("%-H")
+        self.date = timestamp.strftime("%c")
 
 class UserItems():
 
     # TODO: Days ago relative to first date!
     def __init__(self, item, timestamp):
         self.item = item
-        self.timestamp = timestamp
-        self.ts = TimeStamp(timestamp)
-        self.day = self.ts.day
+        self.timestamp = datetime.fromtimestamp(timestamp).astimezone(timezone.utc)
+        self.ts = TimeStamp(self.timestamp)
 
 def data_partition(fpath):
     '''
@@ -44,6 +43,20 @@ def data_partition(fpath):
 
         to_add = UserItems(i, t)
         User[u].append(to_add)
+
+    # Create delta_time
+    for user in User:
+        most_recent_timestamp = User[user][-1].timestamp
+        for u in User[user]:
+            delta_timestamp = most_recent_timestamp - u.timestamp
+            delta_timestamp = delta_timestamp.days # TODO: Add this as an argument
+            if delta_timestamp > 31: # TODO: Add this as an argument
+                delta_timestamp = 31
+
+            u.delta_time = delta_timestamp
+            # if u.delta_time != 0 and u.delta_time != 31:
+            #     print(u.delta_time)
+            # print(most_recent_timestamp, u.timestamp, delta_timestamp)
 
     # Partition data into three parts: train, valid, test.
     for user in User:
@@ -80,12 +93,12 @@ def evaluate(model, dataset, args, sess):
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
-        timeseq[idx] = valid[u][0].day # NOTE: Day for now
+        timeseq[idx] = valid[u][0].delta_time
 
         idx -= 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.day # NOTE: Day for now, make this an argument.
+            timeseq[idx] = i.delta_time
             idx -= 1
             if idx == -1: break
         rated = set([i.item for i in train[u]])
@@ -131,7 +144,7 @@ def evaluate_valid(model, dataset, args, sess):
         idx = args.maxlen - 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.timestamp
+            timeseq[idx] = i.delta_time
             idx -= 1
             if idx == -1: break
 
