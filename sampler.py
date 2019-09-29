@@ -22,7 +22,8 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         seq = np.zeros([maxlen], dtype=np.int32)
         pos = np.zeros([maxlen], dtype=np.int32)
         neg = np.zeros([maxlen], dtype=np.int32)
-        nxt = user_train[user][-1]
+        nxt = user_train[user][-1].item
+        timeseq = np.zeros([maxlen], dtype=np.int32)
         idx = maxlen - 1
         
         # print('sequence', user_train[user])
@@ -35,13 +36,14 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         # NOTE: Reverse sequence (ascending -> descending), except for the last interaction
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)
-            seq[idx] = i
+            seq[idx] = i.item
+            timeseq[idx] = i.day # NOTE: CONTEXT SCOPE IS CHANGED HERE
             pos[idx] = nxt
             if nxt != 0: # TODO: What does nxt != 0 mean?
                 # print('nxt', nxt)
                 # Pick a random product id between 1 and :itemnum: NOT in the set of unique product ids of this sequence
                 neg[idx] = random_neq(1, itemnum + 1, ts)
-            nxt = i # nxt becomes i
+            nxt = i.item # nxt becomes i
             idx -= 1
             if idx == -1: break
 
@@ -49,7 +51,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         # print('sequence', seq)
         # print('positive examples (incl. recent)', pos)
         # print('negative examples', neg)
-        return (user, seq, pos, neg)
+        return (user, seq, pos, neg, timeseq)
 
     np.random.seed(SEED)
     # TODO: I have no idea what this while loop does?

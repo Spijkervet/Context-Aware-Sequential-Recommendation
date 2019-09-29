@@ -11,6 +11,11 @@ import tensorflow as tf
 import numpy as np
 
 
+def timeseq_encoding(timeseq, max_interval):
+  timeseq = tf.one_hot(timeseq, depth=max_interval+1) # Add one to include the zero padding, which will be sliced:
+  timeseq = timeseq[:, :, 1:] # Slice off zero, since we do not want to encode 0 paddings.
+  return timeseq
+
 def positional_encoding(dim, sentence_length, dtype=tf.float32):
 
     encoded_vec = np.array([pos/np.power(10000, 2*i/dim) for pos in range(sentence_length) for i in range(dim)])
@@ -41,7 +46,7 @@ def normalize(inputs,
         params_shape = inputs_shape[-1:]
     
         mean, variance = tf.nn.moments(inputs, [-1], keep_dims=True)
-        beta= tf.Variable(tf.zeros(params_shape))
+        beta = tf.Variable(tf.zeros(params_shape))
         gamma = tf.Variable(tf.ones(params_shape))
         normalized = (inputs - mean) / ( (variance + epsilon) ** (.5) )
         outputs = gamma * normalized + beta

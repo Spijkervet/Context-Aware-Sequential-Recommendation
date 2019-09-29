@@ -3,7 +3,24 @@ import copy
 import random
 import numpy as np
 from collections import defaultdict
+from datetime import datetime, timezone
 
+class TimeStamp():
+    
+    def __init__(self, timestamp):
+        self.day = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%-d")
+        self.hour = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%-H")
+        self.date = datetime.fromtimestamp(timestamp).astimezone(timezone.utc).strftime("%c")
+
+class UserItems():
+
+    def __init__(self, item, timestamp):
+        self.item = item
+        self.timestamp = timestamp
+        self.ts = TimeStamp(timestamp)
+        self.day = self.ts.day
+
+        
 
 def data_partition(fpath):
     '''
@@ -25,7 +42,9 @@ def data_partition(fpath):
         t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)
-        User[u].append(i)
+
+        to_add = UserItems(i, t)
+        User[u].append(to_add)
 
     # Partition data into three parts: train, valid, test.
     for user in User:
@@ -133,4 +152,3 @@ def evaluate_valid(model, dataset, args, sess):
             sys.stdout.flush()
 
     return NDCG / valid_user, HT / valid_user
-
