@@ -49,7 +49,9 @@ class DataReader():
 
     def parse_movielens(self):
         f = open(self.path, 'r')
-        for l in f:
+        for i, l in enumerate(f):
+            if self.limit and i > self.limit:
+                break
             yield l.rstrip()
 
     def preprocess_movielens(self):
@@ -58,13 +60,15 @@ class DataReader():
         countU = defaultdict(lambda: 0)
         countP = defaultdict(lambda: 0)
         total = 100000 if not self.limit else self.limit
+
+        delim = '::'
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
-            user, item, rating, timestamp = tuple(map(int, l.split('::')))
+            user, item, rating, timestamp = l.split(delim)
             f.write('{} {} {}\n'.format(user, item, timestamp))
-            asin = item 
-            rev = user
-            time = timestamp 
+            asin = int(item) 
+            rev = int(user)
+            time = int(timestamp)
             countU[rev] += 1
             countP[asin] += 1
         f.close()
@@ -76,7 +80,10 @@ class DataReader():
         itemnum = 0
         User = dict()
         for l in tqdm(self.parse_movielens(), total=total):
-            rev, asin, rating, time = tuple(map(int, l.split('::')))
+            rev, asin, rating, time = l.split(delim)
+            rev = int(rev)
+            asin = int(asin)
+            time = int(time)
 
             # Minimum of 5:
             if countU[rev] < 5 or countP[asin] < 5:
@@ -114,10 +121,10 @@ class DataReader():
         bn = os.path.basename(self.dataset_fp)
 
         movies_dict = {}
-        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.dat')
+        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.csv')
         with open(movies_labels_path, 'r', encoding='ISO-8859-1') as f:
             for l in f:
-                key, movie, genre, = tuple(l.rstrip().split('::'))
+                key, movie, genre, = tuple(l.rstrip().split(delim))
                 movies_dict[int(key)] = [movie, genre]
 
         metadata_fp = os.path.join(d, bn + '_metadata.tsv')
