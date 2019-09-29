@@ -32,7 +32,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         assert seq.shape[0] == maxlen
 
         # Get unique product ids in sequence
-        ts = set(user_train[user])
+        ts = set([i.item for i in user_train[user]])
         # NOTE: Reverse sequence (ascending -> descending), except for the last interaction
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)

@@ -349,3 +349,157 @@ Use `tf.keras.layers.Conv1D` instead.
 2019-09-29 19:07:07,213 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
 2019-09-29 19:07:07,214 [MainThread  ] [INFO ]  Evaluating
 2019-09-29 19:08:04,826 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 19:10:13,804 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:10:16,567 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:10:16,590 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:10:56,123 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:10:58,916 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:10:58,943 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:11:07,180 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:11:07,180 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:11:36,744 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 19:12:17,438 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:12:20,133 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:12:20,156 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:12:28,587 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:12:28,588 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:12:58,686 [MainThread  ] [ERROR]  list index out of range
+2019-09-29 19:15:30,806 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:15:33,536 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:15:33,560 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:15:41,725 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:15:41,725 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:16:11,954 [MainThread  ] [ERROR]  'int' object has no attribute 'item'
+2019-09-29 19:17:06,627 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:17:09,356 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:17:09,380 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:17:17,557 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:17:17,557 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:17:47,218 [MainThread  ] [ERROR]  'list' object has no attribute 'item'
+2019-09-29 19:18:56,086 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:18:58,755 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:18:58,779 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:19:06,948 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:19:06,949 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:19:36,389 [MainThread  ] [ERROR]  You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+Caused by op 'Placeholder_5', defined at:
+  File "main.py", line 113, in <module>
+    model = Model(usernum, itemnum, args)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py", line 12, in __init__
+    self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 1747, in placeholder
+    return gen_array_ops.placeholder(dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 5206, in placeholder
+    "Placeholder", dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1770, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+InvalidArgumentError (see above for traceback): You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+2019-09-29 22:59:18,163 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 22:59:20,820 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 22:59:20,844 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 22:59:28,893 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 22:59:28,893 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 22:59:56,822 [MainThread  ] [ERROR]  You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+Caused by op 'Placeholder_5', defined at:
+  File "main.py", line 113, in <module>
+    model = Model(usernum, itemnum, args)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py", line 12, in __init__
+    self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 1747, in placeholder
+    return gen_array_ops.placeholder(dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 5206, in placeholder
+    "Placeholder", dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1770, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+InvalidArgumentError (see above for traceback): You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+2019-09-29 23:03:16,448 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:03:19,146 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:03:19,170 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:03:27,292 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:03:27,292 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:03:56,236 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 23:04:48,499 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:04:51,261 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:04:51,284 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:04:59,369 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:04:59,369 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:05:27,327 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 23:06:27,226 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:06:29,929 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:06:29,953 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:06:38,319 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:06:38,319 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:07:07,362 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 23:07:57,120 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:07:59,904 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:07:59,929 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:08:09,598 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:08:09,598 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:10:40,880 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:10:43,636 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:10:43,660 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:10:51,842 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:10:51,842 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:11:22,020 [MainThread  ] [ERROR]  You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+Caused by op 'Placeholder_5', defined at:
+  File "main.py", line 113, in <module>
+    model = Model(usernum, itemnum, args)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py", line 12, in __init__
+    self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/array_ops.py", line 1747, in placeholder
+    return gen_array_ops.placeholder(dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 5206, in placeholder
+    "Placeholder", dtype=dtype, shape=shape, name=name)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 787, in _apply_op_helper
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 488, in new_func
+    return func(*args, **kwargs)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3274, in create_op
+    op_def=op_def)
+  File "/mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 1770, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+InvalidArgumentError (see above for traceback): You must feed a value for placeholder tensor 'Placeholder_5' with dtype int32 and shape [?,200]
+	 [[node Placeholder_5 (defined at /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/model.py:12)  = Placeholder[dtype=DT_INT32, shape=[?,200], _device="/job:localhost/replica:0/task:0/device:CPU:0"]()]]
+
+2019-09-29 23:16:25,706 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:16:49,430 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:18:07,395 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:18:10,176 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:18:10,200 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:18:18,392 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:18:18,392 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:20:04,425 [MainThread  ] [ERROR]  predict() missing 1 required positional argument: 'item_idx'
+2019-09-29 23:21:22,248 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 23:21:25,018 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:21:25,042 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 23:21:33,553 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:21:33,554 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 23:23:23,337 [MainThread  ] [INFO ]  
+2019-09-29 23:23:23,338 [MainThread  ] [INFO ]  epoch:1, time: 4.477513(s), valid (NDCG@10: 0.0558, HR@10: 0.1257), test (NDCG@10: 0.0000, HR@10: 0.0000)
+2019-09-29 23:23:25,367 [MainThread  ] [INFO ]  Model saved in path: /mnt/c/Users/Jane Wilde/git/uva/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 23:23:25,368 [MainThread  ] [INFO ]  Evaluating

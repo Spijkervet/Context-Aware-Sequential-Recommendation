@@ -21,8 +21,6 @@ class UserItems():
         self.ts = TimeStamp(timestamp)
         self.day = self.ts.day
 
-        
-
 def data_partition(fpath):
     '''
     Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
@@ -78,22 +76,27 @@ def evaluate(model, dataset, args, sess):
         if len(train[u]) < 1 or len(test[u]) < 1: continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
+        timeseq = np.zeros([args.maxlen], dtype=np.int32)
+
         idx = args.maxlen - 1
-        seq[idx] = valid[u][0]
+        seq[idx] = valid[u][0].item
+        timeseq[idx] = valid[u][0].day # NOTE: Day for now
+
         idx -= 1
         for i in reversed(train[u]):
             seq[idx] = i.item
+            timeseq[idx] = i.day # NOTE: Day for now, make this an argument.
             idx -= 1
             if idx == -1: break
-        rated = set(train[u])
+        rated = set([i.item for i in train[u]])
         rated.add(0)
-        item_idx = [test[u][0]]
+        item_idx = [test[u][0].item]
         for _ in range(100):
             t = np.random.randint(1, itemnum + 1)
             while t in rated: t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -124,21 +127,23 @@ def evaluate_valid(model, dataset, args, sess):
         if len(train[u]) < 1 or len(valid[u]) < 1: continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
+        timeseq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
         for i in reversed(train[u]):
             seq[idx] = i.item
+            timeseq[idx] = i.timestamp
             idx -= 1
             if idx == -1: break
 
-        rated = set(train[u])
+        rated = set([i.item for i in train[u]])
         rated.add(0)
-        item_idx = [valid[u][0]]
+        item_idx = [valid[u][0].item]
         for _ in range(100):
             t = np.random.randint(1, itemnum + 1)
             while t in rated: t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
