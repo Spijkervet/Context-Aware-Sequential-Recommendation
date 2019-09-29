@@ -1,67 +1,70 @@
-# information_retrieval_2
-IR2 course UvA
+# Information Retrieval 2
+This is the Github repository containing the code for the Context-Aware Sequential Recommendation project for the Information Retrieval 2 course at the University of Amsterdam
 
-## Pulling this repository
-You can either pull the main repository or with all submodules to run the baselines:
+## Quick Start
+The whole program, including initializing the environment, downloading the datasets and training the model, can be run with:
 ```
-git pull
-```
-or
-```
-git pull --recurse-submodules
+sh run.sh
 ```
 
-## Installation
-Run the following command to initialize the environment:
+# Manual Installation
+Run the following commands to initialize the environment:
 ```
-pip3 install virtualenv
-python3 -m venv ir2
-source ir2/bin/activate
+pip3 install virtualenv && \
+python3 -m venv ir2 && \
+source ir2/bin/activate && \
 pip3 install -r requirements.txt
 ```
 
+Activate the environment with: `source ir2/bin/activate`
+
 ## Download the data
-You can download the data by invoking:
+You can download the datasets (Amazon Books, Movielens 1M) by invoking:
 ```
 sh download_data.sh
+```
+
+## Preprocess the data
+The data can be preprocessed with:
+
+```
+# AMAZON BOOKS
+python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
+
+# MOVIELENS 1-M
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
+
 ```
 
 ## Run the program:
 The program accepts dataset/train/model parameters. An example:
 ```
-python3 main.py --raw_dataset data/reviews_Books_5.json.gz --dataset data/Books.txt --preprocess --batch_size 128
+python3 main.py --dataset data/ml-1m.txt --train_dir maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
 ```
 
 ## Parameters:
 ```
-usage: main.py [-h] [--raw_dataset RAW_DATASET] --dataset DATASET
-               [--preprocess] [--limit LIMIT] --train_dir TRAIN_DIR
-               [--batch_size BATCH_SIZE] [--learning_rate LEARNING_RATE]
-               [--train_steps TRAIN_STEPS] [--max_norm MAX_NORM]
-               [--seq_length SEQ_LENGTH]
-               [--dropout_keep_prob DROPOUT_KEEP_PROB]
-               [--saved_model SAVED_MODEL] [--device DEVICE]
+usage: main.py [-h] --dataset DATASET [--limit LIMIT] [--maxlen MAXLEN]
+               --train_dir TRAIN_DIR [--batch_size BATCH_SIZE] [--lr LR]
+               [--num_epochs NUM_EPOCHS] [--max_norm MAX_NORM]
+               [--hidden_units HIDDEN_UNITS] [--num_blocks NUM_BLOCKS]
+               [--num_heads NUM_HEADS] [--dropout_rate DROPOUT_RATE]
+               [--l2_emb L2_EMB] [--saved_model SAVED_MODEL]
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --raw_dataset RAW_DATASET
-                        Raw gzip dataset, Amazon Product Review data
-  --dataset DATASET     Location of pre-processed dataset
-  --preprocess          Preprocess the raw dataset
-  --limit LIMIT         Limit the number of datapoints
+  -h, --help                  show this help message and exit
+  --dataset DATASET           Location of pre-processed dataset
+  --limit LIMIT               Limit the number of datapoints
+  --maxlen MAXLEN             Maximum length of user item sequence, for zero-padding
   --train_dir TRAIN_DIR
-  --batch_size BATCH_SIZE
-                        Batch size
-  --learning_rate LEARNING_RATE
-                        Learning rate
-  --train_steps TRAIN_STEPS
-                        Number of training steps
-  --max_norm MAX_NORM   --
-  --seq_length SEQ_LENGTH
-                        Sequence length
-  --dropout_keep_prob DROPOUT_KEEP_PROB
-                        Dropout
-  --saved_model SAVED_MODEL
-                        File to save model checkpoints
-  --device DEVICE       Device to run model on
+  --batch_size BATCH_SIZE     Batch size
+  --lr LR                     Learning rate
+  --num_epochs NUM_EPOCHS     Number of epochs
+  --max_norm MAX_NORM
+  --hidden_units HIDDEN_UNITS
+  --num_blocks NUM_BLOCKS
+  --num_heads NUM_HEADS
+  --dropout_rate DROPOUT_RATE
+  --l2_emb L2_EMB
+  --saved_model SAVED_MODEL   File to save model checkpoints
   ```

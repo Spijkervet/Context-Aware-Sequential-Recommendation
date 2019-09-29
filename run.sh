@@ -3,7 +3,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
 #SBATCH --gres=gpu:2
@@ -31,7 +31,7 @@ python3 -m virtualenv ir2
 . ir2/bin/activate
 pip3 install -r requirements.txt
 
-# DOWNLOAD DATA
+### DOWNLOAD DATA ###
 sh download_data.sh
 
 ### PREPROCESSING ###
