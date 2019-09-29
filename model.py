@@ -25,6 +25,7 @@ class Model():
 
             # Time sequence encoding ('timestamps -> positional vector')
             # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
+            self.tseq_enc = timeseq_encoding(self.time_seq, args.hidden_units) # For intermediate debug purposes (print)
             self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
             # self.tseq, item_emb_table = embedding(self.time_seq,
             #                             vocab_size=args.max_time_interval + 1,

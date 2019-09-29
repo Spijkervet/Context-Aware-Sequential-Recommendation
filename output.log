@@ -515,3 +515,24 @@ InvalidArgumentError (see above for traceback): You must feed a value for placeh
 2019-09-30 00:02:50,682 [MainThread  ] [INFO ]  Average sequence length: 163.50
 2019-09-30 00:02:53,466 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
 2019-09-30 00:02:53,489 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:07:42,811 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:07:45,570 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:07:45,591 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:07:49,777 [MainThread  ] [ERROR]  'Model' object has no attribute 'timeseq_enc'
+2019-09-30 00:08:36,802 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:08:39,548 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:08:39,570 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:10:07,278 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:10:10,057 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:10:10,081 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:10:17,942 [MainThread  ] [DEBUG]  5768
+2019-09-30 00:10:17,949 [MainThread  ] [ERROR]  name 'mask' is not defined
+2019-09-30 00:11:50,053 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:11:53,227 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:11:53,251 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:13:21,474 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:13:24,508 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:13:24,536 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:14:02,508 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-30 00:14:05,503 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-30 00:14:05,527 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
