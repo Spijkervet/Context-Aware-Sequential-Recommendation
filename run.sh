@@ -21,11 +21,15 @@ export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64
 # Mail
 echo "[IR2] Job $SLURM_JOBID started at `date`" | mail $USER -s "Job $SLURM_JOBID"
 
-pip3 install -r requirements.txt --user --upgrade
+pip3 install virtualenv 
+python3 -m virtualenv ir2
+
+. ir2/bin/activate
+
+pip3 install -r requirements.txt
 
 # DOWNLOAD DATA
 sh download_data.sh
-
 
 ### PREPROCESSING ###
 # AMAZON BOOKS

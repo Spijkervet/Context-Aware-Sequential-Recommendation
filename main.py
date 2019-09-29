@@ -5,7 +5,7 @@ import logging
 import time
 
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 import tensorflow as tf
 
 
@@ -96,28 +96,33 @@ if __name__ == '__main__':
 
 
     # RESET GRAPH
-    tf.reset_default_graph()
+    tf.compat.v1.reset_default_graph()
+
+    # DISABLE EAGER EXECUTION FOR NOW
+    tf.compat.v1.disable_eager_execution()
+
+
     
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
-    config = tf.ConfigProto()
+    config = tf.compat.v1.ConfigProto()
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
 
 
     # SESSION
-    sess = tf.Session(config=config)
+    sess = tf.compat.v1.Session(config=config)
 
     # MODEL
     model = Model(usernum, itemnum, args)
-    sess.run(tf.global_variables_initializer())
+    sess.run(tf.compat.v1.global_variables_initializer())
 
     # Add TensorBoard
-    writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph) 
+    writer = tf.compat.v1.summary.FileWriter(TRAIN_FILES_PATH, sess.graph) 
 
     # Allow saving of model 
     MODEL_SAVE_PATH = os.path.join(TRAIN_FILES_PATH, 'model.ckpt')  
-    saver = tf.train.Saver()
+    saver = tf.compat.v1.train.Saver()
     if os.path.exists(MODEL_SAVE_PATH):
         saver.restore(sess, MODEL_SAVE_PATH) 
 
@@ -155,7 +160,7 @@ if __name__ == '__main__':
                 f.write(str(t_valid) + ' ' + str(t_test) + '\n')
                 f.flush()
 
-                summary = tf.Summary()
+                summary = tf.compat.v1.Summary()
                 summary.value.add(tag='VALID/NDCG@10', simple_value=float(t_valid[0]))
                 summary.value.add(tag='VALID/HR@10', simple_value=float(t_valid[1]))
                 summary.value.add(tag='TEST/NDCG@10', simple_value=float(t_test[0]))
