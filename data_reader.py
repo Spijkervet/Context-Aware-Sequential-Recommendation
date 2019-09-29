@@ -49,7 +49,9 @@ class DataReader():
 
     def parse_movielens(self):
         f = open(self.path, 'r')
-        for l in f:
+        for i, l in enumerate(f):
+            if self.limit and i > self.limit:
+                break
             yield l.rstrip()
 
     def preprocess_movielens(self):
