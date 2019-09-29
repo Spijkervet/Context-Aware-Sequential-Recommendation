@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
 #SBATCH --gres=gpu:2
@@ -28,20 +28,17 @@ python3 -m virtualenv ir2
 
 pip3 install -r requirements.txt
 
-python3 main.py --help
-
-# DOWNLOAD DATA
-sh download_data.sh
+### DOWNLOAD DATA ###
+# sh download_data.sh
 
 ### PREPROCESSING ###
 # AMAZON BOOKS
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
 
 # MOVIELENS 1-M
-python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
+# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
+python3 main.py --dataset data/ml-1m.txt --train_dir ml-1m_maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
 echo "[IR2] Job $SLURM_JOBID finished at `date`" | mail $USER -s "Job $SLURM_JOBID"
-
