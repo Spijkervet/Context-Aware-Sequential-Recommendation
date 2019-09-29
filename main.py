@@ -135,9 +135,9 @@ if __name__ == '__main__':
                 #                         model.is_training: True})
 
 
-                timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.timeseq_encoding, 
+                timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
                         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
-                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.timeseq: timeseq,
+                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                         model.is_training: True})
 
 

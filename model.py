@@ -9,16 +9,56 @@ class Model():
         self.pos = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
-        self.timeseq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        self.timeseq_encoding = timeseq_encoding(self.timeseq, args.max_time_interval)
+        self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
 
-        timeseq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.timeseq, 0)), -1)
-        self.timeseq_mask = timeseq_mask
+        # Mask of time sequence data
+        time_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
+        self.time_seq_mask = time_seq_mask
+
+        # CONTEXT-AWARE
+        with tf.variable_scope("CONTEXT", reuse=reuse):
+
+            # Time sequence encoding ('timestamps -> positional vector')
+            # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
+            self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
+            # self.tseq, item_emb_table = embedding(self.time_seq,
+            #                             vocab_size=args.max_time_interval + 1,
+            #                             num_units=args.hidden_units,
+            #                             zero_pad=True,
+            #                             scale=True,
+            #                             l2_reg=args.l2_emb,
+            #                             scope="time_embeddings",
+            #                             with_t=True,
+            #                             reuse=reuse)
+
+            # Self-attention blocks
+            # Build blocks
+            for i in range(args.num_blocks):
+                with tf.variable_scope("timeseq_num_blocks_%d" % i):
+                    # Self-attention
+                    self.timeseq_queries = normalize(self.tseq)
+                    self.timeseq_keys = self.tseq
+                    self.tseq = multihead_attention(queries=normalize(self.tseq),
+                                                    keys=self.tseq,
+                                                    num_units=args.hidden_units,
+                                                    num_heads=args.num_heads,
+                                                    dropout_rate=args.dropout_rate,
+                                                    is_training=self.is_training,
+                                                    causality=True,
+                                                    scope="self_attention")
+
+                    # Feed forward
+                    self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
+                                            dropout_rate=args.dropout_rate, is_training=self.is_training)
+                    self.tseq *= time_seq_mask
+
+            self.tseq = normalize(self.tseq)
+
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -49,6 +89,9 @@ class Model():
             )
             self.seq += t
 
+            # CONTEXT-AWARE MODULE
+            self.seq += self.tseq
+
             # Dropout
             self.seq = tf.layers.dropout(self.seq,
                                          rate=args.dropout_rate,
@@ -64,8 +107,8 @@ class Model():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(queries=normalize(self.seq),
-                                                   keys=self.seq,
+                    self.seq = multihead_attention(queries=self.queries,
+                                                   keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
                                                    dropout_rate=args.dropout_rate,
