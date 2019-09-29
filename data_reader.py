@@ -121,7 +121,7 @@ class DataReader():
         bn = os.path.basename(self.dataset_fp)
 
         movies_dict = {}
-        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.csv')
+        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.dat')
         with open(movies_labels_path, 'r', encoding='ISO-8859-1') as f:
             for l in f:
                 key, movie, genre, = tuple(l.rstrip().split(delim))
