@@ -52,6 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_heads', default=1, type=int)
     parser.add_argument('--dropout_rate', default=0.5, type=float)
     parser.add_argument('--l2_emb', default=0.0, type=float)
+    parser.add_argument('--max_time_interval', default=31, type=int)
 
     # MISC.
     parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
@@ -81,7 +82,7 @@ if __name__ == '__main__':
     num_batch = round(len(train) / args.batch_size)
 
     cc = sum([len(v) for v in train.values()])
-    logging.info('Average sequence length: {:.2f}'.format(cc / len(train)))
+    logger.info('Average sequence length: {:.2f}'.format(cc / len(train)))
 
     # DONE: Understand WarpSampler (see explanation in Class)
     print('usernum', usernum, 'itemnum', itemnum)
@@ -134,47 +135,47 @@ if __name__ == '__main__':
                 #                         model.is_training: True})
 
 
-                # print(u[0])
-                # print(seq[0])
-                # print(pos[0])
-                # print(neg[0])
-                # print(timeseq[0])
-
-                mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.mask, model.seq, model.item_emb_table,
-                        model.queries, model.keys],
-                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
+                timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.timeseq_encoding, 
+                        model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
+                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.timeseq: timeseq,
                         model.is_training: True})
 
+
                 ## Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
-                # print(u[0])
-                # print(seq[0][-1], seq[0].shape)
-                # print(mask[0][-1])
+                # logger.debug(u[0])
+                # logger.debug(seq[0][-1], seq[0].shape)
+                # logger.debug(mask[0][-1])
 
-                # print(seq_embedding[0][-1], seq_embedding.shape)
+                # logger.debug('timeseq')
+                # logger.debug(timeseq[0][-1], timeseq[0].shape)
 
-                # print(item_emb_table[0][-1], itemnum, item_emb_table.shape)
+                # logger.debug('timeseq encoding')
+                # logger.debug(timeseq_encoding[0][-1], timeseq_encoding.shape)
 
-                # print('queries')
-                # print(queries[0][-1], queries.shape)
+                # logger.debug(seq_embedding[0][-1], seq_embedding.shape)
 
-                # print('keys')
-                # print(keys[0][-1], keys.shape)
-                # exit(0)
+                # logger.debug(item_emb_table[0][-1], itemnum, item_emb_table.shape)
+
+                # logger.debug('queries')
+                # logger.debug(queries[0][-1], queries.shape)
+
+                # logger.debug('keys')
+                # logger.debug(keys[0][-1], keys.shape)
 
 
             writer.add_summary(summary, epoch)
             writer.flush()
             save_path = saver.save(sess, MODEL_SAVE_PATH)
-            print('Model saved in path: %s' % save_path)
+            logger.info('Model saved in path: %s' % save_path)
 
             if epoch % 20 == 0:
-                print('Evaluating')
+                logger.info('Evaluating')
                 t1 = time.time() - t0
                 T += t1
                 t_test = evaluate(model, dataset, args, sess)
                 t_valid = evaluate_valid(model, dataset, args, sess)
-                print('')
-                print('epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
+                logger.info('')
+                logger.info('epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
                 epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1]))
 
                 f.write(str(t_valid) + ' ' + str(t_test) + '\n')

@@ -8,10 +8,17 @@ class Model():
         self.input_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.pos = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.timeseq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.timeseq_encoding = timeseq_encoding(self.timeseq, args.max_time_interval)
+
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
+
+        timeseq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.timeseq, 0)), -1)
+        self.timeseq_mask = timeseq_mask
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
