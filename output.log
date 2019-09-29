@@ -266,4 +266,86 @@ Use `tf.keras.layers.Conv1D` instead.
 2019-09-29 01:25:18,982 [MainThread  ] [INFO ]  Creating user map dictionary
 2019-09-29 01:26:53,231 [MainThread  ] [INFO ]  Sorting reviews for every user on time
 2019-09-29 01:27:27,716 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    2019-09-29 18:38:03,585 [MainThread  ] [INFO ]  Pre-process the data first using the --preprocess flag
+2019-09-29 18:44:33,974 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 18:44:38,887 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 18:44:43,635 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 18:44:47,499 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 18:45:34,043 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 18:45:42,689 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:45:42,729 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:45:55,456 [MainThread  ] [ERROR]  name 'summary' is not defined
+2019-09-29 18:47:28,350 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 18:47:33,327 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 18:47:37,914 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 18:47:39,892 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 18:48:20,036 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 18:48:28,762 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:48:28,812 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:48:44,593 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:48:47,690 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:48:50,819 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:48:53,900 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:48:57,006 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:48:59,983 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:03,010 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:06,050 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:09,128 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:20,258 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:23,255 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:26,345 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:29,409 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:32,431 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:35,498 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:38,518 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:41,639 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:44,689 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:49,029 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:52,077 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:49:52,078 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 18:51:37,631 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 18:51:47,691 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 18:51:52,347 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 18:51:54,089 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 18:52:37,263 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 18:52:45,092 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:52:45,132 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:53:57,004 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 18:54:04,376 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 18:54:09,028 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 18:54:22,883 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 18:55:03,873 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 18:55:11,543 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:55:11,584 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 18:55:48,521 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:55:52,425 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:55:55,571 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:55:58,692 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:01,869 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:05,091 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:08,252 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:11,343 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:14,436 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:17,606 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:31,384 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:34,577 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:37,782 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:40,929 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:44,006 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:56:47,144 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:57:03,048 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:57:15,503 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:57:18,653 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:57:21,800 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 18:57:21,800 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 18:58:17,274 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'
+2019-09-29 19:04:57,696 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 19:05:05,945 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 19:05:10,633 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 19:05:13,826 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 19:05:55,362 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 19:06:03,860 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:06:03,903 [MainThread  ] [INFO ]  Scale of 0 disables regularizer.
+2019-09-29 19:07:07,213 [MainThread  ] [INFO ]  Model saved in path: /home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_ml-1m_maxlen_200_dropout_0.2/model.ckpt
+2019-09-29 19:07:07,214 [MainThread  ] [INFO ]  Evaluating
+2019-09-29 19:08:04,826 [MainThread  ] [ERROR]  int() argument must be a string, a bytes-like object or a number, not 'UserItems'

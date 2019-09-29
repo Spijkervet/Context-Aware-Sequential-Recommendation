@@ -14,6 +14,7 @@ class TimeStamp():
 
 class UserItems():
 
+    # TODO: Days ago relative to first date!
     def __init__(self, item, timestamp):
         self.item = item
         self.timestamp = timestamp
@@ -81,7 +82,7 @@ def evaluate(model, dataset, args, sess):
         seq[idx] = valid[u][0]
         idx -= 1
         for i in reversed(train[u]):
-            seq[idx] = i
+            seq[idx] = i.item
             idx -= 1
             if idx == -1: break
         rated = set(train[u])
@@ -125,7 +126,7 @@ def evaluate_valid(model, dataset, args, sess):
         seq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
         for i in reversed(train[u]):
-            seq[idx] = i
+            seq[idx] = i.item
             idx -= 1
             if idx == -1: break
 

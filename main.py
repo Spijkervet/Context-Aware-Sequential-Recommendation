@@ -130,15 +130,15 @@ if __name__ == '__main__':
 
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq = sampler.next_batch()
-                # auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
-                #                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
-                #                         model.is_training: True})
+                auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
+                                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
+                                        model.is_training: True})
 
 
-                timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
-                        model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
-                        {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
-                        model.is_training: True})
+                # timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
+                #         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
+                #         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
+                #         model.is_training: True})
 
 
                 ## Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
@@ -168,7 +168,7 @@ if __name__ == '__main__':
             save_path = saver.save(sess, MODEL_SAVE_PATH)
             logger.info('Model saved in path: %s' % save_path)
 
-            if epoch % 20 == 0:
+            if epoch % 1 == 0:
                 logger.info('Evaluating')
                 t1 = time.time() - t0
                 T += t1
