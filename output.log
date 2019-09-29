@@ -433,3 +433,212 @@ Use tf.where in 2.0, which has the same broadcast rule as np.where
 2019-09-28 22:58:06,034 [MainThread  ] [WARNI]  From /home/wilde/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
 Instructions for updating:
 Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 12:54:17,727 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 12:54:23,585 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 12:54:28,957 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 12:54:30,625 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 12:54:37,552 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 12:54:37,642 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 12:54:37,689 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 12:54:37,692 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 12:54:37,790 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 12:54:37,958 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 12:54:38,074 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 12:55:25,783 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 12:55:31,656 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 12:55:37,087 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 12:55:38,732 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 12:55:45,390 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 12:55:45,482 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 12:55:45,529 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 12:55:45,532 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 12:55:45,630 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 12:55:45,799 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 12:55:45,916 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 13:00:28,764 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 13:00:34,619 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 13:00:39,985 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 13:00:41,658 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 13:00:48,471 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 13:00:48,983 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 13:00:49,033 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 13:00:49,036 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 13:00:49,145 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 13:00:49,326 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 13:00:49,452 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 13:05:35,870 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 13:05:41,722 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 13:05:47,158 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 13:05:48,843 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 13:05:56,882 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 13:05:57,782 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 13:05:57,829 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 13:05:57,832 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 13:05:57,944 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 13:05:58,111 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 13:05:58,227 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 13:12:40,905 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 13:12:46,765 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 13:12:52,229 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 13:12:53,945 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 13:13:00,845 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 13:13:01,733 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 13:13:01,781 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 13:13:01,784 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 13:13:01,898 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 13:13:02,066 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 13:13:02,183 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 13:17:22,087 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 13:17:27,867 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 13:17:33,220 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 13:17:34,867 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 13:17:41,655 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 13:17:42,384 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 13:17:42,432 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 13:17:42,434 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 13:17:42,540 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 13:17:42,710 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 13:17:42,828 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 14:06:06,596 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:06:12,484 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:08:40,160 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:08:46,040 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:09:10,565 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:09:16,423 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:09:21,821 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:09:23,488 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:09:30,757 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 14:09:31,578 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 14:09:31,630 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 14:09:31,633 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 14:09:31,753 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 14:09:31,941 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 14:09:32,069 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
+2019-09-29 14:11:25,931 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:11:44,227 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:11:50,014 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:14:51,635 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:14:57,533 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:18:12,442 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:18:18,282 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:18:23,647 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:18:25,287 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:19:37,881 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:19:43,713 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:19:49,071 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:19:50,714 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:20:55,943 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:21:01,854 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:21:07,210 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:21:08,865 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:22:49,668 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:22:55,571 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:23:00,932 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:23:02,590 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:24:15,448 [MainThread  ] [INFO ]  Reading and processing data/ml-1m/ratings.dat
+2019-09-29 14:24:21,383 [MainThread  ] [INFO ]  Creating user map dictionary
+2019-09-29 14:24:26,723 [MainThread  ] [INFO ]  Sorting reviews for every user on time
+2019-09-29 14:24:28,445 [MainThread  ] [INFO ]  Writing tsv metadata file (index/label)
+2019-09-29 14:24:36,052 [MainThread  ] [INFO ]  Average sequence length: 163.50
+2019-09-29 14:24:36,634 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/ops/resource_variable_ops.py:1630: calling BaseResourceVariable.__init__ (from tensorflow.python.ops.resource_variable_ops) with constraint is deprecated and will be removed in a future version.
+Instructions for updating:
+If using Keras pass *_constraint arguments to layers.
+2019-09-29 14:24:36,680 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/model.py:45: dropout (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.dropout instead.
+2019-09-29 14:24:36,683 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/ir2/lib/python3.6/site-packages/tensorflow_core/python/layers/core.py:271: Layer.apply (from tensorflow.python.keras.engine.base_layer) is deprecated and will be removed in a future version.
+Instructions for updating:
+Please use `layer.__call__` method instead.
+2019-09-29 14:24:36,797 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:169: dense (from tensorflow.python.layers.core) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use keras.layers.Dense instead.
+2019-09-29 14:24:36,965 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:190: where (from tensorflow.python.ops.array_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.where in 2.0, which has the same broadcast rule as np.where
+2019-09-29 14:24:37,081 [MainThread  ] [WARNI]  From /home/lgpu0220/git/information_retrieval_2/modules.py:250: conv1d (from tensorflow.python.layers.convolutional) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.keras.layers.Conv1D` instead.
