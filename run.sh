@@ -41,5 +41,5 @@ python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --da
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir context_aware_ml-1m_maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
+python3 main.py --dataset data/ml-1m.txt --train_dir context_aware_deltatime_day_ml-1m_maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2 --num_epochs 500
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"
