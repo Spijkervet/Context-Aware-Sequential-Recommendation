@@ -25,16 +25,17 @@ class Model():
 
             # Time sequence encoding ('timestamps -> positional vector')
             # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
-            # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
-            self.tseq, item_emb_table = embedding(self.time_seq,
-                                        vocab_size=args.max_time_interval + 1,
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="time_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
+            self.tseq_enc = timeseq_encoding(self.time_seq, args.hidden_units)
+            self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
+            # self.tseq, item_emb_table = embedding(self.time_seq,
+            #                             vocab_size=args.max_time_interval + 1,
+            #                             num_units=args.hidden_units,
+            #                             zero_pad=True,
+            #                             scale=True,
+            #                             l2_reg=args.l2_emb,
+            #                             scope="time_embeddings",
+            #                             with_t=True,
+            #                             reuse=reuse)
 
             # Self-attention blocks
             # Build blocks
@@ -58,7 +59,6 @@ class Model():
                     self.tseq *= time_seq_mask
 
             self.tseq = normalize(self.tseq)
-
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -89,7 +89,7 @@ class Model():
             )
 
             # TODO: Remove this(?)
-            # self.seq += t
+            self.seq += t
 
             # CONTEXT-AWARE MODULE
             self.seq += self.tseq
