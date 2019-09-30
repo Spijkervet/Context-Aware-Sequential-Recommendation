@@ -16,7 +16,8 @@ inputFileList = [
 			"ratings_Books.csv",
 			]
 
-OUTPUT_FILE = "books.output"
+# OUTPUT_FILE = "STAR_Books.txt"
+OUTPUT_FILE = "STAR_ml-1m.txt"
 
 ITEM_LIMIT = 25
 
@@ -30,7 +31,6 @@ LineCount = 0
 itemFreq = {}
 ratingCount = 0
 gStr = ""
-RATING_STR = "rating"
 ITEM_STR = "item"
 TIMESTAMP_STR = "timestamp"
 USER_STR = 'user'
@@ -82,9 +82,9 @@ def writePreprocessedData(inputFile,finalCart):
 
 def writeAWSData(inputFile,finalCart):
 	# Clear file
-	outputFile = "output.txt"
-	idConverterFile = "./data/idConv_"+outputFile
-	outputFile = "./data/"+outputFile
+	outputFile = OUTPUT_FILE
+	idConverterFile = "../../data/idConv_"+outputFile
+	outputFile = "../../data/"+outputFile
 	with open(outputFile, 'w') as the_file:
 		the_file.write('')
 	for i in finalCart:
@@ -103,11 +103,10 @@ def addToDict(input,diction):
 	else:
 		diction[input]=1
 
-def isDuplicate(item,user,rating,timestamp):
+def isDuplicate(item,user,timestamp):
 	if(user in dupChecker):
 		curObj = dupChecker[user]
 		if(curObj[ITEM_STR]==item
-		   and curObj[RATING_STR]==rating
 		   and curObj[TIMESTAMP_STR]==timestamp):
 			return True
 		else:
@@ -115,7 +114,6 @@ def isDuplicate(item,user,rating,timestamp):
 	else:
 		tempObj = {}
 		tempObj[ITEM_STR] = item
-		tempObj[RATING_STR] = rating
 		tempObj[TIMESTAMP_STR] = timestamp
 		dupChecker[user] = tempObj
 		return False
@@ -184,8 +182,8 @@ def initialProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _ = line.split(',')
-			isDup = isDuplicate(item,user,rating,timestamp)
+			user,item,timestamp = line.split(',')
+			isDup = isDuplicate(item,user,timestamp)
 			if(not isDup):
 				addToDict(item,originalItemFreq)
 			else:
@@ -200,8 +198,8 @@ def processFile(inputFile):
 		for line in infile:
 			LineCount+=1
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _ = line.split(',')
-			isDup = isDuplicate(item,user,rating,timestamp)
+			user,item,timestamp = line.split(',')
+			isDup = isDuplicate(item,user,timestamp)
 			if(originalItemFreq[item] >= ITEM_LIMIT):
 				addToDict(user,originalUserFreq)
 				originalRatingCount+=1
@@ -219,7 +217,7 @@ def reProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _ = line.split(',')
+			user,item,timestamp = line.split(',')
 			if(user in originalUserFreq and 
 				originalUserFreq[user]>=LIMIT):
 				addToDict(item,itemFreq)
@@ -279,7 +277,7 @@ def n_initProcess(inputFile,userRate,itemRate):
 		p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _ = line.split(' ')
+			user,item,timestamp = line.split(' ')
 			addToDict(user,userRate)
 			addToDict(item,itemRate)
 			totalRating+=1
@@ -290,7 +288,7 @@ def n_removeUserNItem(userRate,itemRate):
 	rmItemList = []
 	for key in userRate:
 		if userRate[key] < LIMIT:
-			print( userRate[key], 'gets removed')
+			# print( userRate[key], 'gets removed')
 			# del userRate[key]
 			rmUserList.append(key)
 	for key in itemRate:
@@ -313,7 +311,7 @@ def n_reprocess(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _= line.split(' ')
+			user,item,timestamp= line.split(' ')
 			if user in userRate and item in itemRate:
 				if(userRate[user] < LIMIT):
 					print('user: '+str(user))
@@ -335,7 +333,7 @@ def n_finalRun(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			item,user,rating,timestamp, _ = line.split(' ')
+			user,item,timestamp = line.split(' ')
 			if user in userRate and item in itemRate:
 				if user not in userData:
 					userData[user] = []
@@ -396,7 +394,9 @@ for i in range(len(inputFileList)):
 	# analyseFile('../../AWS/'+str(inputFileList[i]))
 	start_time = time.time()
 	# run('./rawData/'+str(inputFileList[i]))
-	run('../../data/Books.txt')
+	# run('../../data/Books.txt')
+	# run('../../data/ratings_Books.txt')
+	run('../../data/ml-1m.txt')
 	e = time.time() - start_time
 	print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
 	p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))

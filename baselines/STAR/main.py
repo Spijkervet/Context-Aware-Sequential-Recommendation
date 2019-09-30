@@ -14,7 +14,7 @@ from torch.autograd import Variable
 import random
 import torch.nn.functional as F
 import models as srnn
-
+from sampler import get_dataloader
 
 USER_SIZE = None			
 ITEM_SIZE = None			
@@ -51,8 +51,6 @@ WEEKDAY_SIZE = None
 HOUR_SIZE = None
 INTERVAL_SIZE = None
 
-CUSTOM_LOSS = None
-
 BPR_LOSS = 'BPR_LOSS'
 BPR_LOSS_R = 'BPR_LOSS_R'
 
@@ -64,7 +62,6 @@ FLOAT_STR = 'Float'
 LOG_OF_INDEXES = None
 
 def pre_data():
-
 	global ITEM_TRAIN
 	global ITEM_TEST
 	global SPLIT
@@ -109,11 +106,15 @@ def pre_data():
 		HOUR_TEST[i] = hour_test
 		INTERVAL_TRAIN[i] = interval_train
 		INTERVAL_TEST[i] = interval_test
-		
+
+	print("done loading data")
+	# print("ITEM_TRAIN", ITEM_TRAIN)
+	# print("WEEKDAY_TRAIN", WEEKDAY_TRAIN)
+	# print("HOUR_TRAIN", HOUR_TRAIN)
+	# print("INTERVAL_TRAIN", INTERVAL_TRAIN)
+
 def predict(model):
 	relevant = 0.0 					# The total number of predictions
-	hit = {}						# the number of hits in the nth position
-	true_positives = {}				# The total number of hits in the first n positions (TP aka true positives)
 	# nDCG where grade for each item is 1
 	# nDCG  = DCG/IDCG where IDCG = 1/1
 	# because in ideal case, item should be in first position
@@ -122,18 +123,8 @@ def predict(model):
 	hit_at_10 = 0
 
 	numUsers = 0 # num of users
-	numTestItem = 0
 
-	predictionStr = ''
-	
-	
-	for i in range(TOP):
-		hit[i+1] = 0
-		true_positives[i+1] = 0
-	
 	for n in ITEM_TEST.keys():
-		# print('n in test: '+str(n))
-		
 		item_train = ITEM_TRAIN[n]
 		item_test = ITEM_TEST[n]
 		hour_train = HOUR_TRAIN[n]
@@ -157,9 +148,14 @@ def predict(model):
 			hourX = hour_train[i]
 			weekdayX = weekday_train[i]
 			intervalX = interval_train[i]
+			inputX = inputX.unsqueeze(0)
+			hourX = hourX.unsqueeze(0)
+			weekdayX = weekdayX.unsqueeze(0)
+			intervalX = intervalX.unsqueeze(0)
+
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
-		# Forecast
+		# Forecast, from where the training example stopped onwards
 		for j in range(len(item_test)):
 			# Current info (Will be used for next prediction)
 			inputX = item_test[j]
@@ -168,19 +164,20 @@ def predict(model):
 			intervalX = interval_test[j]
 
 			relevant += 1
-			if CUSTOM_LOSS is None:
-				probOfItems = F.softmax(logits,dim=0)
-			# topK returns tuple in the form (sorted values,sorted by index)
+			# apply softmax, because this is not part of the network
+			probOfItems = F.softmax(logits,dim=1)
 
+			# topK returns tuple in the form (sorted values,sorted by index)
 			rankTuple = torch.topk(probOfItems, TOP)
 			rank_index_list = rankTuple[1]
 
+			# use the prediction to see if test is in there
 			if item_test[j] in rank_index_list:
 				index = ((rank_index_list == item_test[j]).nonzero())
 				index = index[0][0].item()
 				# Remember index starts at 0 so +1 to get actual index
 				# +1 more because of nDCG formula
-				nDCG+= 1/getLog2AtK((index+1)+1)
+				nDCG += 1/getLog2AtK((index+1)+1)
 				if index+1 < TOP:
 					hit_at_10 += 1
 	
@@ -188,10 +185,18 @@ def predict(model):
 			indexList = rankFullTuple[1]
 			matchPosition = ((indexList == item_test[j]).nonzero())
 			matchPosition = matchPosition[0][0].item()
+
 			# Remember index starts at 0 so +1 to get actual index
 			# +1 more because of nDCG formula
-			nDCG_full+=1/getLog2AtK((matchPosition+1)+1)
-
+			nDCG_full += 1/getLog2AtK((matchPosition+1)+1)
+			inputX = inputX.unsqueeze(0)
+			hourX = hourX.unsqueeze(0)
+			weekdayX = weekdayX.unsqueeze(0)
+			intervalX = intervalX.unsqueeze(0)
+			# print("inputX.shape", inputX.shape)
+			# print("hourX.shape", hourX.shape)
+			# print("weekdayX.shape", weekdayX.shape)
+			# print("intervalX.shape", intervalX.shape)
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
 	#average over number of queries
@@ -200,87 +205,125 @@ def predict(model):
 	nDCG_full = nDCG_full/relevant
 	hit_at_10 = hit_at_10/relevant
 	
-	print('hit@10' + str(hit_at_10))
+	print('hit@10: ' + str(hit_at_10))
 	print('nDCG@10: '+ str(nDCG))
 	print('nDCG_full: '+str(nDCG_full))
 
 	print('ITEM_SIZE: '+str(ITEM_SIZE))
 	print('numUsers: '+str(numUsers))
 	print('relevant(number of test item): '+str(relevant))
-
-
-	return hit_at_10, nDCG, predictionStr
-	# return true_positives
+	return hit_at_10, nDCG
 
 def learn():
 	original_stdout = sys.stdout
-
 	epoch = 0
 		
-	model = srnn.SRNNModel(mode=MODE_TYPE,hidden_size=HIDDEN_SIZE,
+	model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
 			weekday_size=WEEKDAY_SIZE,hour_size=HOUR_SIZE,num_class=ITEM_SIZE,isCuda=usingCuda())
-	if CUSTOM_LOSS == BPR_LOSS or CUSTOM_LOSS == BPR_LOSS_R:
-		criterion = torch.nn.LogSigmoid()
-	else:
-		criterion = torch.nn.CrossEntropyLoss()
+
+	criterion = torch.nn.CrossEntropyLoss()
 	optimizer = torch.optim.Adam(model.parameters(),lr=0.001)
-
-	print(model)
-	print(model.mode)
-
-
-	f_handler = open(OUTPUT_FILE,'a')
-	sys.stdout=f_handler
-	print(model)
-	print(model.mode)
-
-	f_handler.close()
 
 	if(usingCuda()):
 		model.cuda()
-		# cudnn.benchmark = True
 
-	while (epoch<=125):
+	if os.path.exists(MODEL_FILE):
+		print("loading model to continue training")
+		checkpoint = loadCheckpoint(MODEL_FILE)
+		model.load_state_dict(checkpoint["model"])
+		optimizer.load_state_dict(checkpoint["optim"])
+		model.train()
+
+	print("starting learning")
+	print("MODEL", model)
+
+	temp = sys.stdout
+	f_handler = open(OUTPUT_FILE,'a')
+	sys.stdout=f_handler
+	print(model)
+
+	f_handler.close()
+	data_loader = get_dataloader(ITEM_TRAIN,HOUR_TRAIN,WEEKDAY_TRAIN,INTERVAL_TRAIN)
+
+	while (epoch<=100):
+		sys.stdout=temp
+		print ("Epoch %d" % epoch)
 		f_handler = open(OUTPUT_FILE,'a')
 		sys.stdout=f_handler
 		print ("Epoch %d" % epoch)
 		print ("Training...")
 		sumloss = 0
-		for i in ITEM_TRAIN.keys():
-			user_cart = ITEM_TRAIN[i]
-			hour_cart = HOUR_TRAIN[i]
-			weekday_cart = WEEKDAY_TRAIN[i]
-			interval_cart = INTERVAL_TRAIN[i]
+		for iteration, batch_inputs in enumerate(data_loader):
+			max_length = 0
+			for id in batch_inputs:
+				id = id.item()
+				if len(ITEM_TRAIN[id]) > max_length:
+					max_length = len(ITEM_TRAIN[id])
+
+			user_cart = []
+			hour_cart = []
+			weekday_cart = []
+			interval_cart = []
+
+			# pad the inputs to the longest boy
+			for i, id in enumerate(batch_inputs):
+				id = id.item()
+				tmp_user_cart = ITEM_TRAIN[id]
+				tmp_hour_cart = HOUR_TRAIN[id]
+				tmp_weekday_cart = WEEKDAY_TRAIN[id]
+				tmp_interval_cart = INTERVAL_TRAIN[id]
+
+				if len(tmp_user_cart) < max_length:
+					difference = max_length - len(tmp_user_cart)
+					user_cart.append([0]*difference + tmp_user_cart.tolist())
+					hour_cart.append([0]*difference + tmp_hour_cart.tolist())
+					weekday_cart.append([0]*difference + tmp_weekday_cart.tolist())
+					interval_cart.append([0]*difference + tmp_interval_cart.tolist())
+				else:
+					user_cart.append(tmp_user_cart.tolist())
+					hour_cart.append(tmp_hour_cart.tolist())
+					weekday_cart.append(tmp_weekday_cart.tolist())
+					interval_cart.append(tmp_interval_cart.tolist())
+
+			# process
+			user_cart = torch.tensor(user_cart).to(device)
+			hour_cart = torch.tensor(hour_cart).to(device)
+			weekday_cart = torch.tensor(weekday_cart).to(device)
+			interval_cart = torch.tensor(interval_cart).to(device)
+
+			# print("user_cart", user_cart.shape)
+			# print("hour_cart", user_cart.shape)
+			# print("weekday_cart", user_cart.shape)
+			# print("interval_cart", user_cart.shape)
+
 			loss = 0
+			optimizer.zero_grad()
 			h = None
 			h2 = None
 			h3 = None
-			# We do not need to input the last item
-			optimizer.zero_grad()
-
-			for j in range(len(user_cart)-1):
-				
-				inputX = user_cart[j]
-				hourX = hour_cart[j]
-				weekdayX = weekday_cart[j]
-				intervalX = interval_cart[j]
-				label = user_cart[j+1]
+			# print("user cart", user_cart.shape)
+			# We do not input the last item, as this is the target
+			for j in range(user_cart.shape[1]-1):
+				inputX = user_cart[:, j]
+				hourX = hour_cart[:, j]
+				weekdayX = weekday_cart[:, j]
+				intervalX = interval_cart[:, j]
+				label = user_cart[:, j+1]
 				logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
-				
-
-				loss+=criterion(logits.unsqueeze(0),label.unsqueeze(0))
+				# print("criterion shapes", logits.shape, label.shape)
+				loss += criterion(logits,label)
 			loss.backward()
 			optimizer.step()
-			# print('loss: '+str(loss))
 			sumloss += loss
+			# print('loss: '+str(loss))
 
-		print ("begin predict")
+		print ("begin predict, number of test items", len(ITEM_TEST))
+		sys.stdout=f_handler
 		print('sumloss: '+str(float(sumloss)))
-		hit_at_10, nDCG, predictionStr = predict(model)
+		hit_at_10, nDCG = predict(model)
 		if(nDCG > BEST_NDCG):
 			saveCheckpoint({
 				'hiddenSize':HIDDEN_SIZE,
-				'mode':model.mode,
 				'DATANAME':DATANAME,
 				'BEST_NDCG':BEST_NDCG,
 				'epoch':epoch,
@@ -288,23 +331,16 @@ def learn():
 				'model':model.state_dict()
 			})
 
-		# save_max(recallatx, 10, ite)
 		f_handler.close()
 		epoch += 1
 	sys.stdout = original_stdout
 
 def saveCheckpoint(state):
-	torch.save(state,MODEL_FILE)
+	torch.save(state, MODEL_FILE)
 
 def loadCheckpoint(filename):
-	return torch.load(filename)
-
-TENSOR_FOR_EMB = {}
-def getTensorForEmb(id):
-	if(id not in TENSOR_FOR_EMB):
-		TENSOR_FOR_EMB[id] = genTensor([id],LONG_STR)
-	return TENSOR_FOR_EMB[id]
-
+	device = "cuda" if usingCuda() else "cpu"
+	return torch.load(filename, map_location=device)
 
 def initLogOfIndexes():
 	global LOG_OF_INDEXES
@@ -312,21 +348,14 @@ def initLogOfIndexes():
 	sizeOfArr = ITEM_SIZE+2
 	if isCuda:
 		cuda_str = 'cuda:'+str(torch.cuda.current_device())
-		LOG_OF_INDEXES = torch.log2(torch.arange(1,sizeOfArr, device=cuda_str))
+		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, device=cuda_str))
 	else:
-		LOG_OF_INDEXES = torch.log2(torch.arange(1,sizeOfArr, dtype=torch.float64))
+		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, dtype=torch.float64))
 
 def getLog2AtK(k):
 	global LOG_OF_INDEXES
 	position=k-1
 	return LOG_OF_INDEXES[position].item()
-
-def checkNAdd(curDict,id):
-	if(id in curDict):
-		curDict[id]+=1
-	else:
-		curDict[id]=1
-	return curDict
 
 def genTensor(tensorObj,tensorType=None):
 	isCuda = usingCuda()
@@ -342,13 +371,6 @@ def genTensor(tensorObj,tensorType=None):
 def usingCuda():
 	return (torch.cuda.is_available() and RUN_CUDA)
 
-
-def genNegItem(user_cart):
-	item = random.choice(range(1,ITEM_SIZE))
-	while item in user_cart:
-		item = random.choice(range(1,ITEM_SIZE))
-	return item
-
 def main():
 	global ITEM_TEST,ITEM_TRAIN
 	pWrite('ITEM_SIZE: '+str(ITEM_SIZE))
@@ -360,11 +382,12 @@ def main():
 			INTERVAL_TRAIN[i][k]+=1
 		for k in range(len(INTERVAL_TEST[i])):
 			INTERVAL_TEST[i][k]+=1
-		# LIST_ITEM_TRAIN[i] = ITEM_TRAIN[i]
+
 		ITEM_TRAIN[i] = genTensor(ITEM_TRAIN[i],tensorType=LONG_STR)
 		HOUR_TRAIN[i] = genTensor(HOUR_TRAIN[i],tensorType=LONG_STR)
 		WEEKDAY_TRAIN[i] = genTensor(WEEKDAY_TRAIN[i],tensorType=LONG_STR)
 		INTERVAL_TRAIN[i] = genTensor(INTERVAL_TRAIN[i])
+
 		ITEM_TEST[i] = genTensor(ITEM_TEST[i],tensorType=LONG_STR)
 		HOUR_TEST[i] = genTensor(HOUR_TEST[i],tensorType=LONG_STR)
 		WEEKDAY_TEST[i] = genTensor(WEEKDAY_TEST[i],tensorType=LONG_STR)
@@ -385,21 +408,29 @@ def createFolder(folderName):
 # $ python main.py 1 miniData STAR 
 
 if __name__ == '__main__':
-
 	torch.set_printoptions(threshold=5000)
 
 	HIDDEN_SIZE = 40
+	device='cpu'
+
 	if len(sys.argv) > 1 and sys.argv[1] == 'cuda':
 		RUN_CUDA = True
+		device='cuda'
 	if len(sys.argv)>2 and sys.argv[2] == 'miniData':
 		DATAFILE = './data/miniData.json'
 		DATANAME = 'miniData'
 	elif len(sys.argv)>2 and sys.argv[2] == 'movielens':
-		DATAFILE = './data/movielens.json'
+		DATAFILE = '../../data/STAR_ml-1m.txt'
 		DATANAME = 'movielens'
 	elif len(sys.argv)>2 and sys.argv[2] == 'Books':
-		DATAFILE = './data/Books.json'
+		DATAFILE = '../../data/STAR_Books.txt'
 		DATANAME = 'Books'
+	elif len(sys.argv)>2 and sys.argv[2] == 'test':
+		DATAFILE = '../../data/sample_Books.txt'
+		DATANAME = 'test'
+	elif len(sys.argv)>2 and sys.argv[2] == 'sample':
+		DATAFILE = '../../data/STAR_sample_Books.txt'
+		DATANAME = 'sample'
 	
 	OUTPUT_PATH = './output/results/'
 	MODEL_DIR= './output/model/'
@@ -417,6 +448,8 @@ if __name__ == '__main__':
 				itemFreq[curItem] = 1
 			
 	ITEM_SIZE = len(itemFreq)+1
+	# TODO: remove this
+	# ITEM_SIZE = 500
 	# We add one because we do not want to start id from 0
 	HOUR_SIZE = 24+1 #(hours)
 	WEEKDAY_SIZE = 7+1 #(day)
@@ -426,14 +459,13 @@ if __name__ == '__main__':
 	if len(sys.argv)>3 and sys.argv[3] != None:
 		MODE_TYPE = sys.argv[3]
 	
-	if CUSTOM_LOSS is None:
-		OUTPUT_FILE = OUTPUT_PATH+MODE_TYPE+'_'+DATANAME+'_'+str(HIDDEN_SIZE)+'.txt'
-		MODEL_FILE = MODEL_DIR+MODE_TYPE+'_'+DATANAME+'_'+str(HIDDEN_SIZE)+'.mdl'
 	createFolder(OUTPUT_PATH)
 	createFolder(MODEL_DIR)
 
 	# Clear file
-	with open(OUTPUT_FILE, 'w') as the_file:
+	OUTPUT_FILE = OUTPUT_PATH+MODE_TYPE+'_'+DATANAME+'_'+str(HIDDEN_SIZE)+'.txt'
+	MODEL_FILE = MODEL_DIR+MODE_TYPE+'_'+DATANAME+'_'+str(HIDDEN_SIZE)+'.mdl'
+	with open(OUTPUT_FILE, "w") as the_file:
 		the_file.write("")
 
 	print('OUTPUT_FILE: '+str(OUTPUT_FILE))
@@ -442,7 +474,6 @@ if __name__ == '__main__':
 	pWrite('DATAFILE: '+str(DATAFILE))
 	pWrite('usingCuda(): '+str(usingCuda()))
 	pWrite('HIDDEN_SIZE: '+str(HIDDEN_SIZE))
-	pWrite('CUSTOM_LOSS: '+str(CUSTOM_LOSS))
 
 	initLogOfIndexes()
 	start = time.time()
