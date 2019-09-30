@@ -105,7 +105,6 @@ if __name__ == '__main__':
     config.gpu_options.allow_growth = True
     config.allow_soft_placement = True
 
-
     # SESSION
     sess = tf.Session(config=config)
 
