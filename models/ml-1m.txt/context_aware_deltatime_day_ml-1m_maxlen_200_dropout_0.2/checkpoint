@@ -1,2 +1,2 @@
-model_checkpoint_path: "/home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_deltatime_day_ml-1m_maxlen_200_dropout_0.2/model.ckpt"
-all_model_checkpoint_paths: "/home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/context_aware_deltatime_day_ml-1m_maxlen_200_dropout_0.2/model.ckpt"
+model_checkpoint_path: "/home/robolab/git/information_retrieval_2/models/ml-1m.txt/context_aware_deltatime_day_ml-1m_maxlen_200_dropout_0.2/model.ckpt"
+all_model_checkpoint_paths: "/home/robolab/git/information_retrieval_2/models/ml-1m.txt/context_aware_deltatime_day_ml-1m_maxlen_200_dropout_0.2/model.ckpt"
