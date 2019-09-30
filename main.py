@@ -130,10 +130,9 @@ if __name__ == '__main__':
 
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq = sampler.next_batch()
-                auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op, model.merged],
+                auc, loss, _, summary, tseq_enc = sess.run([model.auc, model.loss, model.train_op, model.merged, model.tseq_enc],
                                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                                         model.is_training: True})
-
 
                 # timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
                 #         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
@@ -141,17 +140,20 @@ if __name__ == '__main__':
                 #         model.is_training: True})
 
 
+                # TODO Janne: Time sequence is calculated as delta_time between very first sequence (disregarding train/valid/test).
                 ## Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
-                # logger.debug(u[0])
-                # logger.debug(seq[0][-1], seq[0].shape)
+                # print(u[0])
+                # print(seq[0][-2], seq[0].shape)
+                # print(seq[0][-1], seq[0].shape)
                 # logger.debug(mask[0][-1])
 
-                # logger.debug('timeseq')
-                # logger.debug(timeseq[0][-1], timeseq[0].shape)
+                # print('timeseq')
+                # print(timeseq[0][-2], timeseq[0].shape)
+                # print(timeseq[0][-1], timeseq[0].shape)
 
-                # logger.debug('timeseq encoding')
-                # logger.debug(timeseq_encoding[0][-1], timeseq_encoding.shape)
-
+                # print('timeseq encoding')
+                # print(tseq_enc[0][-2], tseq_enc.shape)
+                # print(tseq_enc[0][-1], tseq_enc.shape)
                 # logger.debug(seq_embedding[0][-1], seq_embedding.shape)
 
                 # logger.debug(item_emb_table[0][-1], itemnum, item_emb_table.shape)
