@@ -54,7 +54,6 @@ def data_partition(fpath):
             if delta_timestamp > 31: # TODO: Add this as an argument
                 delta_timestamp = 31
 
-            # u.delta_time = delta_timestamp # WORSE PERFORMANCE
             u.delta_time = delta_timestamp
             # if u.delta_time != 0 and u.delta_time != 31:
             #     print(u.delta_time)

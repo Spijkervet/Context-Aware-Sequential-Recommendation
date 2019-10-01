@@ -91,6 +91,24 @@ if __name__ == '__main__':
     print('usernum', usernum, 'itemnum', itemnum)
     sampler = WarpSampler(args, train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
 
+    # for t in train:
+    #     if len(train[t]) >= args.maxlen - 3:
+    #         print('----', t, len(train[t]))
+    #         for i in train[t]:
+    #             print(i.item)
+
+    #         print('----', t, len(train[t]))
+    #         break
+
+    # u, seq, pos, neg, timeseq = sampler.next_batch()
+    # for i, p in enumerate(pos):
+    #     if p[0] != 0:
+    #         print(u[0])
+    #         print(i)
+    #         print(p)
+    #         break
+
+    # print(pos[3])
     # Understand partitioning of train / validation / test data:
     # first_user = list(train.keys())[0]
     # print('first user train data', train[first_user])
@@ -99,7 +117,6 @@ if __name__ == '__main__':
     # # print(u)
 
     # RESET GRAPH
-
     if args.seed:
         random.seed(args.seed)
         np.random.seed(args.seed)
