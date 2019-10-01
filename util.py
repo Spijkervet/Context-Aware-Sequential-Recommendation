@@ -5,6 +5,9 @@ import numpy as np
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
+random.seed(42)
+np.random.seed(42)
+
 class TimeStamp():
     
     def __init__(self, timestamp):
