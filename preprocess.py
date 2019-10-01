@@ -20,10 +20,11 @@ if __name__ == '__main__':
     parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
-    config = parser.parse_args()
+    parser.add_argument('--maxlen', default=50, type=int, help='Maximum length of user item sequence, for zero-padding')
+    args = parser.parse_args()
 
       
     # Start the data reader and read the dataset
-    dr = DataReader(config.raw_dataset, config.dataset, config.type, limit=config.limit)
+    dr = DataReader(args.raw_dataset, args.dataset, args.type, limit=args.limit, maxlen=args.maxlen)
     dr.preprocess()
 
