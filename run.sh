@@ -41,5 +41,5 @@ sh download_data.sh
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_r3 --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --test_baseline --seed 42
+python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_r3 --maxlen 200 --dropout_rate 0.2 --num_blocks 3
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"
