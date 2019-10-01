@@ -2,6 +2,7 @@ import sys
 import copy
 import random
 import numpy as np
+import math
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
@@ -20,6 +21,12 @@ class UserItems():
         self.timestamp = datetime.fromtimestamp(timestamp).astimezone(timezone.utc)
         self.ts = TimeStamp(self.timestamp)
         self.day = self.ts.day
+
+def get_delta_time(ts, bin_in_hours, max_bins):
+    delta_timestamp = math.floor(ts.hour / bin_in_hours)
+    if delta_timestamp > max_bins: # TODO: Add this as an argument
+        delta_timestamp = max_bins
+    return delta_timestamp
 
 def data_partition(fpath):
     '''
@@ -50,11 +57,8 @@ def data_partition(fpath):
         most_recent_timestamp = User[user][-1].timestamp
         for u in User[user]:
             delta_timestamp = most_recent_timestamp - u.timestamp
-            delta_timestamp = delta_timestamp.days # TODO: Add this as an argument
-            if delta_timestamp > 31: # TODO: Add this as an argument
-                delta_timestamp = 31
-
-            u.delta_time = delta_timestamp
+            # delta_timestamp = delta_timestamp.days # TODO: Add this as an argument
+            u.delta_time = get_delta_time(delta_timestamp, 48, 200)
             # if u.delta_time != 0 and u.delta_time != 31:
             #     print(u.delta_time)
             # print(most_recent_timestamp, u.timestamp, delta_timestamp)
