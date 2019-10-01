@@ -10,8 +10,6 @@ path = os.path.join(BASE_DIR, DATA_SOURCE,'userid-timestamp-artid-artname-traid-
 user_item_record = os.path.join(BASE_DIR, DATA_SOURCE, 'user-item.lst')
 user_item_delta_time_record = os.path.join(BASE_DIR, DATA_SOURCE, 'user-item-delta-time.lst')
 user_item_accumulate_time_record = os.path.join(BASE_DIR, DATA_SOURCE, 'user-item-accumulate-time.lst')
-index2item_path = os.path.join(BASE_DIR, DATA_SOURCE, 'index2item')
-item2index_path = os.path.join(BASE_DIR, DATA_SOURCE, 'item2index')
 
 
 def generate_data():

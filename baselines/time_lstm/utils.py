@@ -9,7 +9,7 @@ import logging
 
 import lasagne
 from scipy.sparse import coo_matrix
-import cPickle as pickle
+import _pickle as cPickle
 from lasagne.utils import floatX
 from lasagne.init import Initializer
 from lasagne import nonlinearities
@@ -17,7 +17,7 @@ from lasagne import init
 from lasagne.layers.base import Layer
 from lasagne.random import get_rng
 
-BASE_DIR = 'preprocess/data'
+BASE_DIR = 'data'
 USER_RECORD_PATH = 'user-item.lst'
 DELTA_TIME_PATH = 'user-item-delta-time.lst'
 ACC_TIME_PATH = 'user-item-accumulate-time.lst'
@@ -111,7 +111,7 @@ def load_data(data_attr):
             sents_ret = sentences
             if time_seq is not None:
                 dt_ret = time_seq
-        
+
         return sents_ret, dt_ret
 
 
@@ -152,7 +152,7 @@ def load_data(data_attr):
     def load_file(data_source, prefix, debug=False):
         sentences = []
         user_record_path = os.path.join(BASE_DIR, data_source, prefix + USER_RECORD_PATH)
-
+        logging.info('Looking for path {}'.format(user_record_path))
         if os.path.exists(user_record_path):
             with open(user_record_path, 'r') as f:
                 count = 0

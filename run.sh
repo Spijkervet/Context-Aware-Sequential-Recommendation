@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=6:00:00
+#SBATCH --time=12:00:00
 #SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
 #SBATCH --gres=gpu:2
@@ -19,13 +19,18 @@ module load NCCL/2.0.5-CUDA-9.0.176
 export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64:$LD_LIBRARY_PATH
 
 # Mail
-echo "[IR2] Job $SLURM_JOBID started at `date`" | mail $USER -s "Job $SLURM_JOBID"
+mail_template "IR2" $SLURM_JOBID "STARTED" "$1"
 
-pip3 install -r requirements.txt --user --upgrade
 
-# DOWNLOAD DATA
+pip3 install virtualenv 
+python3 -m virtualenv ir2
+
+. ir2/bin/activate
+
+pip3 install -r requirements.txt
+
+### DOWNLOAD DATA ###
 sh download_data.sh
-
 
 ### PREPROCESSING ###
 # AMAZON BOOKS
@@ -36,5 +41,5 @@ python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --da
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir maxlen_200_dropout_0.2 --maxlen=200 --dropout_rate=0.2
-echo "[IR2] Job $SLURM_JOBID finished at `date`" | mail $USER -s "Job $SLURM_JOBID"
+python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_r2 --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --num_epochs 500 --test_baseline
+mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

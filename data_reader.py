@@ -24,12 +24,13 @@ class DataReader():
     }
     """
 
-    def __init__(self, path, dataset_fp, type, limit=None):
+    def __init__(self, path, dataset_fp, type, limit=None, maxlen=None):
         self.path = path
         self.limit = limit
         self.dataset_fp = dataset_fp
         self.type = type
         self.logger = logging.getLogger('ir2')
+        self.maxlen = maxlen
 
     def preprocess(self):
         assert type(self.type) == str
@@ -49,7 +50,9 @@ class DataReader():
 
     def parse_movielens(self):
         f = open(self.path, 'r')
-        for l in f:
+        for i, l in enumerate(f):
+            if self.limit and i > self.limit:
+                break
             yield l.rstrip()
 
     def preprocess_movielens(self):
@@ -58,13 +61,15 @@ class DataReader():
         countU = defaultdict(lambda: 0)
         countP = defaultdict(lambda: 0)
         total = 100000 if not self.limit else self.limit
+
+        delim = '::'
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
-            user, item, rating, timestamp = tuple(map(int, l.split('::')))
+            user, item, rating, timestamp = l.split(delim)
             f.write('{} {} {}\n'.format(user, item, timestamp))
-            asin = item 
-            rev = user
-            time = timestamp 
+            asin = int(item) 
+            rev = int(user)
+            time = int(timestamp)
             countU[rev] += 1
             countP[asin] += 1
         f.close()
@@ -76,7 +81,10 @@ class DataReader():
         itemnum = 0
         User = dict()
         for l in tqdm(self.parse_movielens(), total=total):
-            rev, asin, rating, time = tuple(map(int, l.split('::')))
+            rev, asin, rating, time = l.split(delim)
+            rev = int(rev)
+            asin = int(asin)
+            time = int(time)
 
             # Minimum of 5:
             if countU[rev] < 5 or countP[asin] < 5:
@@ -104,9 +112,24 @@ class DataReader():
             
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
-            for i in User[user]:
+            for idx, i in enumerate(User[user]):
+                if self.maxlen and idx >= self.maxlen:
+                    break
                 f.write('%d %d %d\n' % (user, i[1], i[0]))
         f.close()
+
+
+        # Test maxlen
+        ts = open(self.dataset_fp, 'r')
+        users = defaultdict(list)
+        for l in ts:
+            user, item, ts = l.split(' ')
+            users[user].append(item)
+        
+        for k, v in users.items():
+            if len(v) > self.maxlen:
+                exit('Maxlen exceeded in {}'.format(k, v))
+
 
         # tsv metadata file (index/label)
         logging.info('Writing tsv metadata file (index/label)')
@@ -117,7 +140,7 @@ class DataReader():
         movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.dat')
         with open(movies_labels_path, 'r', encoding='ISO-8859-1') as f:
             for l in f:
-                key, movie, genre, = tuple(l.rstrip().split('::'))
+                key, movie, genre, = tuple(l.rstrip().split(delim))
                 movies_dict[int(key)] = [movie, genre]
 
         metadata_fp = os.path.join(d, bn + '_metadata.tsv')
