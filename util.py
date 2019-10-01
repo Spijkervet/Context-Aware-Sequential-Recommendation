@@ -7,7 +7,7 @@ from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
 class TimeStamp():
-    
+
     def __init__(self, timestamp):
         self.day = timestamp.strftime("%-d")
         self.hour = timestamp.strftime("%-H")
@@ -22,16 +22,108 @@ class UserItems():
         self.ts = TimeStamp(self.timestamp)
         self.day = self.ts.day
 
-def get_delta_time(ts, bin_in_hours, max_bins):
-    delta_timestamp = math.floor(ts.hour / bin_in_hours)
-    if delta_timestamp > max_bins: # TODO: Add this as an argument
+def get_delta_time(ts, bin_in_hours=48, max_bins=200, log_scale=False, min_ts=None, max_ts=None):
+
+    '''
+    Determines bin for an individual time delta.
+
+    Arguments
+    ---------
+
+    ts : float
+        Time delta for which bin should be calculated
+    bin_in_hours : int
+        Bin size in hours (only used if log scale not applied).
+    max_bins : int
+        Maximum number of bins.
+    log_scale : bool
+        Whether bin should be inferred from a log scale (where each bin is of equal log-length).
+    min_ts : float
+        Minimum timedelta in dataset.
+    max_ts : float
+        Maximum timedelta (defines the boundary of the right-most bin). Everything beyond max_ts
+        will be grouped in last bin.
+    '''
+
+    if log_scale:
+
+        # determine the extents of the log scale
+        min_ts_log = np.log(min_ts)
+        max_ts_log = np.log(max_ts)
+
+        # log-transform the current timedelta
+        ts_log = np.log(ts)
+
+        # determine the size of each bin
+        bin_size = (max_ts_log - min_ts_log) / max_bins
+
+        # determine in which bin the current delta should live
+        delta_timestamp = math.floor(ts_log / bin_size)
+    else:
+
+        # determine in which bin the current delta should live
+        delta_timestamp = math.floor(ts.total_seconds()//3600 / bin_in_hours)
+
+    # if the bin is larger than the maximum number of bins, bring it back to the last bin
+    if delta_timestamp > max_bins:
         delta_timestamp = max_bins
+
     return delta_timestamp
+
+def get_delta_range(User, max_percentile=90):
+
+    '''
+    Function to determine the maximum and minimum time deltas present in the data.
+
+    Arguments
+    ---------
+    User : User object
+        Contains all sequences for all users.
+
+    max_percentile : int
+        If maximum timedelta should be taken at a particular percentile in the dataset.
+        Eventually, all observations beyond this percentile will then be mapped to
+        the last bin.
+
+    Returns
+    -------
+
+    min_timedelta : float
+        Minimum time difference observed between current and previous
+        interactions in a sequence. (Likely to be 0.0 in most datasets.)
+
+    max_timedelta : float
+        Maximum time difference observed between current and previous
+        interactions in a sequence, at the specified max percentile.
+    '''
+
+    all_timedeltas = []
+
+    for user in User:
+
+        ts = User[user][-1].timestamp
+
+        for u in User[user]:
+
+            # get time difference with last-known observations
+            delta_ts = ts - u.timestamp
+
+            all_timedeltas.append(delta_ts)
+
+    all_timedeltas = np.array(all_timedeltas)
+
+    max_timedelta = np.percentile(all_timedeltas, 90)
+    min_timedelta = np.amin(all_timedeltas)
+
+    return min_timedelta, max_timedelta
+
 
 def data_partition(fpath):
     '''
     Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
     '''
+
+    log_scale = False
 
     usernum = 0
     itemnum = 0
@@ -52,13 +144,21 @@ def data_partition(fpath):
         to_add = UserItems(i, t)
         User[u].append(to_add)
 
+    # if positional embedding is calculated on the basis of a log scale get min and max timediff
+    if log_scale:
+        min_timedelta, max_timedelta = get_delta_range(User)
+
+
     # Create delta_time
     for user in User:
         most_recent_timestamp = User[user][-1].timestamp
         for u in User[user]:
             delta_timestamp = most_recent_timestamp - u.timestamp
             # delta_timestamp = delta_timestamp.days # TODO: Add this as an argument
-            u.delta_time = get_delta_time(delta_timestamp, 48, 200)
+            if log_scale:
+                u.delta_time = get_delta_time(delta_timestamp, min_ts=min_timedelta, max_ts=max_timedelta)
+            else:
+                u.delta_time = get_delta_time(delta_timestamp, bin_in_hours=48, max_bins=200)
             # if u.delta_time != 0 and u.delta_time != 31:
             #     print(u.delta_time)
             # print(most_recent_timestamp, u.timestamp, delta_timestamp)
