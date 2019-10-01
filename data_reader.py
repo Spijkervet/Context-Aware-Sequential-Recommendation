@@ -103,7 +103,7 @@ class DataReader():
                 itemnum += 1
                 itemid = itemnum
                 itemmap[asin] = itemid
-            User[userid].append([time, itemid])
+            User[userid].append([itemid, time])
 
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
@@ -111,13 +111,11 @@ class DataReader():
             User[userid].sort(key=lambda x: x[0])
             
         f = open(self.dataset_fp, 'w')
-        for user in tqdm(User.keys()):
-            for idx, i in enumerate(User[user]):
-                if self.maxlen and idx >= self.maxlen:
-                    break
-                f.write('%d %d %d\n' % (user, i[1], i[0]))
+        for user, v in User.items():
+            to_write = v[-self.maxlen:] if self.maxlen else v
+            for tw in to_write:
+                f.write('%d %d %d\n' % (user, tw[0], tw[1]))
         f.close()
-
 
         # Test maxlen
         ts = open(self.dataset_fp, 'r')
