@@ -181,7 +181,8 @@ def predict(model):
 				# +1 more because of nDCG formula
 				nDCG += 1/getLog2AtK((index+1)+1)
 
-				if index+1 < TOP:
+				# max index we allow is 9, which is the 10th element
+				if index < TOP:
 					nDCG_at_10 += 1/getLog2AtK((index+1)+1)
 					hit_at_10 += 1
 			rankFullTuple = torch.topk(probOfItems,ITEM_SIZE)
