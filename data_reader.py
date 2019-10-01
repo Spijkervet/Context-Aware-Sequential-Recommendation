@@ -108,7 +108,7 @@ class DataReader():
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
         for userid in User.keys():
-            User[userid].sort(key=lambda x: x[0])
+            User[userid].sort(key=lambda x: x[1])
             
         f = open(self.dataset_fp, 'w')
         for user, v in User.items():

@@ -3,6 +3,7 @@ import os
 import argparse
 import logging
 import time
+import random
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
@@ -88,7 +89,7 @@ if __name__ == '__main__':
 
     # DONE: Understand WarpSampler (see explanation in Class)
     print('usernum', usernum, 'itemnum', itemnum)
-    sampler = WarpSampler(train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
+    sampler = WarpSampler(args, train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
 
     # Understand partitioning of train / validation / test data:
     # first_user = list(train.keys())[0]
@@ -100,6 +101,7 @@ if __name__ == '__main__':
     # RESET GRAPH
 
     if args.seed:
+        random.seed(args.seed)
         np.random.seed(args.seed)
         tf.reset_default_graph()
         tf.set_random_seed(args.seed)    
@@ -137,8 +139,7 @@ if __name__ == '__main__':
                                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                                         model.is_training: True})
 
-                print(activations[0].shape)
-
+                # print(activations[0].shape)
                 # timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
                 #         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
                 #         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,

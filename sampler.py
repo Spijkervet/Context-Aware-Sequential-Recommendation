@@ -80,9 +80,14 @@ class WarpSampler(object):
     The pos vector has :maxlen: items, filled at the end with the most recent product ids (including the most recent, excluding oldest).
     The neg vector has :maxlen: items, filled at the end with 'negative' samples, i.e. randomly drawn product ids that do not exist in the current interaction data.
     """
-    def __init__(self, User, usernum, itemnum, batch_size=64, maxlen=10, n_workers=1):
+    def __init__(self, args, User, usernum, itemnum, batch_size=64, maxlen=10, n_workers=1):
         self.result_queue = Queue(maxsize=n_workers * 10)
         self.processors = []
+
+        if args.seed:
+            seed = args.seed
+        else:
+            seed = np.random.randint(2e9)
         for i in range(n_workers):
             self.processors.append(
                 Process(target=sample_function, args=(User,
@@ -91,7 +96,7 @@ class WarpSampler(object):
                                                       batch_size,
                                                       maxlen,
                                                       self.result_queue,
-                                                      42 #np.random.randint(2e9)
+                                                      seed
                                                       )))
             self.processors[-1].daemon = True
             self.processors[-1].start()
