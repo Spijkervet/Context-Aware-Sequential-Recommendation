@@ -3,7 +3,9 @@ from modules import *
 
 class Model():
     def __init__(self, usernum, itemnum, args, reuse=None):
-        tf.set_random_seed(42)
+
+        if args.seed:
+            tf.set_random_seed(args.seed)
         self.is_training = tf.placeholder(tf.bool, shape=())
         self.u = tf.placeholder(tf.int32, shape=(None))
         self.input_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))

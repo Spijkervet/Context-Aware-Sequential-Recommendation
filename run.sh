@@ -37,9 +37,9 @@ sh download_data.sh
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
 
 # MOVIELENS 1-M
-python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt
+# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt --maxlen 200
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_r2 --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --num_epochs 500 --test_baseline
+python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_r3 --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --test_baseline --seed 42
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"
