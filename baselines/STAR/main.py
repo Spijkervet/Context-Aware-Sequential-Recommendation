@@ -120,6 +120,7 @@ def predict(model):
 	# because in ideal case, item should be in first position
 	nDCG = 0
 	nDCG_full = 0
+	nDCG_at_10 = 0
 	hit_at_10 = 0
 
 	numUsers = 0 # num of users
@@ -170,25 +171,28 @@ def predict(model):
 
 			# topK returns tuple in the form (sorted values,sorted by index)
 			rankTuple = torch.topk(probOfItems, TOP)
-			rank_index_list = rankTuple[1]
+			rank_index_list = rankTuple[1][0] # 2d tensor so get the first thing
 
 			# use the prediction to see if test is in there
 			if item_test[j] in rank_index_list:
-				index = ((rank_index_list == item_test[j]).nonzero())
-				index = index[0][0].item()
+				matchPosition = ((indexList == item_test[j]).nonzero())
+				index = matchPosition.item()
 				# Remember index starts at 0 so +1 to get actual index
 				# +1 more because of nDCG formula
 				nDCG += 1/getLog2AtK((index+1)+1)
+
 				if index+1 < TOP:
+					nDCG_at_10 += 1/getLog2AtK((index+1)+1)
 					hit_at_10 += 1
-	
 			rankFullTuple = torch.topk(probOfItems,ITEM_SIZE)
 			indexList = rankFullTuple[1][0] # 2d tensor so get the first thing
 			# print("length index list", len(indexList))
 			# print("index list", indexList[:10])
 			# print("item test", item_test)
 			# print("equality check", (indexList == item_test[j])[:10])
+			# print("indexList", (indexList == item_test[j]))
 			matchPosition = ((indexList == item_test[j]).nonzero())
+			# print("matchPosition", matchPosition)
 			matchPosition = matchPosition.item()
 			# Remember index starts at 0 so +1 to get actual index
 			# +1 more because of nDCG formula
@@ -208,9 +212,10 @@ def predict(model):
 	nDCG = nDCG/relevant
 	nDCG_full = nDCG_full/relevant
 	hit_at_10 = hit_at_10/relevant
-	
+	nDCG_at_10 = nDCG_at_10/relevant
+
 	print('hit@10: ' + str(hit_at_10))
-	print('nDCG@10: '+ str(nDCG))
+	print('nDCG@10: '+ str(nDCG_at_10))
 	print('nDCG_full: '+str(nDCG_full))
 
 	print('ITEM_SIZE: '+str(ITEM_SIZE))
