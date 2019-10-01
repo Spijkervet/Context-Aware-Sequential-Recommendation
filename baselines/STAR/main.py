@@ -125,6 +125,7 @@ def predict(model):
 	numUsers = 0 # num of users
 
 	for n in ITEM_TEST.keys():
+
 		item_train = ITEM_TRAIN[n]
 		item_test = ITEM_TEST[n]
 		hour_train = HOUR_TRAIN[n]
@@ -182,10 +183,13 @@ def predict(model):
 					hit_at_10 += 1
 	
 			rankFullTuple = torch.topk(probOfItems,ITEM_SIZE)
-			indexList = rankFullTuple[1]
+			indexList = rankFullTuple[1][0] # 2d tensor so get the first thing
+			# print("length index list", len(indexList))
+			# print("index list", indexList[:10])
+			# print("item test", item_test)
+			# print("equality check", (indexList == item_test[j])[:10])
 			matchPosition = ((indexList == item_test[j]).nonzero())
-			matchPosition = matchPosition[0][0].item()
-
+			matchPosition = matchPosition.item()
 			# Remember index starts at 0 so +1 to get actual index
 			# +1 more because of nDCG formula
 			nDCG_full += 1/getLog2AtK((matchPosition+1)+1)
@@ -351,6 +355,12 @@ def initLogOfIndexes():
 		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, device=cuda_str))
 	else:
 		LOG_OF_INDEXES = torch.log2(torch.arange(1.,sizeOfArr, dtype=torch.float64))
+
+def genNegItem(user_cart):
+	item = random.choice(range(1,ITEM_SIZE))
+	while item in user_cart:
+		item = random.choice(range(1,ITEM_SIZE))
+	return item
 
 def getLog2AtK(k):
 	global LOG_OF_INDEXES
