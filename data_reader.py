@@ -117,26 +117,6 @@ class DataReader():
                 f.write('%d %d %d\n' % (user, i[0], i[1]))
         f.close()
 
-        # f = open(self.dataset_fp, 'w')
-        # for user, v in User.items():
-        #     # NOTE: self.maxlen - 3, since we want to hold one out for validation and for testing and have self.maxlen as training set!!!
-        #     to_write = v[-self.maxlen-3:] if self.maxlen else v
-        #     for tw in to_write:
-        #         f.write('%d %d %d\n' % (user, tw[0], tw[1]))
-        # f.close()
-
-        # Test maxlen
-        # ts = open(self.dataset_fp, 'r')
-        # users = defaultdict(list)
-        # for l in ts:
-        #     user, item, ts = l.split(' ')
-        #     users[user].append(item)
-        
-        # for k, v in users.items():
-        #     if len(v) > self.maxlen + 3:
-        #         exit('Maxlen exceeded in {}'.format(k, v))
-
-
         # tsv metadata file (index/label)
         logging.info('Writing tsv metadata file (index/label)')
         d = os.path.dirname(self.dataset_fp)

@@ -59,6 +59,7 @@ if __name__ == '__main__':
     parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
     parser.add_argument('--test_baseline', default=False, action='store_true')
     parser.add_argument('--seed', default=None , type=int)
+    parser.add_argument('--log_scale', default=False, action='store_true')
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -80,41 +81,15 @@ if __name__ == '__main__':
     so train[-1] is the most recent product in the sequence
     """
 
-    dataset = data_partition(args.dataset)
+    dataset = data_partition(args, args.dataset)
     [train, valid, test, usernum, itemnum] = dataset
     num_batch = round(len(train) / args.batch_size)
 
     cc = sum([len(v) for v in train.values()])
     logger.info('Average sequence length: {:.2f}'.format(cc / len(train)))
 
-    # DONE: Understand WarpSampler (see explanation in Class)
     print('usernum', usernum, 'itemnum', itemnum)
     sampler = WarpSampler(args, train, usernum, itemnum, batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
-
-    # for t in train:
-    #     if len(train[t]) >= args.maxlen - 3:
-    #         print('----', t, len(train[t]))
-    #         for i in train[t]:
-    #             print(i.item)
-
-    #         print('----', t, len(train[t]))
-    #         break
-
-    # u, seq, pos, neg, timeseq = sampler.next_batch()
-    # for i, p in enumerate(pos):
-    #     if p[0] != 0:
-    #         print(u[0])
-    #         print(i)
-    #         print(p)
-    #         break
-
-    # print(pos[3])
-    # Understand partitioning of train / validation / test data:
-    # first_user = list(train.keys())[0]
-    # print('first user train data', train[first_user])
-    # print('first user valid data', valid[first_user])
-    # print('first user valid data', test[first_user])
-    # # print(u)
 
     # RESET GRAPH
     if args.seed:
@@ -157,13 +132,7 @@ if __name__ == '__main__':
                                         model.is_training: True})
 
                 # print(activations[0].shape)
-                # timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
-                #         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],
-                #         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
-                #         model.is_training: True})
 
-
-                # TODO Janne: Time sequence is calculated as delta_time between very first sequence (disregarding train/valid/test).
                 ## Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
                 # print(u[0])
                 # print(seq[0][-2], seq[0].shape)
@@ -222,5 +191,3 @@ if __name__ == '__main__':
     f.close()
     sampler.close()
     print("Done")
-
-

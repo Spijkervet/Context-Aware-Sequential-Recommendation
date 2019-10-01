@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/jspijkervet/git/information_retrieval_2/models/ml-1m.txt/sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_old_datareader_r2/model.ckpt"
+all_model_checkpoint_paths: "/home/jspijkervet/git/information_retrieval_2/models/ml-1m.txt/sasrec_ml-1m_maxlen_200_dropout_0.2_num_blocks_3_seed_42_old_datareader_r2/model.ckpt"

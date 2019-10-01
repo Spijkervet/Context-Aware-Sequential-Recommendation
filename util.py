@@ -118,12 +118,12 @@ def get_delta_range(User, max_percentile=90):
     return min_timedelta, max_timedelta
 
 
-def data_partition(fpath):
+def data_partition(args, fpath):
     '''
     Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
     '''
 
-    log_scale = False
+    log_scale = args.log_scale
 
     usernum = 0
     itemnum = 0
