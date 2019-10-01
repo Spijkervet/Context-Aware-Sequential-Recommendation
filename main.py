@@ -56,10 +56,11 @@ if __name__ == '__main__':
 
     # MISC.
     parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
+    parser.add_argument('--test_baseline', default=False, action='store_true')
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
-
+    np.random.seed(42)
     # Check if dataset exists
     if not os.path.exists(args.dataset):
         logger.info('Pre-process the data first using the --preprocess flag')
@@ -98,7 +99,7 @@ if __name__ == '__main__':
 
     # RESET GRAPH
     tf.reset_default_graph()
-    
+    tf.set_random_seed(42)    
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
@@ -123,15 +124,17 @@ if __name__ == '__main__':
 
     T = 0.0
     t0 = time.time()
-
+    tf.get_default_graph().finalize()
     try:
         for epoch in range(1, args.num_epochs + 1):
 
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq = sampler.next_batch()
-                auc, loss, _, summary, tseq_enc = sess.run([model.auc, model.loss, model.train_op, model.merged, model.tseq_enc],
+                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations],
                                         {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                                         model.is_training: True})
+
+                print(activations[0].shape)
 
                 # timeseq_encoding, mask, seq_embedding, item_emb_table, queries, keys = sess.run([model.tseq, 
                 #         model.mask, model.seq, model.item_emb_table, model.queries, model.keys],

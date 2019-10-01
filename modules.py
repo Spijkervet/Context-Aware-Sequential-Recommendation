@@ -135,7 +135,7 @@ def embedding(inputs,
     else: return outputs
 
 
-def multihead_attention(queries, 
+def multihead_attention(model, queries, 
                         keys, 
                         num_units=None, 
                         num_heads=8, 
@@ -205,6 +205,7 @@ def multihead_attention(queries,
   
         # Activation
         outputs = tf.nn.softmax(outputs) # (h*N, T_q, T_k)
+        model.activations = outputs
          
         # Query Masking
         query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) # (N, T_q)
