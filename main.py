@@ -57,10 +57,11 @@ if __name__ == '__main__':
     # MISC.
     parser.add_argument('--saved_model', default='model.pt', type=str, help='File to save model checkpoints')
     parser.add_argument('--test_baseline', default=False, action='store_true')
+    parser.add_argument('--seed', default=None , type=int)
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
-    np.random.seed(42)
+
     # Check if dataset exists
     if not os.path.exists(args.dataset):
         logger.info('Pre-process the data first using the --preprocess flag')
@@ -96,10 +97,13 @@ if __name__ == '__main__':
     # print('first user valid data', test[first_user])
     # # print(u)
 
-
     # RESET GRAPH
-    tf.reset_default_graph()
-    tf.set_random_seed(42)    
+
+    if args.seed:
+        np.random.seed(args.seed)
+        tf.reset_default_graph()
+        tf.set_random_seed(args.seed)    
+
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
@@ -124,7 +128,6 @@ if __name__ == '__main__':
 
     T = 0.0
     t0 = time.time()
-    tf.get_default_graph().finalize()
     try:
         for epoch in range(1, args.num_epochs + 1):
 
