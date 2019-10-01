@@ -23,7 +23,8 @@ class UserItems():
         self.day = self.ts.day
 
 def get_delta_time(ts, bin_in_hours, max_bins):
-    delta_timestamp = math.floor(ts.hour / bin_in_hours)
+    hours = ts.total_seconds() // 3600
+    delta_timestamp = math.floor(hours / bin_in_hours)
     if delta_timestamp > max_bins: # TODO: Add this as an argument
         delta_timestamp = max_bins
     return delta_timestamp
