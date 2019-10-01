@@ -24,12 +24,13 @@ class DataReader():
     }
     """
 
-    def __init__(self, path, dataset_fp, type, limit=None):
+    def __init__(self, path, dataset_fp, type, limit=None, maxlen=None):
         self.path = path
         self.limit = limit
         self.dataset_fp = dataset_fp
         self.type = type
         self.logger = logging.getLogger('ir2')
+        self.maxlen = maxlen
 
     def preprocess(self):
         assert type(self.type) == str
@@ -111,9 +112,24 @@ class DataReader():
             
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
-            for i in User[user]:
+            for idx, i in enumerate(User[user]):
+                if self.maxlen and idx >= self.maxlen:
+                    break
                 f.write('%d %d %d\n' % (user, i[1], i[0]))
         f.close()
+
+
+        # Test maxlen
+        ts = open(self.dataset_fp, 'r')
+        users = defaultdict(list)
+        for l in ts:
+            user, item, ts = l.split(' ')
+            users[user].append(item)
+        
+        for k, v in users.items():
+            if len(v) > self.maxlen:
+                exit('Maxlen exceeded in {}'.format(k, v))
+
 
         # tsv metadata file (index/label)
         logging.info('Writing tsv metadata file (index/label)')

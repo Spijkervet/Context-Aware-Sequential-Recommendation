@@ -91,7 +91,7 @@ class WarpSampler(object):
                                                       batch_size,
                                                       maxlen,
                                                       self.result_queue,
-                                                      np.random.randint(2e9)
+                                                      42 #np.random.randint(2e9)
                                                       )))
             self.processors[-1].daemon = True
             self.processors[-1].start()
