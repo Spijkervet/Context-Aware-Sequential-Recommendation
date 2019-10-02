@@ -76,12 +76,7 @@ if __name__ == '__main__':
 
 
     # Partition data
-    """
-    NOTE: Important - the timestamps are sorted ASCENDING, 
-    so train[-1] is the most recent product in the sequence
-    """
-
-    dataset = data_partition(args, args.dataset)
+    dataset = data_partition(args.dataset, args.log_scale)
     [train, valid, test, usernum, itemnum] = dataset
     num_batch = round(len(train) / args.batch_size)
 

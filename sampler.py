@@ -29,7 +29,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         # print('sequence', user_train[user])
         # print('get most recent product in sequence', nxt)
         # Sequence shape has maxlen zero padding
-        assert seq.shape[0] == maxlen
+        # assert seq.shape[0] == maxlen
 
         # Get unique product ids in sequence
         ts = set([i.item for i in user_train[user]])
@@ -37,7 +37,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)
             seq[idx] = i.item
-            timeseq[idx] = i.delta_time # NOTE: CONTEXT SCOPE IS CHANGED HERE
+            timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
             pos[idx] = nxt
             if nxt != 0: # TODO: What does nxt != 0 mean?
                 # print('nxt', nxt)

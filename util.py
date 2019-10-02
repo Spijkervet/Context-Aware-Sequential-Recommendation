@@ -6,6 +6,7 @@ import math
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
+
 class TimeStamp():
 
     def __init__(self, timestamp):
@@ -13,17 +14,36 @@ class TimeStamp():
         self.hour = timestamp.strftime("%-H")
         self.date = timestamp.strftime("%c")
 
+
 class UserItems():
 
     # TODO: Days ago relative to first date!
     def __init__(self, item, timestamp):
         self.item = item
-        self.timestamp = datetime.fromtimestamp(timestamp).astimezone(timezone.utc)
+        self.timestamp_raw = timestamp
+        self.timestamp = datetime.fromtimestamp(
+            timestamp).astimezone(timezone.utc)
         self.ts = TimeStamp(self.timestamp)
         self.day = self.ts.day
 
-def get_delta_time(ts, bin_in_hours=48, max_bins=200, log_scale=False, min_ts=None, max_ts=None):
 
+def get_bin_size(min_ts, max_ts, max_bins):
+    # determine the extents of the log scale
+    # log(0) is undefined (-inf), add eps:
+    # if min_ts == 0:
+    #     min_ts += np.finfo(float).eps
+    # if max_ts == 0:
+    #     max_ts += np.finfo(float).eps
+
+    min_ts_log = np.log(min_ts)
+    max_ts_log = np.log(max_ts)
+
+    # determine the size of each bin
+    bin_size = (max_ts_log - min_ts_log) / max_bins
+    return bin_size
+
+
+def get_timedelta_bin(ts, bin_in_hours=48, max_bins=200, log_scale=False, min_ts=None, max_ts=None):
     '''
     Determines bin for an individual time delta.
 
@@ -31,7 +51,7 @@ def get_delta_time(ts, bin_in_hours=48, max_bins=200, log_scale=False, min_ts=No
     ---------
 
     ts : float
-        Time delta for which bin should be calculated
+        Time delta in seconds for which bin should be calculated
     bin_in_hours : int
         Bin size in hours (only used if log scale not applied).
     max_bins : int
@@ -39,41 +59,43 @@ def get_delta_time(ts, bin_in_hours=48, max_bins=200, log_scale=False, min_ts=No
     log_scale : bool
         Whether bin should be inferred from a log scale (where each bin is of equal log-length).
     min_ts : float
-        Minimum timedelta in dataset.
+        Minimum hours in dataset.
     max_ts : float
-        Maximum timedelta (defines the boundary of the right-most bin). Everything beyond max_ts
+        Maximum hours (defines the boundary of the right-most bin). Everything beyond max_ts
         will be grouped in last bin.
     '''
 
     if log_scale:
-
-        # determine the extents of the log scale
-        min_ts_log = np.log(min_ts)
-        max_ts_log = np.log(max_ts)
-
-        # log-transform the current timedelta
-        ts_log = np.log(ts)
-
-        # determine the size of each bin
-        bin_size = (max_ts_log - min_ts_log) / max_bins
+        # NOTE: (?) Add 1, since log(1) = 0
+        min_ts += 1
+        max_ts += 1
+        ts += 1
 
         # determine in which bin the current delta should live
-        delta_timestamp = math.floor(ts_log / bin_size)
+        bin_size = get_bin_size(min_ts, max_ts, max_bins)
+
+        # log-transform the current timedelta, add eps if zero
+        # if ts == 0:
+        #     ts += np.finfo(float).eps
+
+        ts_log = np.log(ts)
+        time_bin = math.floor(ts_log / bin_size)
+
     else:
 
         # determine in which bin the current delta should live
-        delta_timestamp = math.floor(ts.total_seconds()//3600 / bin_in_hours)
+        time_bin = math.floor(ts // 3600 / bin_in_hours)
 
     # if the bin is larger than the maximum number of bins, bring it back to the last bin
-    if delta_timestamp > max_bins:
-        delta_timestamp = max_bins
+    if time_bin > max_bins:
+        time_bin = max_bins
 
-    return delta_timestamp
+    return time_bin
+
 
 def get_delta_range(User, max_percentile=90):
-
     '''
-    Function to determine the maximum and minimum time deltas present in the data.
+    Function to determine the maximum and minimum time deltas present in the data in seconds.
 
     Arguments
     ---------
@@ -89,50 +111,33 @@ def get_delta_range(User, max_percentile=90):
     -------
 
     min_timedelta : float
-        Minimum time difference observed between current and previous
+        Minimum time difference in seconds observed between current and previous
         interactions in a sequence. (Likely to be 0.0 in most datasets.)
 
     max_timedelta : float
-        Maximum time difference observed between current and previous
+        Maximum time difference in seconds observed between current and previous
         interactions in a sequence, at the specified max percentile.
     '''
 
     all_timedeltas = []
-
-    for user in User:
-
-        ts = User[user][-1].timestamp
-
-        for u in User[user]:
-
+    for _, sequences in User.items():
+        ts = sequences[-1].timestamp
+        for u in sequences:
             # get time difference with last-known observations
-            delta_ts = ts - u.timestamp
-
+            delta_ts = (ts - u.timestamp).total_seconds()
             all_timedeltas.append(delta_ts)
 
     all_timedeltas = np.array(all_timedeltas)
-
     max_timedelta = np.percentile(all_timedeltas, 90)
     min_timedelta = np.amin(all_timedeltas)
-
     return min_timedelta, max_timedelta
 
 
-def data_partition(args, fpath):
-    '''
-    Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
-    '''
-
-    log_scale = args.log_scale
-
+def get_users(fpath):
     usernum = 0
     itemnum = 0
-    User = defaultdict(list)
-    user_train = {}
-    user_valid = {}
-    user_test = {}
-    # assume user/item index starting from 1
     f = open(fpath, 'r')
+    User = defaultdict(list)
     for line in f:
         u, i, t = line.rstrip().split(' ')
         u = int(u)
@@ -143,25 +148,40 @@ def data_partition(args, fpath):
 
         to_add = UserItems(i, t)
         User[u].append(to_add)
+    f.close()
+    return User, usernum, itemnum
 
+
+def add_time_bin(User, log_scale):
     # if positional embedding is calculated on the basis of a log scale get min and max timediff
     if log_scale:
         min_timedelta, max_timedelta = get_delta_range(User)
 
+    for _, sequences in User.items():
+        most_recent_timestamp = sequences[-1].timestamp
+        for s in sequences:
+            time_delta = (most_recent_timestamp - s.timestamp).total_seconds()
 
-    # Create delta_time
-    for user in User:
-        most_recent_timestamp = User[user][-1].timestamp
-        for u in User[user]:
-            delta_timestamp = most_recent_timestamp - u.timestamp
-            # delta_timestamp = delta_timestamp.days # TODO: Add this as an argument
             if log_scale:
-                u.delta_time = get_delta_time(delta_timestamp, min_ts=min_timedelta, max_ts=max_timedelta)
+                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                               log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
             else:
-                u.delta_time = get_delta_time(delta_timestamp, bin_in_hours=48, max_bins=200)
-            # if u.delta_time != 0 and u.delta_time != 31:
-            #     print(u.delta_time)
-            # print(most_recent_timestamp, u.timestamp, delta_timestamp)
+                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                               log_scale=False)
+    return User
+
+
+def data_partition(fpath, log_scale=False):
+    '''
+    Temporarily taken from https://github.com/kang205/SASRec/blob/master/util.py
+    '''
+
+    user_train = {}
+    user_valid = {}
+    user_test = {}
+    User, usernum, itemnum = get_users(fpath)
+
+    User = add_time_bin(User, log_scale)
 
     # Partition data into three parts: train, valid, test.
     for user in User:
@@ -178,6 +198,7 @@ def data_partition(args, fpath):
             user_test[user].append(User[user][-1])
     return [user_train, user_valid, user_test, usernum, itemnum]
 
+
 def evaluate(model, dataset, args, sess):
 
     [train, valid, test, usernum, itemnum] = copy.deepcopy(dataset)
@@ -186,32 +207,35 @@ def evaluate(model, dataset, args, sess):
     HT = 0.0
     valid_user = 0.0
 
-    if usernum>10000:
+    if usernum > 10000:
         users = random.sample(range(1, usernum + 1), 10000)
     else:
         users = range(1, usernum + 1)
     for u in users:
-        if len(train[u]) < 1 or len(test[u]) < 1: continue
+        if len(train[u]) < 1 or len(test[u]) < 1:
+            continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
-        timeseq[idx] = valid[u][0].delta_time
+        timeseq[idx] = valid[u][0].time_bin
 
         idx -= 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.delta_time
+            timeseq[idx] = i.time_bin
             idx -= 1
-            if idx == -1: break
+            if idx == -1:
+                break
         rated = set([i.item for i in train[u]])
         rated.add(0)
         item_idx = [test[u][0].item]
         for _ in range(100):
             t = np.random.randint(1, itemnum + 1)
-            while t in rated: t = np.random.randint(1, itemnum + 1)
+            while t in rated:
+                t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
         predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)
@@ -232,33 +256,36 @@ def evaluate(model, dataset, args, sess):
 
 
 def evaluate_valid(model, dataset, args, sess):
-    [train, valid, test, usernum, itemnum] = copy.deepcopy(dataset)
+    [train, valid, _, usernum, itemnum] = copy.deepcopy(dataset)
 
     NDCG = 0.0
     valid_user = 0.0
     HT = 0.0
-    if usernum>10000:
+    if usernum > 10000:
         users = random.sample(list(range(1, usernum + 1)), 10000)
     else:
         users = list(range(1, usernum + 1))
     for u in users:
-        if len(train[u]) < 1 or len(valid[u]) < 1: continue
+        if len(train[u]) < 1 or len(valid[u]) < 1:
+            continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.delta_time
+            timeseq[idx] = i.time_bin
             idx -= 1
-            if idx == -1: break
+            if idx == -1:
+                break
 
         rated = set([i.item for i in train[u]])
         rated.add(0)
         item_idx = [valid[u][0].item]
         for _ in range(100):
             t = np.random.randint(1, itemnum + 1)
-            while t in rated: t = np.random.randint(1, itemnum + 1)
+            while t in rated:
+                t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
         predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)

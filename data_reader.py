@@ -54,6 +54,7 @@ class DataReader():
             if self.limit and i > self.limit:
                 break
             yield l.rstrip()
+        f.close()
 
     def preprocess_movielens(self):
         logging.info('Reading and processing {}'.format(self.path))
@@ -136,6 +137,7 @@ class DataReader():
                 # asin=k, index=v
                 f.write('{} {}\n'.format(v, movies_dict[k][0])) # movie
                 genre_fp.write('{} {}\n'.format(v, movies_dict[k][1])) #genre
+        genre_fp.close()
 
     def preprocess_amazon_ratings(self):
         countU = defaultdict(lambda: 0)
