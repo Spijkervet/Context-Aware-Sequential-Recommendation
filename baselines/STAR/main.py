@@ -120,13 +120,14 @@ def predict(model):
 	# because in ideal case, item should be in first position
 	nDCG = 0
 	nDCG_full = 0
-	nDCG_at_10 = 0
 	hit_at_10 = 0
+
+	neg_nDCG = 0
+	neg_hit_at_10 = 0
 
 	numUsers = 0 # num of users
 
 	for n in ITEM_TEST.keys():
-
 		item_train = ITEM_TRAIN[n]
 		item_test = ITEM_TEST[n]
 		hour_train = HOUR_TRAIN[n]
@@ -167,57 +168,81 @@ def predict(model):
 
 			relevant += 1
 			# apply softmax, because this is not part of the network
-			probOfItems = F.softmax(logits,dim=1)
+			probOfItems = F.softmax(logits,dim=1)[0]
 
+			# NORMAL VALIDATION
 			# topK returns tuple in the form (sorted values,sorted by index)
 			rankTuple = torch.topk(probOfItems, TOP)
-			rank_index_list = rankTuple[1][0] # 2d tensor so get the first thing
+			rank_index_list = rankTuple[1]
 
 			# use the prediction to see if test is in there
 			if item_test[j] in rank_index_list:
-				matchPosition = ((indexList == item_test[j]).nonzero())
+				matchPosition = ((rank_index_list == item_test[j]).nonzero())
 				index = matchPosition.item()
 				# Remember index starts at 0 so +1 to get actual index
 				# +1 more because of nDCG formula
 				nDCG += 1/getLog2AtK((index+1)+1)
+				hit_at_10 += 1
 
-				# max index we allow is 9, which is the 10th element
-				if index < TOP:
-					nDCG_at_10 += 1/getLog2AtK((index+1)+1)
-					hit_at_10 += 1
+			# START NEGATIVE SAMPLING
+			# Get logits for our boy
+			test_index = item_test[j]
+			test_logits = probOfItems[test_index]
+			items = [test_logits]
+			# Sample 100 negative boys
+			for _ in range(100):
+				neg_index = genNegItem(item_test)
+				neg = probOfItems[neg_index]
+				items.append(neg)
+
+			# Proceed as normal, but with a subset of items
+			sampled_items = torch.tensor(items).to(device)
+
+			# topK returns tuple in the form (sorted values,sorted by index)
+			neg_rankTuple = torch.topk(sampled_items, TOP)
+			neg_rank_index_list = neg_rankTuple[1] # get the indices
+
+			# use the prediction to see if test is in there
+			if item_test[j] in neg_rank_index_list:
+				matchPosition = (neg_rank_index_list == item_test[j]).nonzero()
+				index = matchPosition.item()
+				# Remember index starts at 0 so +1 to get actual index
+				# +1 more because of nDCG formula
+				neg_nDCG += 1/getLog2AtK((index+1)+1)
+				neg_hit_at_10 += 1
+
+			# END NEGATIVE SAMPLING
+
+			# calculate the nDCG over all items
 			rankFullTuple = torch.topk(probOfItems,ITEM_SIZE)
-			indexList = rankFullTuple[1][0] # 2d tensor so get the first thing
-			# print("length index list", len(indexList))
-			# print("index list", indexList[:10])
-			# print("item test", item_test)
-			# print("equality check", (indexList == item_test[j])[:10])
-			# print("indexList", (indexList == item_test[j]))
-			matchPosition = ((indexList == item_test[j]).nonzero())
-			# print("matchPosition", matchPosition)
-			matchPosition = matchPosition.item()
+			indexList = rankFullTuple[1] # get the indices
+			matchPosition = (indexList == item_test[j]).nonzero()
 			# Remember index starts at 0 so +1 to get actual index
 			# +1 more because of nDCG formula
 			nDCG_full += 1/getLog2AtK((matchPosition+1)+1)
+
+			# Recurrent
 			inputX = inputX.unsqueeze(0)
 			hourX = hourX.unsqueeze(0)
 			weekdayX = weekdayX.unsqueeze(0)
 			intervalX = intervalX.unsqueeze(0)
-			# print("inputX.shape", inputX.shape)
-			# print("hourX.shape", hourX.shape)
-			# print("weekdayX.shape", weekdayX.shape)
-			# print("intervalX.shape", intervalX.shape)
 			logits,h,h2,h3 = model(inputX,hourX,weekdayX,intervalX,h=h,h2=h2,h3=h3)
 
 	#average over number of queries
-
 	nDCG = nDCG/relevant
 	nDCG_full = nDCG_full/relevant
 	hit_at_10 = hit_at_10/relevant
-	nDCG_at_10 = nDCG_at_10/relevant
 
 	print('hit@10: ' + str(hit_at_10))
-	print('nDCG@10: '+ str(nDCG_at_10))
+	print('nDCG@10: '+ str(nDCG))
 	print('nDCG_full: '+str(nDCG_full))
+
+	# NEGATIVE SAMPLING
+	neg_hit_at_10 = neg_hit_at_10/relevant
+	neg_nDCG = neg_nDCG/relevant
+
+	print('NEGATIVE hit@10: ' + str(neg_hit_at_10))
+	print('NEGATIVE nDCG@10: '+ str(neg_nDCG))
 
 	print('ITEM_SIZE: '+str(ITEM_SIZE))
 	print('numUsers: '+str(numUsers))
@@ -441,9 +466,6 @@ if __name__ == '__main__':
 	elif len(sys.argv)>2 and sys.argv[2] == 'Books':
 		DATAFILE = '../../data/STAR_Books.txt'
 		DATANAME = 'Books'
-	elif len(sys.argv)>2 and sys.argv[2] == 'test':
-		DATAFILE = '../../data/sample_Books.txt'
-		DATANAME = 'test'
 	elif len(sys.argv)>2 and sys.argv[2] == 'sample':
 		DATAFILE = '../../data/STAR_sample_Books.txt'
 		DATANAME = 'sample'
@@ -464,8 +486,7 @@ if __name__ == '__main__':
 				itemFreq[curItem] = 1
 			
 	ITEM_SIZE = len(itemFreq)+1
-	# TODO: remove this
-	# ITEM_SIZE = 500
+
 	# We add one because we do not want to start id from 0
 	HOUR_SIZE = 24+1 #(hours)
 	WEEKDAY_SIZE = 7+1 #(day)
