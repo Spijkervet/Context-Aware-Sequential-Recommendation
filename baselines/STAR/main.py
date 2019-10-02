@@ -196,7 +196,7 @@ def predict(model):
 				items.append(neg)
 
 			# Proceed as normal, but with a subset of items
-			sampled_items = torch.tensor(items)
+			sampled_items = torch.tensor(items).to(device)
 
 			# topK returns tuple in the form (sorted values,sorted by index)
 			neg_rankTuple = torch.topk(sampled_items, TOP)
