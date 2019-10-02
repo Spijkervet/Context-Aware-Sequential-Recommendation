@@ -31,40 +31,39 @@ class Model():
 
                 # Time sequence encoding ('timestamps -> positional vector')
                 # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
-                self.tseq_enc = timeseq_encoding(self.time_seq, args.hidden_units)
-                self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
-                # self.tseq, item_emb_table = embedding(self.time_seq,
-                #                             vocab_size=args.max_time_interval + 1,
-                #                             num_units=args.hidden_units,
-                #                             zero_pad=True,
-                #                             scale=True,
-                #                             l2_reg=args.l2_emb,
-                #                             scope="time_embeddings",
-                #                             with_t=True,
-                #                             reuse=reuse)
+                self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins)
+                # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
+                self.tseq, item_emb_table = embedding(self.time_seq,
+                                            vocab_size=args.max_bins,
+                                            num_units=args.hidden_units,
+                                            zero_pad=True,
+                                            scale=True,
+                                            l2_reg=args.l2_emb,
+                                            scope="time_embeddings",
+                                            with_t=True,
+                                            reuse=reuse)
 
-                # Self-attention blocks
-                # Build blocks
-                for i in range(args.num_blocks):
-                    with tf.variable_scope("timeseq_num_blocks_%d" % i):
-                        # Self-attention
-                        self.timeseq_queries = normalize(self.tseq)
-                        self.timeseq_keys = self.tseq
-                        self.tseq = multihead_attention(self, queries=normalize(self.tseq),
-                                                        keys=self.tseq,
-                                                        num_units=args.hidden_units,
-                                                        num_heads=args.num_heads,
-                                                        dropout_rate=args.dropout_rate,
-                                                        is_training=self.is_training,
-                                                        causality=True,
-                                                        scope="self_attention")
+                # # Self-attention blocks
+                # # Build blocks
+                # for i in range(args.num_blocks):
+                #     with tf.variable_scope("timeseq_num_blocks_%d" % i):
+                #         # Self-attention
+                #         self.timeseq_queries = normalize(self.tseq)
+                #         self.timeseq_keys = self.tseq
+                #         self.tseq = multihead_attention(self, queries=normalize(self.tseq),
+                #                                         keys=self.tseq,
+                #                                         num_units=args.hidden_units,
+                #                                         num_heads=args.num_heads,
+                #                                         dropout_rate=args.dropout_rate,
+                #                                         is_training=self.is_training,
+                #                                         causality=True,
+                #                                         scope="self_attention")
 
-                        # Feed forward
-                        self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
-                                                dropout_rate=args.dropout_rate, is_training=self.is_training)
-                        self.tseq *= time_seq_mask
-
-                self.tseq = normalize(self.tseq)
+                #         # Feed forward
+                #         self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
+                #                                 dropout_rate=args.dropout_rate, is_training=self.is_training)
+                #         self.tseq *= time_seq_mask
+                # self.tseq = normalize(self.tseq)
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -95,7 +94,7 @@ class Model():
             )
 
             # TODO: Remove this(?)
-            self.seq += t
+            # self.seq += t
 
             if not args.test_baseline:
                 # CONTEXT-AWARE MODULE

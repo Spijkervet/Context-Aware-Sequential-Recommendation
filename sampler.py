@@ -1,6 +1,10 @@
 import numpy as np
 from multiprocessing import Process, Queue
 
+import multiprocessing
+multiprocessing.set_start_method('spawn', True)
+
+from util import get_timedelta_bin
 
 def random_neq(l, r, s):
     t = np.random.randint(l, r)
@@ -24,6 +28,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         neg = np.zeros([maxlen], dtype=np.int32)
         nxt = user_train[user][-1].item
         timeseq = np.zeros([maxlen], dtype=np.int32)
+        orig_seq = [0] * maxlen
         idx = maxlen - 1
         
         # print('sequence', user_train[user])
@@ -37,7 +42,8 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)
             seq[idx] = i.item
-            timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
+            # timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
+            orig_seq[idx] = i
             pos[idx] = nxt
             if nxt != 0: # TODO: What does nxt != 0 mean?
                 # print('nxt', nxt)
@@ -47,11 +53,28 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             idx -= 1
             if idx == -1: break
 
+        # log_scale = False
+        # if log_scale:
+        #     min_timedelta, max_timedelta = get_delta_range(User)
+        most_recent_timestamp = orig_seq[-1].timestamp
+        for idx, s in enumerate(orig_seq):
+            if s != 0:
+                time_delta = (most_recent_timestamp - s.timestamp).total_seconds()
+                # if log_scale:
+                #     s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                #                                    log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
+                # else:
+                
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                                log_scale=False)
+            else:
+                timeseq[idx] = 0
+
         # print('user_id', user)
         # print('sequence', seq)
         # print('positive examples (incl. recent)', pos)
         # print('negative examples', neg)
-        return (user, seq, pos, neg, timeseq)
+        return (user, seq, pos, neg, timeseq, orig_seq)
 
     np.random.seed(SEED)
     # TODO: I have no idea what this while loop does?
