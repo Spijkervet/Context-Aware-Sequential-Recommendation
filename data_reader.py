@@ -54,6 +54,7 @@ class DataReader():
             if self.limit and i > self.limit:
                 break
             yield l.rstrip()
+        f.close()
 
     def preprocess_movielens(self):
         logging.info('Reading and processing {}'.format(self.path))
@@ -108,26 +109,14 @@ class DataReader():
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
         for userid in User.keys():
-            User[userid].sort(key=lambda x: x[0])
+            User[userid].sort(key=lambda x: x[1])
             
+        # Original data writer
         f = open(self.dataset_fp, 'w')
-        for user, v in User.items():
-            to_write = v[-self.maxlen:] if self.maxlen else v
-            for tw in to_write:
-                f.write('%d %d %d\n' % (user, tw[0], tw[1]))
+        for user in User.keys():
+            for i in User[user]:
+                f.write('%d %d %d\n' % (user, i[0], i[1]))
         f.close()
-
-        # Test maxlen
-        ts = open(self.dataset_fp, 'r')
-        users = defaultdict(list)
-        for l in ts:
-            user, item, ts = l.split(' ')
-            users[user].append(item)
-        
-        for k, v in users.items():
-            if len(v) > self.maxlen:
-                exit('Maxlen exceeded in {}'.format(k, v))
-
 
         # tsv metadata file (index/label)
         logging.info('Writing tsv metadata file (index/label)')
@@ -148,6 +137,7 @@ class DataReader():
                 # asin=k, index=v
                 f.write('{} {}\n'.format(v, movies_dict[k][0])) # movie
                 genre_fp.write('{} {}\n'.format(v, movies_dict[k][1])) #genre
+        genre_fp.close()
 
     def preprocess_amazon_ratings(self):
         countU = defaultdict(lambda: 0)
