@@ -41,5 +41,5 @@ python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --da
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir sasrec_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --seed 42 --test_baseline
+python3 main.py --dataset data/ml-1m.txt --train_dir context_aware_withtransformer_with_posemb_bin24hour_maxbin200_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader --maxlen 200 --bin_in_hours 24 --dropout_rate 0.2 --num_blocks 3 --seed 42
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

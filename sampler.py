@@ -14,7 +14,7 @@ def random_neq(l, r, s):
     return t
 
 
-def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, SEED):
+def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, bin_in_hours, max_bins, SEED):
     def sample():
 
         # Get a random user_id, make sure it has more than x interactions (which we already checked?):
@@ -65,7 +65,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
                 #                                    log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
                 # else:
                 
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=max_bins,
                                                 log_scale=False)
             else:
                 timeseq[idx] = 0
@@ -119,6 +119,8 @@ class WarpSampler(object):
                                                       batch_size,
                                                       maxlen,
                                                       self.result_queue,
+                                                      args.bin_in_hours,
+                                                      args.max_bins,
                                                       seed
                                                       )))
             self.processors[-1].daemon = True

@@ -55,6 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_heads', default=1, type=int)
     parser.add_argument('--dropout_rate', default=0.5, type=float)
     parser.add_argument('--l2_emb', default=0.0, type=float)
+    parser.add_argument('--bin_in_hours', default=24, type=int)
     parser.add_argument('--max_bins', default=200, type=int)
 
     # MISC.
