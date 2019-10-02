@@ -181,7 +181,7 @@ def data_partition(fpath, log_scale=False):
     user_test = {}
     User, usernum, itemnum = get_users(fpath)
 
-    User = add_time_bin(User, log_scale)
+    # User = add_time_bin(User, log_scale)
 
     # Partition data into three parts: train, valid, test.
     for user in User:
@@ -216,19 +216,37 @@ def evaluate(model, dataset, args, sess):
             continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
+        orig_seq = [0] * args.maxlen
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
-        timeseq[idx] = valid[u][0].time_bin
+        orig_seq[idx] = valid[u][0]
 
+        valid_to_test_delta = (
+            test[u][0].timestamp - valid[u][0].timestamp).total_seconds()
+        timeseq[idx] = get_timedelta_bin(
+            valid_to_test_delta, bin_in_hours=48, max_bins=200, log_scale=False)
         idx -= 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.time_bin
+            orig_seq[idx] = i
+            # timeseq[idx] = i.time_bin
             idx -= 1
             if idx == -1:
                 break
+
+        # Get the timestamps between the most recent timestamp and the item's timestamp, and calculate its bin
+        most_recent_timestamp = orig_seq[-1].timestamp
+        for idx, s in enumerate(orig_seq):
+            if s != 0:
+                time_delta = (most_recent_timestamp -
+                              s.timestamp).total_seconds()
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                                 log_scale=False)
+            else:
+                timeseq[idx] = 0
+
         rated = set([i.item for i in train[u]])
         rated.add(0)
         item_idx = [test[u][0].item]
@@ -270,14 +288,26 @@ def evaluate_valid(model, dataset, args, sess):
             continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
+        orig_seq = [0] * args.maxlen
+        # for test data, the most recent item is always in the 0 bin
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
         idx = args.maxlen - 1
         for i in reversed(train[u]):
             seq[idx] = i.item
-            timeseq[idx] = i.time_bin
+            orig_seq[idx] = i
             idx -= 1
             if idx == -1:
                 break
+
+        most_recent_timestamp = orig_seq[-1].timestamp
+        for idx, s in enumerate(orig_seq):
+            if s != 0:
+                time_delta = (most_recent_timestamp -
+                              s.timestamp).total_seconds()
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                                 log_scale=False)
+            else:
+                timeseq[idx] = 0
 
         rated = set([i.item for i in train[u]])
         rated.add(0)
