@@ -2,7 +2,7 @@ from modules import *
 
 
 class Model():
-    def __init__(self, usernum, itemnum, args, reuse=None):
+    def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
         if args.seed:
             tf.set_random_seed(args.seed)
@@ -14,6 +14,7 @@ class Model():
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        
 
         pos = self.pos
         neg = self.neg
@@ -23,6 +24,50 @@ class Model():
         # Mask of time sequence data
         time_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
         self.time_seq_mask = time_seq_mask
+        
+        
+        self.input_context_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.max_rating = ratingnum
+        
+        # Mask of input sequence data
+        input_context_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_context_seq, 0)), -1)
+        self.input_context_seq_mask = input_context_seq_mask 
+
+        # INPUT-CONTEXT AWARE
+        if args.input_context:
+            print('INPUT-CONTEXT-AWARE MODULE')
+            with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
+                self.input_context_seq, item_emb_table = embedding(self.input_context_seq,
+                                            vocab_size=self.max_rating,
+                                            num_units=args.hidden_units,
+                                            zero_pad=True,
+                                            scale=True,
+                                            l2_reg=args.l2_emb,
+                                            scope="input_context_embeddings",
+                                            with_t=True,
+                                            reuse=reuse)
+
+                # Self-attention blocks
+                # Build blocks
+                for i in range(args.num_blocks):
+                    with tf.variable_scope("input_context_seq_num_blocks_%d" % i):
+                        # Self-attention
+                        self.input_context_seq_queries = normalize(self.input_context_seq)
+                        self.input_context_seq_keys = self.input_context_seq
+                        self.input_context_seq = multihead_attention(self, queries=normalize(self.input_context_seq),
+                                                        keys=self.input_context_seq,
+                                                        num_units=args.hidden_units,
+                                                        num_heads=args.num_heads,
+                                                        dropout_rate=args.dropout_rate,
+                                                        is_training=self.is_training,
+                                                        causality=True,
+                                                        scope="self_attention")
+
+                        # Feed forward
+                        self.input_context_seq = feedforward(normalize(self.input_context_seq), num_units=[args.hidden_units, args.hidden_units],
+                                                dropout_rate=args.dropout_rate, is_training=self.is_training)
+                        self.input_context_seq *= input_context_seq_mask
+                self.input_context_seq = normalize(self.input_context_seq)
 
         # CONTEXT-AWARE
         if not args.test_baseline:
@@ -98,6 +143,9 @@ class Model():
             if not args.test_baseline:
                 # CONTEXT-AWARE MODULE
                 self.seq += self.tseq
+
+                if args.input_context:
+                    self.seq += self.input_context_seq
 
             # Dropout
             self.seq = tf.layers.dropout(self.seq,

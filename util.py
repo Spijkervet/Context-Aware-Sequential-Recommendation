@@ -18,8 +18,9 @@ class TimeStamp():
 class UserItems():
 
     # TODO: Days ago relative to first date!
-    def __init__(self, item, timestamp):
+    def __init__(self, item, rating, timestamp):
         self.item = item
+        self.rating = rating
         self.timestamp_raw = timestamp
         self.timestamp = datetime.fromtimestamp(
             timestamp).astimezone(timezone.utc)
@@ -136,20 +137,23 @@ def get_delta_range(User, max_percentile=90):
 def get_users(fpath):
     usernum = 0
     itemnum = 0
+    ratingnum = 0
     f = open(fpath, 'r')
     User = defaultdict(list)
     for line in f:
-        u, i, t = line.rstrip().split(' ')
+        u, i, r, t = line.rstrip().split(' ')
         u = int(u)
         i = int(i)
+        r = int(r)
         t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)
+        ratingnum = max(r, ratingnum)
 
-        to_add = UserItems(i, t)
+        to_add = UserItems(i, r, t)
         User[u].append(to_add)
     f.close()
-    return User, usernum, itemnum
+    return User, usernum, itemnum, ratingnum
 
 
 def add_time_bin(User, log_scale, bin_in_hours):
@@ -179,7 +183,7 @@ def data_partition(fpath, log_scale=False):
     user_train = {}
     user_valid = {}
     user_test = {}
-    User, usernum, itemnum = get_users(fpath)
+    User, usernum, itemnum, ratingnum = get_users(fpath)
 
     # User = add_time_bin(User, log_scale)
 
@@ -196,7 +200,7 @@ def data_partition(fpath, log_scale=False):
             user_valid[user].append(User[user][-2])
             user_test[user] = []
             user_test[user].append(User[user][-1])
-    return [user_train, user_valid, user_test, usernum, itemnum]
+    return [user_train, user_valid, user_test, usernum, itemnum, ratingnum]
 
 
 def evaluate(model, dataset, args, sess):

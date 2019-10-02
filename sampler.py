@@ -28,6 +28,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         neg = np.zeros([maxlen], dtype=np.int32)
         nxt = user_train[user][-1].item
         timeseq = np.zeros([maxlen], dtype=np.int32)
+        input_context_seq = np.zeros([maxlen], dtype=np.int32)
         orig_seq = [0] * maxlen
         idx = maxlen - 1
         
@@ -42,6 +43,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)
             seq[idx] = i.item
+            input_context_seq[idx] = i.rating
             # timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
             orig_seq[idx] = i
             pos[idx] = nxt
@@ -74,7 +76,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         # print('sequence', seq)
         # print('positive examples (incl. recent)', pos)
         # print('negative examples', neg)
-        return (user, seq, pos, neg, timeseq, orig_seq)
+        return (user, seq, pos, neg, timeseq, input_context_seq, orig_seq)
 
     np.random.seed(SEED)
     # TODO: I have no idea what this while loop does?
