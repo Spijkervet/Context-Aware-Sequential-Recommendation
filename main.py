@@ -126,7 +126,7 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations, tseq_enc = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations, model.tseq_enc],
+                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations],
                                                                     {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                                                                      model.is_training: True})
 

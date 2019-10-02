@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/sasrec_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader/model.ckpt"
+all_model_checkpoint_paths: "/home/lgpu0220/git/information_retrieval_2/models/ml-1m.txt/sasrec_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader/model.ckpt"
