@@ -28,13 +28,12 @@ class Model():
         if not args.test_baseline:
             print('CONTEXT-AWARE MODULE')
             with tf.variable_scope("CONTEXT", reuse=reuse):
-
                 # Time sequence encoding ('timestamps -> positional vector')
                 # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
-                self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins)
+                self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins+1)
                 # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
                 self.tseq, item_emb_table = embedding(self.time_seq,
-                                            vocab_size=args.max_bins,
+                                            vocab_size=args.max_bins+1,
                                             num_units=args.hidden_units,
                                             zero_pad=True,
                                             scale=True,
@@ -94,7 +93,7 @@ class Model():
             )
 
             # TODO: Remove this(?)
-            # self.seq += t
+            self.seq += t
 
             if not args.test_baseline:
                 # CONTEXT-AWARE MODULE

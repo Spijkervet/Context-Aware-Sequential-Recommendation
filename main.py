@@ -55,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_heads', default=1, type=int)
     parser.add_argument('--dropout_rate', default=0.5, type=float)
     parser.add_argument('--l2_emb', default=0.0, type=float)
-    parser.add_argument('--max_bins', default=31, type=int)
+    parser.add_argument('--max_bins', default=200, type=int)
 
     # MISC.
     parser.add_argument('--saved_model', default='model.pt',
@@ -126,12 +126,18 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations, tseq = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations, model.tseq_enc],
+                auc, loss, _, summary, activations, tseq_enc = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations, model.tseq_enc],
                                                                     {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
                                                                      model.is_training: True})
 
-                # print(activations[0].shape)
+                # for tsb, ts_encb in zip(timeseq, tseq_enc):
+                #     for t, tenc in zip(tsb, ts_encb):
+                #         print(tenc)
+                #         i = np.where(tenc == 1)
+                #         assert i == t, "i not the same as t {}, {}".format(i, t) # Ensure one-hot encoding is done well.
 
+
+                # print(activations[0].shape)
                 # Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
                 # print(u[0])
                 # print(seq[0][-2], seq[0].shape)
