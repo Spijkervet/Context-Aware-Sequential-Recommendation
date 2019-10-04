@@ -209,8 +209,9 @@ def predict(model):
             # TODO: index klopt niet voor deze match..!
             # TODO: alleen laatste item predicten
             # because we start with our positive example at index 0
-            if 0 in neg_rank_index_list:
-                matchPosition = (neg_rank_index_list == item_test[j]).nonzero()
+            match_index = torch.tensor(0).to(device)
+            if match_index in neg_rank_index_list:
+                matchPosition = (neg_rank_index_list == match_index).nonzero()
                 index = matchPosition.item()
                 # Remember index starts at 0 so +1 to get actual index
                 # +1 more because of nDCG formula
