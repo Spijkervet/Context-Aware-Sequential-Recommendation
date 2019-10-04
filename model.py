@@ -15,7 +15,9 @@ class Model():
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         
-
+        self.input_context = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.max_rating = ratingnum
+        
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
@@ -26,19 +28,16 @@ class Model():
         self.time_seq_mask = time_seq_mask
         
         
-        self.input_context_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        self.max_rating = ratingnum
-        
         # Mask of input sequence data
-        input_context_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_context_seq, 0)), -1)
+        input_context_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_context, 0)), -1)
         self.input_context_seq_mask = input_context_seq_mask 
 
         # INPUT-CONTEXT AWARE
         if args.input_context:
             print('INPUT-CONTEXT-AWARE MODULE')
             with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
-                self.input_context_seq, item_emb_table = embedding(self.input_context_seq,
-                                            vocab_size=self.max_rating,
+                self.input_context_seq, item_emb_table = embedding(self.input_context,
+                                            vocab_size=self.max_rating+1,
                                             num_units=args.hidden_units,
                                             zero_pad=True,
                                             scale=True,
@@ -52,8 +51,6 @@ class Model():
                 for i in range(args.num_blocks):
                     with tf.variable_scope("input_context_seq_num_blocks_%d" % i):
                         # Self-attention
-                        self.input_context_seq_queries = normalize(self.input_context_seq)
-                        self.input_context_seq_keys = self.input_context_seq
                         self.input_context_seq = multihead_attention(self, queries=normalize(self.input_context_seq),
                                                         keys=self.input_context_seq,
                                                         num_units=args.hidden_units,
@@ -67,6 +64,7 @@ class Model():
                         self.input_context_seq = feedforward(normalize(self.input_context_seq), num_units=[args.hidden_units, args.hidden_units],
                                                 dropout_rate=args.dropout_rate, is_training=self.is_training)
                         self.input_context_seq *= input_context_seq_mask
+                
                 self.input_context_seq = normalize(self.input_context_seq)
 
         # CONTEXT-AWARE
