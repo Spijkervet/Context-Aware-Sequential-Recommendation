@@ -11,12 +11,12 @@
 
 
 module purge
-module load eb
+module load 2019
 
-module load Python/3.6.3-foss-2017b
-module load cuDNN/7.0.5-CUDA-9.0.176
-module load NCCL/2.0.5-CUDA-9.0.176
-export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64:$LD_LIBRARY_PATH
+module load eb
+module load Python/3.6.6-foss-2018b
+module load CUDA/10.0.130
+module load cuDNN/7.6.3-CUDA-10.0.130
 
 # Mail
 mail_template "IR2" $SLURM_JOBID "STARTED" "$1"
@@ -37,9 +37,9 @@ sh download_data.sh
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt
 
 # MOVIELENS 1-M
-python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt --maxlen 200
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt --maxlen 200 --input_context
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --train_dir context_aware_bin48hour_maxbin200_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader --maxlen 200 --dropout_rate 0.2 --num_blocks 3 --seed 42
+python3 main.py --dataset data/ml-1m.txt --train_dir input_context_time_context_test --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 3 --seed 42 --input_context
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

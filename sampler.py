@@ -14,7 +14,7 @@ def random_neq(l, r, s):
     return t
 
 
-def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, SEED):
+def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, bin_in_hours, max_bins, SEED):
     def sample():
 
         # Get a random user_id, make sure it has more than x interactions (which we already checked?):
@@ -28,6 +28,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         neg = np.zeros([maxlen], dtype=np.int32)
         nxt = user_train[user][-1].item
         timeseq = np.zeros([maxlen], dtype=np.int32)
+        input_context_seq = np.zeros([maxlen], dtype=np.int32)
         orig_seq = [0] * maxlen
         idx = maxlen - 1
         
@@ -42,6 +43,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         for i in reversed(user_train[user][:-1]):
             # print('idx', idx, 'i', i, 'nxt', nxt)
             seq[idx] = i.item
+            input_context_seq[idx] = i.rating
             # timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
             orig_seq[idx] = i
             pos[idx] = nxt
@@ -65,7 +67,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
                 #                                    log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
                 # else:
                 
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=max_bins,
                                                 log_scale=False)
             else:
                 timeseq[idx] = 0
@@ -74,7 +76,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         # print('sequence', seq)
         # print('positive examples (incl. recent)', pos)
         # print('negative examples', neg)
-        return (user, seq, pos, neg, timeseq, orig_seq)
+        return (user, seq, pos, neg, timeseq, input_context_seq, orig_seq)
 
     np.random.seed(SEED)
     # TODO: I have no idea what this while loop does?
@@ -119,6 +121,8 @@ class WarpSampler(object):
                                                       batch_size,
                                                       maxlen,
                                                       self.result_queue,
+                                                      args.bin_in_hours,
+                                                      args.max_bins,
                                                       seed
                                                       )))
             self.processors[-1].daemon = True
