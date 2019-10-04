@@ -55,7 +55,8 @@ if __name__ == '__main__':
     parser.add_argument('--num_heads', default=1, type=int)
     parser.add_argument('--dropout_rate', default=0.5, type=float)
     parser.add_argument('--l2_emb', default=0.0, type=float)
-    parser.add_argument('--max_bins', default=31, type=int)
+    parser.add_argument('--bin_in_hours', default=24, type=int)
+    parser.add_argument('--max_bins', default=200, type=int)
 
     # MISC.
     parser.add_argument('--saved_model', default='model.pt',
@@ -63,6 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_baseline', default=False, action='store_true')
     parser.add_argument('--seed', default=None, type=int)
     parser.add_argument('--log_scale', default=False, action='store_true')
+    parser.add_argument('--input_context', default=False, action='store_true')
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -80,7 +82,7 @@ if __name__ == '__main__':
 
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
-    [train, valid, test, usernum, itemnum] = dataset
+    [train, valid, test, usernum, itemnum, ratingnum] = dataset
     num_batch = round(len(train) / args.batch_size)
 
     cc = sum([len(v) for v in train.values()])
@@ -107,7 +109,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    model = Model(usernum, itemnum, args)
+    model = Model(usernum, itemnum, ratingnum, args)
     sess.run(tf.global_variables_initializer())
 
     # Add TensorBoard
@@ -124,14 +126,22 @@ if __name__ == '__main__':
     try:
         for epoch in range(1, args.num_epochs + 1):
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-                u, seq, pos, neg, timeseq, orig_seq = sampler.next_batch()
+                u, seq, pos, neg, timeseq, input_context_seq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations, tseq = sess.run([model.auc, model.loss, model.train_op, model.merged, model.activations, model.tseq_enc],
-                                                                    {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg, model.time_seq: timeseq,
-                                                                     model.is_training: True})
+                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.activations],
+                                                              {model.u: u, model.input_seq: seq, model.pos: pos,
+                                                               model.neg: neg, model.time_seq: timeseq,
+                                                               model.input_context: input_context_seq,
+                                                               model.is_training: True})
+
+                # for tsb, ts_encb in zip(timeseq, tseq_enc):
+                #     for t, tenc in zip(tsb, ts_encb):
+                #         print(tenc)
+                #         i = np.where(tenc == 1)
+                #         assert i == t, "i not the same as t {}, {}".format(i, t) # Ensure one-hot encoding is done well.
 
                 # print(activations[0].shape)
-
                 # Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
                 # print(u[0])
                 # print(seq[0][-2], seq[0].shape)

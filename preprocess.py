@@ -3,9 +3,9 @@ import argparse
 
 from data_reader import DataReader
 
-def main(raw_dataset, out_dataset, dataset_type, limit, maxlen):
+def main(raw_dataset, out_dataset, dataset_type, limit, maxlen, input_context):
     # Start the data reader and read the dataset
-    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, maxlen=maxlen)
+    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, maxlen=maxlen, input_context=input_context)
     dr.preprocess()
 
 if __name__ == '__main__':
@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
     parser.add_argument('--maxlen', default=50, type=int, help='Maximum length of user item sequence, for zero-padding')
+    parser.add_argument('--input_context', default=False, action='store_true', help='Incorporate input context information')
     args = parser.parse_args()
 
-    main(args.raw_dataset, args.dataset, args.type, args.limit, args.maxlen)
+    main(args.raw_dataset, args.dataset, args.type, args.limit, args.maxlen, args.input_context)

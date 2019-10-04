@@ -18,8 +18,9 @@ class TimeStamp():
 class UserItems():
 
     # TODO: Days ago relative to first date!
-    def __init__(self, item, timestamp):
+    def __init__(self, item, rating, timestamp):
         self.item = item
+        self.rating = rating
         self.timestamp_raw = timestamp
         self.timestamp = datetime.fromtimestamp(
             timestamp).astimezone(timezone.utc)
@@ -136,23 +137,26 @@ def get_delta_range(User, max_percentile=90):
 def get_users(fpath):
     usernum = 0
     itemnum = 0
+    ratingnum = 0
     f = open(fpath, 'r')
     User = defaultdict(list)
     for line in f:
-        u, i, t = line.rstrip().split(' ')
+        u, i, r, t = line.rstrip().split(' ')
         u = int(u)
         i = int(i)
+        r = int(r)
         t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)
+        ratingnum = max(r, ratingnum)
 
-        to_add = UserItems(i, t)
+        to_add = UserItems(i, r, t)
         User[u].append(to_add)
     f.close()
-    return User, usernum, itemnum
+    return User, usernum, itemnum, ratingnum
 
 
-def add_time_bin(User, log_scale):
+def add_time_bin(User, log_scale, bin_in_hours):
     # if positional embedding is calculated on the basis of a log scale get min and max timediff
     if log_scale:
         min_timedelta, max_timedelta = get_delta_range(User)
@@ -163,10 +167,10 @@ def add_time_bin(User, log_scale):
             time_delta = (most_recent_timestamp - s.timestamp).total_seconds()
 
             if log_scale:
-                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=200,
                                                log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
             else:
-                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=200,
                                                log_scale=False)
     return User
 
@@ -179,7 +183,7 @@ def data_partition(fpath, log_scale=False):
     user_train = {}
     user_valid = {}
     user_test = {}
-    User, usernum, itemnum = get_users(fpath)
+    User, usernum, itemnum, ratingnum = get_users(fpath)
 
     # User = add_time_bin(User, log_scale)
 
@@ -196,7 +200,7 @@ def data_partition(fpath, log_scale=False):
             user_valid[user].append(User[user][-2])
             user_test[user] = []
             user_test[user].append(User[user][-1])
-    return [user_train, user_valid, user_test, usernum, itemnum]
+    return [user_train, user_valid, user_test, usernum, itemnum, ratingnum]
 
 
 def evaluate(model, dataset, args, sess):
@@ -226,7 +230,7 @@ def evaluate(model, dataset, args, sess):
         valid_to_test_delta = (
             test[u][0].timestamp - valid[u][0].timestamp).total_seconds()
         timeseq[idx] = get_timedelta_bin(
-            valid_to_test_delta, bin_in_hours=48, max_bins=200, log_scale=False)
+            valid_to_test_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins, log_scale=False)
         idx -= 1
         for i in reversed(train[u]):
             seq[idx] = i.item
@@ -242,7 +246,7 @@ def evaluate(model, dataset, args, sess):
             if s != 0:
                 time_delta = (most_recent_timestamp -
                               s.timestamp).total_seconds()
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
                                                  log_scale=False)
             else:
                 timeseq[idx] = 0
@@ -304,7 +308,7 @@ def evaluate_valid(model, dataset, args, sess):
             if s != 0:
                 time_delta = (most_recent_timestamp -
                               s.timestamp).total_seconds()
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
                                                  log_scale=False)
             else:
                 timeseq[idx] = 0
