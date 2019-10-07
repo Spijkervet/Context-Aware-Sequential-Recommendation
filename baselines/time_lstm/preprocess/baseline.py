@@ -4,7 +4,7 @@ import pickle
 import os
 
 BASE_DIR = 'data'
-DATA_SOURCE = 'amazon'
+DATA_SOURCE = 'movielens'
 
 inputFile = os.path.join('../../data/', 'ml-1m.txt')
 
