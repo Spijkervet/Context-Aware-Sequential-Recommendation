@@ -12,8 +12,8 @@ import numpy as np
 
 
 def timeseq_encoding(timeseq, max_interval):
-  timeseq = tf.one_hot(timeseq, depth=max_interval+1) # Add one to include the zero padding, which will be sliced:
-  timeseq = timeseq[:, :, 1:] # Slice off zero, since we do not want to encode 0 paddings.
+  timeseq = tf.one_hot(timeseq, depth=max_interval) # Add one to include the zero padding, which will be sliced:
+  # timeseq = timeseq[:, :, 1:] # Slice off zero, since we do not want to encode 0 paddings.
   return timeseq
 
 def positional_encoding(dim, sentence_length, dtype=tf.float32):
@@ -135,7 +135,7 @@ def embedding(inputs,
     else: return outputs
 
 
-def multihead_attention(queries, 
+def multihead_attention(model, queries, 
                         keys, 
                         num_units=None, 
                         num_heads=8, 
@@ -205,6 +205,7 @@ def multihead_attention(queries,
   
         # Activation
         outputs = tf.nn.softmax(outputs) # (h*N, T_q, T_k)
+        model.activations = outputs
          
         # Query Masking
         query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) # (N, T_q)

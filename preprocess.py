@@ -3,6 +3,11 @@ import argparse
 
 from data_reader import DataReader
 
+def main(raw_dataset, out_dataset, dataset_type, limit, maxlen, input_context):
+    # Start the data reader and read the dataset
+    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, maxlen=maxlen, input_context=input_context)
+    dr.preprocess()
+
 if __name__ == '__main__':
     logger = logging.getLogger('ir2')
     logging.basicConfig(
@@ -17,13 +22,11 @@ if __name__ == '__main__':
 
     # DATASET PARAMETERS
     parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
-    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
+    parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
-    config = parser.parse_args()
+    parser.add_argument('--maxlen', default=50, type=int, help='Maximum length of user item sequence, for zero-padding')
+    parser.add_argument('--input_context', default=False, action='store_true', help='Incorporate input context information')
+    args = parser.parse_args()
 
-      
-    # Start the data reader and read the dataset
-    dr = DataReader(config.raw_dataset, config.dataset, config.type, limit=config.limit)
-    dr.preprocess()
-
+    main(args.raw_dataset, args.dataset, args.type, args.limit, args.maxlen, args.input_context)

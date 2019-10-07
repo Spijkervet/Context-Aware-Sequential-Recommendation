@@ -24,12 +24,14 @@ class DataReader():
     }
     """
 
-    def __init__(self, path, dataset_fp, type, limit=None):
+    def __init__(self, path, dataset_fp, type, limit=None, maxlen=None, input_context=False):
         self.path = path
         self.limit = limit
         self.dataset_fp = dataset_fp
         self.type = type
         self.logger = logging.getLogger('ir2')
+        self.maxlen = maxlen
+        self.input_context = input_context
 
     def preprocess(self):
         assert type(self.type) == str
@@ -53,6 +55,7 @@ class DataReader():
             if self.limit and i > self.limit:
                 break
             yield l.rstrip()
+        f.close()
 
     def preprocess_movielens(self):
         logging.info('Reading and processing {}'.format(self.path))
@@ -65,10 +68,14 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(delim)
-            f.write('{} {} {}\n'.format(user, item, timestamp))
+
+            if self.input_context:
+                f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
+            else:
+                f.write('{} {} {}\n'.format(user, item, timestamp))
+
             asin = int(item) 
             rev = int(user)
-            time = int(timestamp)
             countU[rev] += 1
             countP[asin] += 1
         f.close()
@@ -83,6 +90,7 @@ class DataReader():
             rev, asin, rating, time = l.split(delim)
             rev = int(rev)
             asin = int(asin)
+            rating = int(rating)
             time = int(time)
 
             # Minimum of 5:
@@ -102,17 +110,21 @@ class DataReader():
                 itemnum += 1
                 itemid = itemnum
                 itemmap[asin] = itemid
-            User[userid].append([time, itemid])
+            User[userid].append([itemid, rating, time])
 
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
         for userid in User.keys():
-            User[userid].sort(key=lambda x: x[0])
+            User[userid].sort(key=lambda x: x[2])
             
+        # Original data writer
         f = open(self.dataset_fp, 'w')
-        for user in tqdm(User.keys()):
+        for user in User.keys():
             for i in User[user]:
-                f.write('%d %d %d\n' % (user, i[1], i[0]))
+                if self.input_context:
+                    f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
+                else:
+                    f.write('%d %d %d\n' % (user, i[0], i[1]))
         f.close()
 
         # tsv metadata file (index/label)
@@ -134,6 +146,7 @@ class DataReader():
                 # asin=k, index=v
                 f.write('{} {}\n'.format(v, movies_dict[k][0])) # movie
                 genre_fp.write('{} {}\n'.format(v, movies_dict[k][1])) #genre
+        genre_fp.close()
 
     def preprocess_amazon_ratings(self):
         countU = defaultdict(lambda: 0)
