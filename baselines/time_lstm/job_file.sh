@@ -3,27 +3,30 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=0:05:00
-#SBATCH --mem=60000M
+#SBATCH --time=12:00:00
+#SBATCH --mem=30000M
 #SBATCH --partition=gpu_shared_course
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 
 
 module purge
 module load eb
+module load pre2019
 
 module load python/3.5.0
-module load cudnn
+module load cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0
 module load CUDA/8.0.44-GCCcore-5.4.0
+module load anaconda
 
 cd $HOME/time_lstm
 
-pip install virtualenv
-python3 -m virtualenv time_lstm
-. time_lstm/bin/activate
+#conda create --name time_lstm -y
+#source deactivate time_lstm
+#conda clean --lock
+#conda env update --file environment.yml
 
-pip3 install -v theano==0.9.0
-pip3 install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
-pip3 install -v pandas==0.18.1
+source activate time_lstm
 
-THEANO_FLAGS='floatX=float32' python3 main.py --model TLSTM3 --data amazon
+pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
+
+THEANO_FLAGS='device=cuda0, gpuarray.preallocate=1, floatX=float32' python main.py --model TLSTM3 --data movielens

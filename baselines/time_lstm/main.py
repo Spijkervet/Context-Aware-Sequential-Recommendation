@@ -28,11 +28,11 @@ parser.add_argument('--fixed_epochs', type=int, default=10, help='Number of epoc
 parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs in the first and second stage.')
 parser.add_argument('--num_hidden', type=int, default=128, help='Number of hidden unit.')
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate.')
-parser.add_argument('--sample_time', type=int, default=3, help='Sample time in the evaluate method.')
+parser.add_argument('--sample_time', type=int, default=1, help='Sample time in the evaluate method.')
 parser.add_argument('--batch_size', type=int, default=5, help='Batch size in the training phase.')
 parser.add_argument('--test_batch', type=int, default=5, help='Batch size in the testing phase')
-parser.add_argument('--vocab_size', type=int, default=20000, help='Vocabulary size')
-parser.add_argument('--max_len', type=int, default=50, help='Maximum length of the sequence.')
+parser.add_argument('--vocab_size', type=int, default=3000, help='Vocabulary size')
+parser.add_argument('--max_len', type=int, default=250, help='Maximum length of the sequence.')
 parser.add_argument('--grad_clip', type=int, default=0, help='Maximum grad step. Grad will be cliped if greater than this. 0 means no clip')
 parser.add_argument('--debug', dest='debug', action='store_true', help='If debug is set, train one time, load small dataset.')
 parser.add_argument('--bn', dest='bn', action='store_true', help='If bn is set, input data will be batch normed')
@@ -400,9 +400,10 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         test_y = test_data['y']
         test_mask = test_data['mask']
         lengths = test_data['lengths']
-        logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
-        do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
+        #logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
+        #do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
         # Evaluate the model on short data
+        additional_test_length = 500
         if additional_test_length > 0:
             logging.info('-----------Evaluate Additional---------------')
             test_x, test_y, test_mask, lengths, test_t = get_short_test_data(additional_test_length)

@@ -5,9 +5,7 @@ import numpy as np
 import math
 
 BASE_DIR = 'data'
-DATA_SOURCE = 'amazon'
-
-training_size = 0.8
+DATA_SOURCE = 'movielens'
 
 files = {
     'user_item_record': 'user-item.lst',
@@ -20,22 +18,26 @@ def load_lines(fileName):
         lineList = f.readlines()
     return np.array(lineList)
 
-
-def write_lines(fileName, prefix, lines):
-    out = open(os.path.join(BASE_DIR, DATA_SOURCE, prefix+fileName), 'w')
-    for line in np.nditer(lines):
-        out.write(str(line))
-
-    out.close()
-
-
 loaded_data = {i: load_lines(files[i]) for i in files}
 
-permutation = np.random.permutation(loaded_data['user_item_record'].shape[0])
-shuffled_data = {i: loaded_data[i][permutation] for i in loaded_data}
+perms = np.random.permutation(loaded_data['user_item_record'].shape[0])
+loaded_data = {i: loaded_data[i][perms] for i in loaded_data }
 
-abs_training_size = math.floor(loaded_data['user_item_record'].shape[0] * 0.8)
 
-for dset in shuffled_data:
-    write_lines(files[dset], 'tr_', shuffled_data[dset][:abs_training_size])
-    write_lines(files[dset], 'te_', shuffled_data[dset][abs_training_size:])
+for name in files:
+    loaded_lines = loaded_data[name]
+    print("Converting file '"+ name + "' with "+str(len(loaded_lines))+" lines")
+    training_file = open(os.path.join(BASE_DIR, DATA_SOURCE, 'tr_'+ files[name]), 'w')
+    test_file = open(os.path.join(BASE_DIR, DATA_SOURCE, 'te_' + files[name]), 'w')
+
+    for line in loaded_lines:
+        splitted_line = line.split()
+        training = ' '.join(splitted_line[:-2]) + "\n"
+        test = ' '.join(splitted_line) + "\n"
+
+        training_file.write(training)
+        test_file.write(test)
+
+    training_file.close()
+    test_file.close()
+

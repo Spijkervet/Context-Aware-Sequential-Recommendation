@@ -205,7 +205,7 @@ def data_partition(fpath, log_scale=False):
 
 def evaluate(model, dataset, args, sess):
 
-    [train, valid, test, usernum, itemnum] = copy.deepcopy(dataset)
+    [train, valid, test, usernum, itemnum, ratingnum] = copy.deepcopy(dataset)
 
     NDCG = 0.0
     HT = 0.0
@@ -222,10 +222,12 @@ def evaluate(model, dataset, args, sess):
         seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
+        input_context_seq = np.zeros([args.maxlen], dtype=np.int32)
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
         orig_seq[idx] = valid[u][0]
+        input_context_seq[idx] = valid[u][0].rating
 
         valid_to_test_delta = (
             test[u][0].timestamp - valid[u][0].timestamp).total_seconds()
@@ -235,6 +237,7 @@ def evaluate(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
+            input_context_seq[idx] = i.rating
             # timeseq[idx] = i.time_bin
             idx -= 1
             if idx == -1:
@@ -260,7 +263,7 @@ def evaluate(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], [timeseq], [input_context_seq], item_idx)
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -278,7 +281,7 @@ def evaluate(model, dataset, args, sess):
 
 
 def evaluate_valid(model, dataset, args, sess):
-    [train, valid, _, usernum, itemnum] = copy.deepcopy(dataset)
+    [train, valid, _, usernum, itemnum, ratingnum] = copy.deepcopy(dataset)
 
     NDCG = 0.0
     valid_user = 0.0
@@ -292,6 +295,7 @@ def evaluate_valid(model, dataset, args, sess):
             continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
+        input_context_seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         # for test data, the most recent item is always in the 0 bin
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
@@ -299,6 +303,7 @@ def evaluate_valid(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
+            input_context_seq[idx] = i.rating
             idx -= 1
             if idx == -1:
                 break
@@ -322,7 +327,7 @@ def evaluate_valid(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], [timeseq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], [timeseq], [input_context_seq], item_idx)
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]

@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/jspijkervet/git/information_retrieval_2/models/ml-1m.txt/context_aware_no_posemb_bin48hour_maxbin200_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader/model.ckpt"
-all_model_checkpoint_paths: "/home/jspijkervet/git/information_retrieval_2/models/ml-1m.txt/context_aware_no_posemb_bin48hour_maxbin200_ml1m_maxlen200_dropout0.2_numblocks3_seed42_olddatareader/model.ckpt"
