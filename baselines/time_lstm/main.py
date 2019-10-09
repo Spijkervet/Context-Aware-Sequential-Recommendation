@@ -25,14 +25,14 @@ parser = argparse.ArgumentParser(description='Specific model, data and other par
 parser.add_argument('--model', type=str, default='LSTM', help='Model to train:LSTM, LSTM_T, PLSTM, TLSTM1, TLSTM2, TLSTM2.')
 parser.add_argument('--data', type=str, default='music', help='Input data source: music, citeulike.')
 parser.add_argument('--fixed_epochs', type=int, default=10, help='Number of epochs in the first stage.')
-parser.add_argument('--num_epochs', type=int, default=50, help='Number of epochs in the first and second stage.')
+parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs in the first and second stage.')
 parser.add_argument('--num_hidden', type=int, default=128, help='Number of hidden unit.')
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate.')
-parser.add_argument('--sample_time', type=int, default=3, help='Sample time in the evaluate method.')
+parser.add_argument('--sample_time', type=int, default=1, help='Sample time in the evaluate method.')
 parser.add_argument('--batch_size', type=int, default=5, help='Batch size in the training phase.')
 parser.add_argument('--test_batch', type=int, default=5, help='Batch size in the testing phase')
-parser.add_argument('--vocab_size', type=int, default=20000, help='Vocabulary size')
-parser.add_argument('--max_len', type=int, default=10000, help='Maximum length of the sequence.')
+parser.add_argument('--vocab_size', type=int, default=3000, help='Vocabulary size')
+parser.add_argument('--max_len', type=int, default=250, help='Maximum length of the sequence.')
 parser.add_argument('--grad_clip', type=int, default=0, help='Maximum grad step. Grad will be cliped if greater than this. 0 means no clip')
 parser.add_argument('--debug', dest='debug', action='store_true', help='If debug is set, train one time, load small dataset.')
 parser.add_argument('--bn', dest='bn', action='store_true', help='If bn is set, input data will be batch normed')
@@ -117,9 +117,9 @@ handler = logging.StreamHandler()
 handler.setFormatter(logging.Formatter(FORMAT))
 logging.getLogger().addHandler(handler)
 logging.info('Start {} {}'.format(MODEL_TYPE, DATA_TYPE))
-logging.info('VOCAB_SIZE {}, MAX_LEN {}, HIDDEN {}'.format(VOCAB_SIZE, SEQ_LENGTH, N_HIDDEN))
-for k, v in locals().items():
-    logging.info('{}  {}'.format(k, v))
+#logging.info('VOCAB_SIZE {}, MAX_LEN {}, HIDDEN {}'.format(VOCAB_SIZE, SEQ_LENGTH, N_HIDDEN))
+#for k, v in locals().items():
+#    logging.info('{}  {}'.format(k, v))
 
 
 
@@ -147,7 +147,7 @@ def gen_data(p, data, batch_size = 1):
     x = data['x'][p:p + batch_size]
     y = data['y'][p:p + batch_size]
     batch_data = {'x':x,'y':y}
-    if data.has_key('t'):
+    if 't' in data:
         batch_data['t'] = data['t'][p:p + batch_size]
 
     ret = utils.prepare_data(batch_data, VOCAB_SIZE, one_hot=ONE_HOT, sigmoid_on=SIGMOID_ON)
@@ -400,9 +400,10 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         test_y = test_data['y']
         test_mask = test_data['mask']
         lengths = test_data['lengths']
-        logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
-        do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
+        #logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
+        #do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
         # Evaluate the model on short data
+        additional_test_length = 500
         if additional_test_length > 0:
             logging.info('-----------Evaluate Additional---------------')
             test_x, test_y, test_mask, lengths, test_t = get_short_test_data(additional_test_length)
@@ -418,7 +419,7 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         # Remote the train_data added before
         train_data['x'] = train_data['x'][:train_data_size]
         train_data['y'] = train_data['y'][:train_data_size]
-        if train_data.has_key('t'):
+        if 't' in train_data:
             train_data['t'] = train_data['t'][:train_data_size]
         test_x = test_data['x']
         lengths = test_data['lengths']
@@ -436,7 +437,7 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
                 new_y = test_x[idx, 1:n_length+1, 0]
             train_data['x'].append(new_x)
             train_data['y'].append(new_y)
-            if train_data.has_key('t'):
+            if 't' in train_data:
                 test_t = test_data['t']
                 new_t = test_t[idx, :n_length].tolist()
                 train_data['t'].append(new_t)

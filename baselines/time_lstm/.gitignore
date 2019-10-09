@@ -104,3 +104,6 @@ train.sh
 tmp_train.sh
 log/DEBUG*
 nohup.out
+
+
+job_file.sh
