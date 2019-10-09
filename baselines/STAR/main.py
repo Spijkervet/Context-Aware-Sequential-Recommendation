@@ -488,6 +488,8 @@ if __name__ == '__main__':
     elif len(sys.argv) > 2 and sys.argv[2] == 'sample':
         DATAFILE = '../../data/STAR_sample_Books.txt'
         DATANAME = 'sample'
+    elif len(sys.argv) > 3:
+        DATAFILE = sys.argv[3]
 
     OUTPUT_PATH = './output/results/'
     MODEL_DIR = './output/model/'

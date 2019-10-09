@@ -167,10 +167,10 @@ if __name__ == '__main__':
 
             writer.add_summary(summary, epoch)
             writer.flush()
-            save_path = saver.save(sess, MODEL_SAVE_PATH)
-            logger.info('Model saved in path: %s' % save_path)
 
             if epoch % 20 == 0:
+                save_path = saver.save(sess, MODEL_SAVE_PATH)
+                logger.info('Model saved in path: %s' % save_path)
                 logger.info('Evaluating')
                 t1 = time.time() - t0
                 T += t1
