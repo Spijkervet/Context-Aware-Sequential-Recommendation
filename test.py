@@ -11,7 +11,7 @@ class CAST(unittest.TestCase):
         Test whether the MovieLens-1m dataset is read properly
         """
         preprocess('data/ml-1m/ratings.dat',
-                          'data/ml-1m.txt', 'movielens', limit=None, maxlen=200)
+                          'data/ml-1m.txt', 'movielens', limit=None, input_context=False)
         with open('data/ml-1m.txt', 'r') as f:
             for l in f:
                 user, item, timestamp = tuple(map(int, l.rstrip().split(' ')))
@@ -24,7 +24,7 @@ class CAST(unittest.TestCase):
         dataset_path = 'data/ml-1m.txt'
 
         dataset = util.data_partition(dataset_path, log_scale=False)
-        [train, _, _, usernum, itemnum] = dataset
+        [train, _, _, usernum, itemnum, ratingnum] = dataset
 
         cc = sum([len(v) for v in train.values()])
         avg_seq_len = cc / len(train)
@@ -39,7 +39,7 @@ class CAST(unittest.TestCase):
         """
 
         dataset_path = 'data/ml-1m.txt'
-        User, usernum, itemnum = util.get_users(dataset_path)
+        User, usernum, itemnum, ratingum = util.get_users(dataset_path)
         self.assertEqual(usernum, 6040)
         self.assertEqual(itemnum, 3416)
 
@@ -48,7 +48,7 @@ class CAST(unittest.TestCase):
             User, max_percentile=90)
         self.assertEqual(min_timedelta, 0)
         self.assertEqual(max_timedelta, 58896613)
-        
+
         # Test delta_time
         User = util.add_time_bin(User, log_scale=True)
         self.assertEqual(User[1][0].time_bin, 147)

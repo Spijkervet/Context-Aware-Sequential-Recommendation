@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*
 
 import os
-import numpy as np
-import random
 import json
-import pickle
 import sys
 import time
-import copy
+import argparse
 import torch
-import torch.nn as nn
-from torch.autograd import Variable
 import random
 import torch.nn.functional as F
 import models as srnn
@@ -267,7 +262,11 @@ def learn():
     epoch = 0
 
     model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
-                           weekday_size=WEEKDAY_SIZE, hour_size=HOUR_SIZE, num_class=ITEM_SIZE, isCuda=usingCuda())
+                           weekday_size=WEEKDAY_SIZE,
+                           hour_size=HOUR_SIZE,
+                           num_class=ITEM_SIZE,
+                           isCuda=usingCuda(),
+                           mode=MODE)
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -338,11 +337,6 @@ def learn():
             hour_cart = torch.tensor(hour_cart).to(device)
             weekday_cart = torch.tensor(weekday_cart).to(device)
             interval_cart = torch.tensor(interval_cart).to(device)
-
-            # print("user_cart", user_cart.shape)
-            # print("hour_cart", user_cart.shape)
-            # print("weekday_cart", user_cart.shape)
-            # print("interval_cart", user_cart.shape)
 
             loss = 0
             optimizer.zero_grad()
@@ -477,23 +471,28 @@ if __name__ == '__main__':
 
     HIDDEN_SIZE = 40
     device = 'cpu'
-    if len(sys.argv) > 1 and sys.argv[1] == 'cuda':
-        RUN_CUDA = True
-        device = 'cuda'
-    if len(sys.argv) > 2 and sys.argv[2] == 'miniData':
-        DATAFILE = './data/miniData.json'
-        DATANAME = 'miniData'
-    elif len(sys.argv) > 2 and sys.argv[2] == 'movielens':
-        DATAFILE = '../../data/STAR_ml-1m.txt'
+    parser = argparse.ArgumentParser()
+
+    # DATASET PARAMETERS
+    parser.add_argument('--cuda', default=False, help='Use cuda')
+    parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
+    parser.add_argument('--model', default="STAR", help='Model used. Choose from {STAR, SITAR}')
+    args = parser.parse_args()
+
+    if "movielens" in args.dataset.lower() or "ml-1m" in args.dataset.lower():
         DATANAME = 'movielens'
-    elif len(sys.argv) > 2 and sys.argv[2] == 'Books':
-        DATAFILE = '../../data/STAR_Books.txt'
+    elif "books" in args.dataset.lower():
         DATANAME = 'Books'
-    elif len(sys.argv) > 2 and sys.argv[2] == 'sample':
-        DATAFILE = '../../data/STAR_sample_Books.txt'
-        DATANAME = 'sample'
-    if len(sys.argv) > 3:
-        DATAFILE = sys.argv[3]
+    elif "beauty" in args.dataset.lower():
+        DATANAME = 'Beauty'
+    else:
+        DATANAME = args.dataset.split("/")[-1].split(".")[-1]
+
+    DATAFILE = args.dataset
+    if args.model != srnn.STAR and args.model != srnn.SITAR:
+        print("incorrect model")
+        sys.exit(0)
+    MODE = args.model
 
     OUTPUT_PATH = './output/results/'
     MODEL_DIR = './output/model/'
@@ -521,8 +520,8 @@ if __name__ == '__main__':
     createFolder(MODEL_DIR)
 
     # Clear file
-    OUTPUT_FILE = OUTPUT_PATH + 'STAR_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
-    MODEL_FILE = MODEL_DIR + 'STAR_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
+    OUTPUT_FILE = OUTPUT_PATH + MODE+'_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
+    MODEL_FILE = MODEL_DIR + MODE+'_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
     with open(OUTPUT_FILE, "w") as the_file:
         the_file.write("")
 
