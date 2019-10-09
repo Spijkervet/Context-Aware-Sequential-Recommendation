@@ -16,13 +16,6 @@ inputFileList = [
 			"ratings_Books.csv",
 			]
 
-# OUTPUT_FILE = "STAR_Books.txt"
-OUTPUT_FILE = "STAR_ml-1m.txt"
-
-ITEM_LIMIT = 25
-
-LIMIT = 25
-
 originalUserFreq = {}
 originalItemFreq = {}
 dupChecker = {}
@@ -80,9 +73,14 @@ def writePreprocessedData(inputFile,finalCart):
 	with open(idConverterFile,'w') as the_file:
 		json.dump(itemIdConverter,the_file)
 
+# OUTPUT_FILE = "STAR_Books.txt"
+# OUTPUT_FILE = "STAR_ml-1m.txt"
+OUTPUT_FILE = "STAR_sample_Books.txt"
+
 def writeAWSData(inputFile,finalCart):
 	# Clear file
-	outputFile = OUTPUT_FILE
+	outputFile = inputFile.split("/")[-1]
+	outputFile = "STAR_"+outputFile
 	idConverterFile = "../../data/idConv_"+outputFile
 	outputFile = "../../data/"+outputFile
 	with open(outputFile, 'w') as the_file:
@@ -219,7 +217,7 @@ def reProcessFile(inputFile):
 			line = line.replace('\n','')
 			user,item,timestamp = line.split(',')
 			if(user in originalUserFreq and 
-				originalUserFreq[user]>=LIMIT):
+				originalUserFreq[user] >= LIMIT):
 				addToDict(item,itemFreq)
 				ratingCount +=1
 				addToCart(item,user,timestamp)
@@ -287,7 +285,7 @@ def n_removeUserNItem(userRate,itemRate):
 	rmUserList = []
 	rmItemList = []
 	for key in userRate:
-		if userRate[key] < LIMIT:
+		if userRate[key] < LIMIT or userRate[key] > MAX_LIMIT:
 			# print( userRate[key], 'gets removed')
 			# del userRate[key]
 			rmUserList.append(key)
@@ -387,24 +385,32 @@ def run(inputFile):
 	p('')
 	writeAWSData(inputFile,totalCart)	
 
-import time
-# STARTING POINT
-gStart = time.time()
-for i in range(len(inputFileList)):
-	# analyseFile('../../AWS/'+str(inputFileList[i]))
-	start_time = time.time()
-	# run('./rawData/'+str(inputFileList[i]))
-	# run('../../data/Books.txt')
-	# run('../../data/ratings_Books.txt')
-	run('../../data/ml-1m.txt')
-	e = time.time() - start_time
-	print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
-	p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
-	p("")
-print('total')
-e = time.time() - gStart
-print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
-p('Total Time for preprocessing')
-p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
+if __name__ == "__main__":
+	# STARTING POINT
+	# OUTPUT_FILE = "STAR_Books.txt"
+	OUTPUT_FILE = "STAR_ml-1m_5_200.txt"
 
-saveToFile("")
+	LIMIT = 5
+	ITEM_LIMIT = LIMIT
+	MAX_LIMIT = 200
+
+	gStart = time.time()
+	for i in range(len(inputFileList)):
+		# analyseFile('../../AWS/'+str(inputFileList[i]))
+		start_time = time.time()
+		# run('../../data/Books.txt')
+		# run('../../data/ratings_Books.txt')
+		run('../../data/ml-1m.txt')
+		# run('../../data/sample_Books_2.txt')
+		e = time.time() - start_time
+		print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
+		p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
+		p("")
+
+	print('total')
+	e = time.time() - gStart
+	print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
+	p('Total Time for preprocessing')
+	p('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
+
+	saveToFile("")

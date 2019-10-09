@@ -43,9 +43,6 @@ INTERVAL_TEST = {}
 
 SPLIT = 0.8
 
-# Default Mode Type
-MODE_TYPE = srnn.STAR
-
 # Context Sizes
 WEEKDAY_SIZE = None
 HOUR_SIZE = None
@@ -493,7 +490,6 @@ if __name__ == '__main__':
 
     OUTPUT_PATH = './output/results/'
     MODEL_DIR = './output/model/'
-    DATANAME = sys.argv[2]
     USER_SIZE = 1
     itemFreq = {}
     data = open(DATAFILE, 'r')
@@ -514,15 +510,12 @@ if __name__ == '__main__':
     # We do not want 0 interval so we add 1
     INTERVAL_SIZE = 32 + 1
 
-    if len(sys.argv) > 3 and sys.argv[3] != None:
-        MODE_TYPE = sys.argv[3]
-
     createFolder(OUTPUT_PATH)
     createFolder(MODEL_DIR)
 
     # Clear file
-    OUTPUT_FILE = OUTPUT_PATH + MODE_TYPE + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
-    MODEL_FILE = MODEL_DIR + MODE_TYPE + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
+    OUTPUT_FILE = OUTPUT_PATH + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
+    MODEL_FILE = MODEL_DIR + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
     with open(OUTPUT_FILE, "w") as the_file:
         the_file.write("")
 
