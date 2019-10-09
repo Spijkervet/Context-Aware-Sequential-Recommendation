@@ -156,7 +156,7 @@ def get_users(fpath):
     return User, usernum, itemnum, ratingnum
 
 
-def add_time_bin(User, log_scale, bin_in_hours):
+def add_time_bin(User, log_scale, bin_in_hours=48, max_bins=200):
     # if positional embedding is calculated on the basis of a log scale get min and max timediff
     if log_scale:
         min_timedelta, max_timedelta = get_delta_range(User)
@@ -167,10 +167,10 @@ def add_time_bin(User, log_scale, bin_in_hours):
             time_delta = (most_recent_timestamp - s.timestamp).total_seconds()
 
             if log_scale:
-                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=200,
+                s.time_bin = get_timedelta_bin(time_delta, max_bins=max_bins,
                                                log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
             else:
-                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=200,
+                s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=max_bins,
                                                log_scale=False)
     return User
 
