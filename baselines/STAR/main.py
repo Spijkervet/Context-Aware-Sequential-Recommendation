@@ -71,6 +71,8 @@ def pre_data():
     for line in lines:
         line1 = json.loads(line)
         all_cart.append(line1)
+
+    # loop over all sequences
     for i in range(len(all_cart)):
         item_train = []
         item_test = []
@@ -82,14 +84,20 @@ def pre_data():
         interval_test = []
 
         behavior_list = all_cart[i]
-        behavior_train = behavior_list[0:int(SPLIT * len(behavior_list))]
-        behavior_test = behavior_list[int(SPLIT * len(behavior_list)):]
+        # TODO: ORIGINAL
+        # behavior_train = behavior_list[0:int(SPLIT * len(behavior_list))]
+        # behavior_test = behavior_list[int(SPLIT * len(behavior_list)):]
+
+        # use the final item as test item just like in SASRec
+        behavior_train = behavior_list[:-1]
+        behavior_test = behavior_list[-1:]
 
         for behavior in behavior_train:
             item_train.append(behavior[0])
             weekday_train.append(behavior[1])
             hour_train.append(behavior[2])
             interval_train.append(behavior[3])
+
         for behavior in behavior_test:
             item_test.append(behavior[0])
             weekday_test.append(behavior[1])
@@ -469,7 +477,6 @@ if __name__ == '__main__':
 
     HIDDEN_SIZE = 40
     device = 'cpu'
-
     if len(sys.argv) > 1 and sys.argv[1] == 'cuda':
         RUN_CUDA = True
         device = 'cuda'
@@ -485,7 +492,7 @@ if __name__ == '__main__':
     elif len(sys.argv) > 2 and sys.argv[2] == 'sample':
         DATAFILE = '../../data/STAR_sample_Books.txt'
         DATANAME = 'sample'
-    elif len(sys.argv) > 3:
+    if len(sys.argv) > 3:
         DATAFILE = sys.argv[3]
 
     OUTPUT_PATH = './output/results/'
@@ -514,8 +521,8 @@ if __name__ == '__main__':
     createFolder(MODEL_DIR)
 
     # Clear file
-    OUTPUT_FILE = OUTPUT_PATH + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
-    MODEL_FILE = MODEL_DIR + '_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
+    OUTPUT_FILE = OUTPUT_PATH + 'STAR_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.txt'
+    MODEL_FILE = MODEL_DIR + 'STAR_' + DATANAME + '_' + str(HIDDEN_SIZE) + '.mdl'
     with open(OUTPUT_FILE, "w") as the_file:
         the_file.write("")
 
