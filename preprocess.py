@@ -3,9 +3,9 @@ import argparse
 
 from data_reader import DataReader
 
-def main(raw_dataset, out_dataset, dataset_type, limit, maxlen, input_context):
+def main(raw_dataset, out_dataset, dataset_type, limit, input_context):
     # Start the data reader and read the dataset
-    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, maxlen=maxlen, input_context=input_context)
+    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, input_context=input_context)
     dr.preprocess()
 
 if __name__ == '__main__':
@@ -28,4 +28,4 @@ if __name__ == '__main__':
     parser.add_argument('--input_context', default=False, action='store_true', help='Incorporate input context information')
     args = parser.parse_args()
 
-    main(args.raw_dataset, args.dataset, args.type, args.limit, args.maxlen, args.input_context)
+    main(args.raw_dataset, args.dataset, args.type, args.limit, args.input_context)

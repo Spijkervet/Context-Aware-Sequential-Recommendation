@@ -130,6 +130,7 @@ if __name__ == '__main__':
 
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
+
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.input_context: input_context_seq,
