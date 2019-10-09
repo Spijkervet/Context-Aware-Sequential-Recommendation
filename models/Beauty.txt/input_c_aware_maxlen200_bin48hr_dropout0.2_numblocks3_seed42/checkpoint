@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/jspijkervet/git/information_retrieval_2/models/Beauty.txt/input_c_aware_maxlen200_bin48hr_dropout0.2_numblocks3_seed42/model.ckpt"
+all_model_checkpoint_paths: "/home/jspijkervet/git/information_retrieval_2/models/Beauty.txt/input_c_aware_maxlen200_bin48hr_dropout0.2_numblocks3_seed42/model.ckpt"
