@@ -124,7 +124,7 @@ class DataReader():
                 if self.input_context:
                     f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
                 else:
-                    f.write('%d %d %d\n' % (user, i[0], i[1]))
+                    f.write('{} {} {}\n'.format(user, i[0], i[2]))
         f.close()
 
         # tsv metadata file (index/label)
@@ -157,7 +157,7 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(',')
-            f.write('{} {} {}\n'.format(user, item, timestamp))
+            f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
 
             asin = item
             rev = user
@@ -195,17 +195,20 @@ class DataReader():
                 itemnum += 1
                 itemid = itemnum
                 itemmap[asin] = itemid
-            User[userid].append([time, itemid])
+            User[userid].append([itemid, rating, time])
 
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
         for userid in User.keys():
-            User[userid].sort(key=lambda x: x[0])
+            User[userid].sort(key=lambda x: x[2])
 
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
             for i in User[user]:
-                f.write('%s %s %s\n' % (user, i[1], i[0]))
+                if self.input_context:
+                    f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
+                else:
+                    f.write('{} {} {}\n'.format(user, i[0], i[2]))
         f.close()
 
         # product map
@@ -242,6 +245,7 @@ class DataReader():
         for l in tqdm(self.parse_amazon(), total=total):
             asin = l['asin']
             rev = l['reviewerID']
+            rating = l['overall']
             time = l['unixReviewTime']
 
             # Minimum of 5:
@@ -261,17 +265,21 @@ class DataReader():
                 itemnum += 1
                 itemid = itemnum
                 itemmap[asin] = itemid
-            User[userid].append([time, itemid])
+            User[userid].append([itemid, rating, time])
 
         logging.info('Sorting reviews for every user on time')
         # sort reviews in User according to time
         for userid in User.keys():
-            User[userid].sort(key=lambda x: x[0])
+            User[userid].sort(key=lambda x: x[2])
 
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
             for i in User[user]:
-                f.write('%d %d %d\n' % (user, i[1], i[0]))
+                if self.input_context:
+                    f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
+                else:
+                    f.write('{} {} {}\n'.format(user, i[0], i[2]))
+
         f.close()
 
         # product map

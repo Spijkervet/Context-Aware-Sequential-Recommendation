@@ -102,8 +102,8 @@ if __name__ == '__main__':
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    config.allow_soft_placement = True
+    # config.gpu_options.allow_growth = True
+    # config.allow_soft_placement = True
 
     # SESSION
     sess = tf.Session(config=config)
