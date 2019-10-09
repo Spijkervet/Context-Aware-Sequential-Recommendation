@@ -144,7 +144,7 @@ def get_users(fpath):
         u, i, r, t = line.rstrip().split(' ')
         u = int(u)
         i = int(i)
-        r = int(r)
+        r = float(r)
         t = int(t)
         usernum = max(u, usernum)
         itemnum = max(i, itemnum)

@@ -102,8 +102,8 @@ if __name__ == '__main__':
     # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    config.allow_soft_placement = True
+    # config.gpu_options.allow_growth = True
+    # config.allow_soft_placement = True
 
     # SESSION
     sess = tf.Session(config=config)
@@ -130,6 +130,7 @@ if __name__ == '__main__':
 
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
+
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.input_context: input_context_seq,
