@@ -79,13 +79,14 @@ def pre_data():
         interval_test = []
 
         behavior_list = all_cart[i]
-        # TODO: ORIGINAL
-        # behavior_train = behavior_list[0:int(SPLIT * len(behavior_list))]
-        # behavior_test = behavior_list[int(SPLIT * len(behavior_list)):]
+
+        # ORIGINAL
+        behavior_train = behavior_list[0:int(SPLIT * len(behavior_list))]
+        behavior_test = behavior_list[int(SPLIT * len(behavior_list)):]
 
         # use the final item as test item just like in SASRec
-        behavior_train = behavior_list[:-1]
-        behavior_test = behavior_list[-1:]
+        # behavior_train = behavior_list[:-1]
+        # behavior_test = behavior_list[-1:]
 
         for behavior in behavior_train:
             item_train.append(behavior[0])
