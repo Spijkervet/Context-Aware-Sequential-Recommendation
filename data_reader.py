@@ -157,7 +157,10 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(',')
-            f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
+            if self.input_context:
+                f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
+            else:
+                f.write('{} {} {}\n'.format(user, item, timestamp))
 
             asin = item
             rev = user

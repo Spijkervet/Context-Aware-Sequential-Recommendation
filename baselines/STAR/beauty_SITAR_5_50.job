@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH --job-name=STAR_ml-1m
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=3
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=24:00:00
+#SBATCH --mem=60000M
+#SBATCH --partition=gpu_shared_course
+#SBATCH --gres=gpu:1
+
+module purge
+module load 2019
+module load eb
+
+
+module load Python/3.6.6-foss-2018b
+module load CUDA/10.0.130
+module load cuDNN/7.6.3-CUDA-10.0.130
+
+srun python -u main.py --cuda=True --dataset="../../data/STAR_Beauty_5_50.txt" --model="SITAR"

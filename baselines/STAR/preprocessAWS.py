@@ -388,19 +388,21 @@ def run(inputFile):
 if __name__ == "__main__":
 	# STARTING POINT
 	# OUTPUT_FILE = "STAR_Books.txt"
-	OUTPUT_FILE = "STAR_ml-1m_5_200.txt"
+	OUTPUT_FILE = "STAR_Beauty.txt"
+	# OUTPUT_FILE = "STAR_ml-1m_5_200.txt"
 
 	LIMIT = 5
 	ITEM_LIMIT = LIMIT
-	MAX_LIMIT = 200
+	# 200 for MovieLens
+	MAX_LIMIT = 50
 
 	gStart = time.time()
 	for i in range(len(inputFileList)):
 		# analyseFile('../../AWS/'+str(inputFileList[i]))
 		start_time = time.time()
 		# run('../../data/Books.txt')
-		# run('../../data/ratings_Books.txt')
-		run('../../data/ml-1m.txt')
+		run('../../data/Beauty.txt')
+		# run('../../data/ml-1m.txt')
 		# run('../../data/sample_Books_2.txt')
 		e = time.time() - start_time
 		print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))
