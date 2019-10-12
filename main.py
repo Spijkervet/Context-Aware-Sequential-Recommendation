@@ -1,17 +1,18 @@
-from util import *
-from sampler import WarpSampler
-from model import Model
-from data_reader import DataReader
-from tqdm import tqdm
-import numpy as np
-from datetime import datetime
-import tensorflow as tf
-import sys
 import os
 import argparse
 import logging
 import time
-import random
+
+from util import *
+from sampler import WarpSampler, sample_function, future_sample_function
+
+from model import Model as CAST
+from sasrec import SASRec
+from future_cast import FutureCAST
+
+from tqdm import tqdm
+import numpy as np
+import tensorflow as tf
 
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
@@ -65,6 +66,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=None, type=int)
     parser.add_argument('--log_scale', default=False, action='store_true')
     parser.add_argument('--input_context', default=False, action='store_true')
+    parser.add_argument('--model', default="cast", required=True, help="model to use from {cast, sasrec, futurecast}")
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -88,10 +90,6 @@ if __name__ == '__main__':
     cc = sum([len(v) for v in train.values()])
     logger.info('Average sequence length: {:.2f}'.format(cc / len(train)))
 
-    print('usernum', usernum, 'itemnum', itemnum)
-    sampler = WarpSampler(args, train, usernum, itemnum,
-                          batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
-
     # RESET GRAPH
     if args.seed:
         random.seed(args.seed)
@@ -109,7 +107,24 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    model = Model(usernum, itemnum, ratingnum, args)
+    if args.model.lower() not in ["cast", "sasrec", "futurecast"]:
+        print("provide model from {CAST, SASRec, FutureCAST}")
+        sys.exit(0)
+
+    if args.model == "cast":
+        model = CAST(usernum, itemnum, ratingnum, args)
+    elif args.model == "sasrec" or args.test_baseline:
+        model = SASRec(usernum, itemnum, args)
+    elif args.model == "futurecast":
+        model = FutureCAST(usernum, itemnum, args)
+        sample_function = future_sample_function
+
+    # SAMPLER
+    print('usernum', usernum, 'itemnum', itemnum)
+    sampler = WarpSampler(args, train, usernum, itemnum,
+                          sample_func=sample_function,
+                          batch_size=args.batch_size, maxlen=args.maxlen, n_workers=1)
+
     sess.run(tf.global_variables_initializer())
 
     # Add TensorBoard
@@ -135,36 +150,6 @@ if __name__ == '__main__':
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.input_context: input_context_seq,
                                                                model.is_training: True})
-
-                # for tsb, ts_encb in zip(timeseq, tseq_enc):
-                #     for t, tenc in zip(tsb, ts_encb):
-                #         print(tenc)
-                #         i = np.where(tenc == 1)
-                #         assert i == t, "i not the same as t {}, {}".format(i, t) # Ensure one-hot encoding is done well.
-
-                # print(activations[0].shape)
-                # Print various variables, with [0] as the first item in the batch, and [-1] as the most recent item in the sequence
-                # print(u[0])
-                # print(seq[0][-2], seq[0].shape)
-                # print(seq[0][-1], seq[0].shape)
-                # logger.debug(mask[0][-1])
-
-                # print('timeseq')
-                # print(timeseq[0][-2], timeseq[0].shape)
-                # print(timeseq[0][-1], timeseq[0].shape)
-
-                # print('timeseq encoding')
-                # print(tseq_enc[0][-2], tseq_enc.shape)
-                # print(tseq_enc[0][-1], tseq_enc.shape)
-                # logger.debug(seq_embedding[0][-1], seq_embedding.shape)
-
-                # logger.debug(item_emb_table[0][-1], itemnum, item_emb_table.shape)
-
-                # logger.debug('queries')
-                # logger.debug(queries[0][-1], queries.shape)
-
-                # logger.debug('keys')
-                # logger.debug(keys[0][-1], keys.shape)
 
             writer.add_summary(summary, epoch)
             writer.flush()
