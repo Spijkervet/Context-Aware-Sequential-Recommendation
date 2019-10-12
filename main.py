@@ -4,11 +4,11 @@ import logging
 import time
 
 from util import *
-from sampler import WarpSampler, sample_function, future_sample_function
+from sampler import WarpSampler, sample_function
 
 from model import Model as CAST
 from sasrec import SASRec
-from future_cast import FutureCAST
+from cast_sp import CASTSP
 
 from tqdm import tqdm
 import numpy as np
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=None, type=int)
     parser.add_argument('--log_scale', default=False, action='store_true')
     parser.add_argument('--input_context', default=False, action='store_true')
-    parser.add_argument('--model', default="cast", required=True, help="model to use from {cast, sasrec, futurecast}")
+    parser.add_argument('--model', default="cast", required=True, help="model to use from {cast, sasrec, castsp}")
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -107,7 +107,8 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    if args.model.lower() not in ["cast", "sasrec", "futurecast"]:
+    MODELS = ["cast", "sasrec", "castsp"]
+    if args.model.lower() not in MODELS:
         print("provide model from {CAST, SASRec, FutureCAST}")
         sys.exit(0)
 
@@ -115,9 +116,9 @@ if __name__ == '__main__':
         model = CAST(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
-    elif args.model == "futurecast":
-        model = FutureCAST(usernum, itemnum, args)
-        sample_function = future_sample_function
+    elif args.model == "castsp":
+        model = CASTSP(usernum, itemnum, args)
+        # sample_function = future_sample_function
 
     # SAMPLER
     print('usernum', usernum, 'itemnum', itemnum)

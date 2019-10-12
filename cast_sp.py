@@ -1,7 +1,7 @@
 from modules import *
 
-
-class FutureCAST():
+#Context Aware Sequential Transformer using a Sinusoidal Positional embedding
+class CASTSP():
     def __init__(self, usernum, itemnum, args, reuse=None):
 
         if args.seed:
@@ -167,7 +167,7 @@ class FutureCAST():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, timeseq, input_context_seq, item_idx):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None):
         return sess.run(self.test_logits,
                         {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.input_context: input_context_seq, self.test_item: item_idx, self.is_training: False})
 
