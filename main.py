@@ -151,8 +151,8 @@ if __name__ == '__main__':
                                                                model.input_context: input_context_seq,
                                                                model.is_training: True})
 
-            writer.add_summary(summary, epoch)
-            writer.flush()
+            # writer.add_summary(summary, epoch)
+            # writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)

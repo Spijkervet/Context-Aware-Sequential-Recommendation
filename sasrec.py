@@ -3,6 +3,10 @@ from modules import *
 
 class SASRec():
     def __init__(self, usernum, itemnum, args, reuse=None):
+
+        if args.seed:
+            tf.set_random_seed(args.seed)
+
         self.is_training = tf.placeholder(tf.bool, shape=())
         self.u = tf.placeholder(tf.int32, shape=(None))
         self.input_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
@@ -44,15 +48,16 @@ class SASRec():
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
             self.seq *= mask
-
+            # Self-attention blocks
             # Build blocks
             for i in range(args.num_blocks):
                 with tf.variable_scope("num_blocks_%d" % i):
 
                     # Self-attention
-                    self.seq = multihead_attention(self,
-                                                   queries=normalize(self.seq),
-                                                   keys=self.seq,
+                    self.queries = normalize(self.seq)
+                    self.keys = self.seq
+                    self.seq = multihead_attention(self, queries=self.queries,
+                                                   keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
                                                    dropout_rate=args.dropout_rate,
@@ -107,6 +112,7 @@ class SASRec():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None):
         return sess.run(self.test_logits,
                         {self.u: u, self.input_seq: seq, self.test_item: item_idx, self.is_training: False})
+
