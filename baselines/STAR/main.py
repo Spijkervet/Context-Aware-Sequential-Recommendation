@@ -468,6 +468,7 @@ def createFolder(folderName):
 # $ python main.py 1 miniData STAR 
 
 if __name__ == '__main__':
+    torch.manual_seed(42)
     torch.set_printoptions(threshold=5000)
 
     HIDDEN_SIZE = 40
@@ -487,7 +488,7 @@ if __name__ == '__main__':
     elif "beauty" in args.dataset.lower():
         DATANAME = 'Beauty'
     else:
-        DATANAME = args.dataset.split("/")[-1].split(".")[-1]
+        DATANAME = args.dataset.split("/")[-1].split(".")[0]
 
     DATAFILE = args.dataset
     if args.model != srnn.STAR and args.model != srnn.SITAR:
