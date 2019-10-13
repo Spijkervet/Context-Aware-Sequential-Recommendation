@@ -138,18 +138,21 @@ class Model():
             # TODO: Remove this(?)
             self.seq += t
 
-            if not args.test_baseline:
-                # CONTEXT-AWARE MODULE
-                self.seq += self.tseq
+            # CONTEXT-AWARE MODULE
+            # self.seq += self.tseq
+            self.seq = tf.concat([self.seq, self.tseq], 1)
 
-                if args.input_context:
-                    self.seq += self.input_context_seq
+            # INPUT-CONTEXT-AWARE MODULE
+            # self.seq += self.input_context_seq
 
             # Dropout
             self.seq = tf.layers.dropout(self.seq,
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
-            self.seq *= mask
+            
+            concat_mask = tf.concat([mask, time_seq_mask], 1)
+            # self.seq *= mask
+            self.seq *= concat_mask
             
             # Self-attention blocks
             # Build blocks
@@ -161,7 +164,7 @@ class Model():
                     self.keys = self.seq
                     self.seq = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
-                                                   num_units=args.hidden_units,
+                                                   num_units=args.hidden_units, # * 2, since we are concat'ing input+time seqs
                                                    num_heads=args.num_heads,
                                                    dropout_rate=args.dropout_rate,
                                                    is_training=self.is_training,
@@ -171,7 +174,7 @@ class Model():
                     # Feed forward
                     self.seq = feedforward(normalize(self.seq), num_units=[args.hidden_units, args.hidden_units],
                                            dropout_rate=args.dropout_rate, is_training=self.is_training)
-                    self.seq *= mask
+                    self.seq *= concat_mask
 
             self.seq = normalize(self.seq)
 
