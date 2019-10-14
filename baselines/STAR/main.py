@@ -6,8 +6,8 @@ import sys
 import time
 import argparse
 import torch
-import random
 import torch.nn.functional as F
+import numpy as np
 import models as srnn
 from sampler import get_dataloader
 
@@ -257,131 +257,69 @@ def predict(model):
     print('relevant(number of test item): ' + str(relevant))
     return hit_at_10, nDCG
 
+def learn(model, optimizer, criterion, data_loader):
+    sumloss = 0
+    for iteration, batch_inputs in enumerate(data_loader):
+        max_length = 0
+        for id in batch_inputs:
+            id = id.item()
+            if len(ITEM_TRAIN[id]) > max_length:
+                max_length = len(ITEM_TRAIN[id])
 
-def learn():
-    original_stdout = sys.stdout
-    epoch = 0
+        user_cart = []
+        hour_cart = []
+        weekday_cart = []
+        interval_cart = []
 
-    model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
-                           weekday_size=WEEKDAY_SIZE,
-                           hour_size=HOUR_SIZE,
-                           num_class=ITEM_SIZE,
-                           isCuda=usingCuda(),
-                           mode=MODE)
+        # pad the inputs to the longest boy
+        for i, id in enumerate(batch_inputs):
+            id = id.item()
+            tmp_user_cart = ITEM_TRAIN[id]
+            tmp_hour_cart = HOUR_TRAIN[id]
+            tmp_weekday_cart = WEEKDAY_TRAIN[id]
+            tmp_interval_cart = INTERVAL_TRAIN[id]
 
-    criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+            if len(tmp_user_cart) < max_length:
+                difference = max_length - len(tmp_user_cart)
+                user_cart.append([0] * difference + tmp_user_cart.tolist())
+                hour_cart.append([0] * difference + tmp_hour_cart.tolist())
+                weekday_cart.append([0] * difference + tmp_weekday_cart.tolist())
+                interval_cart.append([0] * difference + tmp_interval_cart.tolist())
+            else:
+                user_cart.append(tmp_user_cart.tolist())
+                hour_cart.append(tmp_hour_cart.tolist())
+                weekday_cart.append(tmp_weekday_cart.tolist())
+                interval_cart.append(tmp_interval_cart.tolist())
 
-    if (usingCuda()):
-        model.cuda()
+        # process
+        user_cart = torch.tensor(user_cart).to(device)
+        hour_cart = torch.tensor(hour_cart).to(device)
+        weekday_cart = torch.tensor(weekday_cart).to(device)
+        interval_cart = torch.tensor(interval_cart).to(device)
 
-    if os.path.exists(MODEL_FILE):
-        print("loading model to continue training")
-        checkpoint = loadCheckpoint(MODEL_FILE)
-        model.load_state_dict(checkpoint["model"])
-        optimizer.load_state_dict(checkpoint["optim"])
-        model.train()
+        loss = 0
+        optimizer.zero_grad()
+        h = None
+        h2 = None
+        h3 = None
 
-    print("starting learning")
-    print("MODEL", model)
-
-    temp = sys.stdout
-    f_handler = open(OUTPUT_FILE, 'a')
-    sys.stdout = f_handler
-    print(model)
-
-    f_handler.close()
-    data_loader = get_dataloader(ITEM_TRAIN, HOUR_TRAIN, WEEKDAY_TRAIN, INTERVAL_TRAIN)
-
-    while (epoch <= 100):
-        sys.stdout = temp
-        print("Epoch %d" % epoch)
-        f_handler = open(OUTPUT_FILE, 'a')
-        sys.stdout = f_handler
-        print("Epoch %d" % epoch)
-        print("Training...")
-        sumloss = 0
-        for iteration, batch_inputs in enumerate(data_loader):
-            max_length = 0
-            for id in batch_inputs:
-                id = id.item()
-                if len(ITEM_TRAIN[id]) > max_length:
-                    max_length = len(ITEM_TRAIN[id])
-
-            user_cart = []
-            hour_cart = []
-            weekday_cart = []
-            interval_cart = []
-
-            # pad the inputs to the longest boy
-            for i, id in enumerate(batch_inputs):
-                id = id.item()
-                tmp_user_cart = ITEM_TRAIN[id]
-                tmp_hour_cart = HOUR_TRAIN[id]
-                tmp_weekday_cart = WEEKDAY_TRAIN[id]
-                tmp_interval_cart = INTERVAL_TRAIN[id]
-
-                if len(tmp_user_cart) < max_length:
-                    difference = max_length - len(tmp_user_cart)
-                    user_cart.append([0] * difference + tmp_user_cart.tolist())
-                    hour_cart.append([0] * difference + tmp_hour_cart.tolist())
-                    weekday_cart.append([0] * difference + tmp_weekday_cart.tolist())
-                    interval_cart.append([0] * difference + tmp_interval_cart.tolist())
-                else:
-                    user_cart.append(tmp_user_cart.tolist())
-                    hour_cart.append(tmp_hour_cart.tolist())
-                    weekday_cart.append(tmp_weekday_cart.tolist())
-                    interval_cart.append(tmp_interval_cart.tolist())
-
-            # process
-            user_cart = torch.tensor(user_cart).to(device)
-            hour_cart = torch.tensor(hour_cart).to(device)
-            weekday_cart = torch.tensor(weekday_cart).to(device)
-            interval_cart = torch.tensor(interval_cart).to(device)
-
-            loss = 0
-            optimizer.zero_grad()
-            h = None
-            h2 = None
-            h3 = None
-            # print("user cart", user_cart.shape)
-            # We do not input the last item, as this is the target
-            for j in range(user_cart.shape[1] - 1):
-                inputX = user_cart[:, j]
-                hourX = hour_cart[:, j]
-                weekdayX = weekday_cart[:, j]
-                intervalX = interval_cart[:, j]
-                label = user_cart[:, j + 1]
-                logits, h, h2, h3 = model(inputX, hourX, weekdayX, intervalX, h=h, h2=h2, h3=h3)
-                # print("criterion shapes", logits.shape, label.shape)
-                loss += criterion(logits, label)
-            loss.backward()
-            optimizer.step()
-            sumloss += loss
-        # print('loss: '+str(loss))
-
-        print("begin predict, number of test items", len(ITEM_TEST))
-        sys.stdout = f_handler
-        print('sumloss: ' + str(float(sumloss)))
-        hit_at_10, nDCG = predict(model)
-        if (nDCG > BEST_NDCG):
-            saveCheckpoint({
-                'hiddenSize': HIDDEN_SIZE,
-                'DATANAME': DATANAME,
-                'BEST_NDCG': BEST_NDCG,
-                'epoch': epoch,
-                'optim': optimizer.state_dict(),
-                'model': model.state_dict()
-            })
-
-        f_handler.close()
-        epoch += 1
-    sys.stdout = original_stdout
-
+        # We do not input the last item, as this is the target
+        for j in range(user_cart.shape[1] - 1):
+            inputX = user_cart[:, j]
+            hourX = hour_cart[:, j]
+            weekdayX = weekday_cart[:, j]
+            intervalX = interval_cart[:, j]
+            label = user_cart[:, j + 1]
+            logits, h, h2, h3 = model(inputX, hourX, weekdayX, intervalX, h=h, h2=h2, h3=h3)
+            loss += criterion(logits, label)
+        loss.backward()
+        optimizer.step()
+        sumloss += loss
+    print('sumloss: ' + str(float(sumloss)))
+    return model
 
 def saveCheckpoint(state):
     torch.save(state, MODEL_FILE)
-
 
 def loadCheckpoint(filename):
     device = "cuda" if usingCuda() else "cpu"
@@ -400,9 +338,9 @@ def initLogOfIndexes():
 
 
 def genNegItem(user_cart):
-    item = random.choice(range(1, ITEM_SIZE))
+    item = np.random.randint(1, ITEM_SIZE)
     while item in user_cart:
-        item = random.choice(range(1, ITEM_SIZE))
+        item = np.random.randint(1, ITEM_SIZE)
     return item
 
 
@@ -428,12 +366,13 @@ def usingCuda():
     return (torch.cuda.is_available() and RUN_CUDA)
 
 
-def main():
+def main(evaluate_only=False):
     global ITEM_TEST, ITEM_TRAIN
-    pWrite('ITEM_SIZE: ' + str(ITEM_SIZE))
-    pWrite('USER_SIZE: ' + str(USER_SIZE))
+    print('ITEM_SIZE: ' + str(ITEM_SIZE))
+    print('USER_SIZE: ' + str(USER_SIZE))
+
     pre_data()
-    pWrite('ITEM_TRAIN.keys(): ' + str(len(ITEM_TRAIN.keys())))
+    print('ITEM_TRAIN.keys(): ' + str(len(ITEM_TRAIN.keys())))
     for i in ITEM_TRAIN.keys():
         for k in range(len(INTERVAL_TRAIN[i])):
             INTERVAL_TRAIN[i][k] += 1
@@ -449,15 +388,57 @@ def main():
         HOUR_TEST[i] = genTensor(HOUR_TEST[i], tensorType=LONG_STR)
         WEEKDAY_TEST[i] = genTensor(WEEKDAY_TEST[i], tensorType=LONG_STR)
         INTERVAL_TEST[i] = genTensor(INTERVAL_TEST[i])
-    learn()
+
+
+    model = srnn.SRNNModel(hidden_size=HIDDEN_SIZE,
+                           weekday_size=WEEKDAY_SIZE,
+                           hour_size=HOUR_SIZE,
+                           num_class=ITEM_SIZE,
+                           isCuda=usingCuda(),
+                           mode=MODE)
+
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+
+    if (usingCuda()):
+        model.cuda()
+
+    if os.path.exists(MODEL_FILE):
+        print("loading stored model to continue")
+        checkpoint = loadCheckpoint(MODEL_FILE)
+        model.load_state_dict(checkpoint["model"])
+        optimizer.load_state_dict(checkpoint["optim"])
+        model.train()
+
+    if evaluate_only:
+        predict(model)
+        return
+
+    # start training & testing
+    epoch = 0
+    print("starting learning")
+    print("MODEL", model)
+    data_loader = get_dataloader(ITEM_TRAIN, HOUR_TRAIN, WEEKDAY_TRAIN, INTERVAL_TRAIN)
+
+    while (epoch <= 100):
+        print("Epoch %d" % epoch)
+        print("Training...")
+
+        learn(model, optimizer, criterion, data_loader)
+        print("begin predict, number of test items", len(ITEM_TEST))
+        hit_at_10, nDCG = predict(model)
+        if (nDCG > BEST_NDCG):
+            saveCheckpoint({
+                'hiddenSize': HIDDEN_SIZE,
+                'DATANAME': DATANAME,
+                'BEST_NDCG': BEST_NDCG,
+                'epoch': epoch,
+                'optim': optimizer.state_dict(),
+                'model': model.state_dict()
+            })
+            epoch += 1
+
     print('FINISHED LEARNING!')
-    pWrite('FINISHED LEARNING!')
-
-
-def pWrite(inStr):
-    with open(OUTPUT_FILE, 'a') as the_file:
-        the_file.write(inStr + '\n')
-
 
 def createFolder(folderName):
     if not os.path.exists(folderName):
@@ -479,7 +460,17 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', default=False, help='Use cuda')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
     parser.add_argument('--model', default="STAR", help='Model used. Choose from {STAR, SITAR}')
+    parser.add_argument('--seed', default=42, type=int, help="random seed used to generate batches and negative samples")
+    parser.add_argument('--evaluate_only', type=bool, default=False, help="Set to True if you have a trained model and only want to evaluate")
+    parser.add_argument('--sequence_length', type=int, default=-1, help="If set, uses the last x items from the sequence to make prediction")
     args = parser.parse_args()
+
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+
+    if args.sequence_length > 200:
+        print("we use maximum length of 200 in our experiments")
+        sys.exit(0)
 
     if "movielens" in args.dataset.lower() or "ml-1m" in args.dataset.lower():
         DATANAME = 'movielens'
@@ -492,7 +483,7 @@ if __name__ == '__main__':
 
     DATAFILE = args.dataset
     if args.model != srnn.STAR and args.model != srnn.SITAR:
-        print("incorrect model")
+        print("incorrect model name given")
         sys.exit(0)
     MODE = args.model
 
@@ -528,17 +519,15 @@ if __name__ == '__main__':
         the_file.write("")
 
     print('OUTPUT_FILE: ' + str(OUTPUT_FILE))
-    pWrite('OUTPUT_FILE: ' + str(OUTPUT_FILE))
-    pWrite('RUN_CUDA: ' + str(RUN_CUDA))
-    pWrite('DATAFILE: ' + str(DATAFILE))
-    pWrite('usingCuda(): ' + str(usingCuda()))
-    pWrite('HIDDEN_SIZE: ' + str(HIDDEN_SIZE))
+    print('RUN_CUDA: ' + str(RUN_CUDA))
+    print('DATAFILE: ' + str(DATAFILE))
+    print('usingCuda(): ' + str(usingCuda()))
+    print('HIDDEN_SIZE: ' + str(HIDDEN_SIZE))
 
     initLogOfIndexes()
     start = time.time()
-    main()
+    main(args.evaluate_only)
     end = time.time()
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
     print("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
-    pWrite("{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
