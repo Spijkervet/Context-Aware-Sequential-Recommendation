@@ -371,12 +371,12 @@ def usingCuda():
     return (torch.cuda.is_available() and RUN_CUDA)
 
 
-def main(sequence_length=-1, evaluate_only=False):
+def main(args):
     global ITEM_TEST, ITEM_TRAIN
     print('ITEM_SIZE: ' + str(ITEM_SIZE))
     print('USER_SIZE: ' + str(USER_SIZE))
 
-    pre_data(sequence_length)
+    pre_data(args.sequence_length)
     print('ITEM_TRAIN.keys(): ' + str(len(ITEM_TRAIN.keys())))
     for i in ITEM_TRAIN.keys():
         for k in range(len(INTERVAL_TRAIN[i])):
@@ -408,14 +408,16 @@ def main(sequence_length=-1, evaluate_only=False):
     if (usingCuda()):
         model.cuda()
 
-    if os.path.exists(MODEL_FILE):
-        print("loading stored model to continue")
-        checkpoint = loadCheckpoint(MODEL_FILE)
+    load_model_from = MODEL_FILE if args.model_path == "" else args.model_path
+    if os.path.exists(load_model_from):
+        print("loading stored from", load_model_from, "to continue")
+        checkpoint = loadCheckpoint(load_model_from)
         model.load_state_dict(checkpoint["model"])
         optimizer.load_state_dict(checkpoint["optim"])
         model.train()
 
-    if evaluate_only:
+    if args.evaluate_only:
+        model.eval()
         predict(model)
         return
 
@@ -532,7 +534,7 @@ if __name__ == '__main__':
 
     initLogOfIndexes()
     start = time.time()
-    main(evaluate_only=args.evaluate_only, sequence_length=args.sequence_length)
+    main(args)
     end = time.time()
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
