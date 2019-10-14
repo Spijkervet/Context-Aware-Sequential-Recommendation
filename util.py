@@ -263,7 +263,7 @@ def evaluate(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], [timeseq], [input_context_seq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], input_context_seq=[input_context_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -327,7 +327,7 @@ def evaluate_valid(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], [timeseq], [input_context_seq], item_idx)
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], input_context_seq=[input_context_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]

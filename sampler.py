@@ -13,10 +13,8 @@ def random_neq(l, r, s):
         t = np.random.randint(l, r)
     return t
 
-
 def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, bin_in_hours, max_bins, SEED):
     def sample():
-
         # Get a random user_id, make sure it has more than x interactions (which we already checked?):
         user = np.random.randint(1, usernum + 1)
         while len(user_train[user]) <= 1: 
@@ -105,7 +103,7 @@ class WarpSampler(object):
     The pos vector has :maxlen: items, filled at the end with the most recent product ids (including the most recent, excluding oldest).
     The neg vector has :maxlen: items, filled at the end with 'negative' samples, i.e. randomly drawn product ids that do not exist in the current interaction data.
     """
-    def __init__(self, args, User, usernum, itemnum, batch_size=64, maxlen=10, n_workers=1):
+    def __init__(self, args, User, usernum, itemnum, sample_func=sample_function, batch_size=64, maxlen=10, n_workers=1):
         self.result_queue = Queue(maxsize=n_workers * 10)
         self.processors = []
 
@@ -115,16 +113,16 @@ class WarpSampler(object):
             seed = np.random.randint(2e9)
         for i in range(n_workers):
             self.processors.append(
-                Process(target=sample_function, args=(User,
-                                                      usernum,
-                                                      itemnum,
-                                                      batch_size,
-                                                      maxlen,
-                                                      self.result_queue,
-                                                      args.bin_in_hours,
-                                                      args.max_bins,
-                                                      seed
-                                                      )))
+                Process(target=sample_func, args=(User,
+                                                  usernum,
+                                                  itemnum,
+                                                  batch_size,
+                                                  maxlen,
+                                                  self.result_queue,
+                                                  args.bin_in_hours,
+                                                  args.max_bins,
+                                                  seed
+                                                  )))
             self.processors[-1].daemon = True
             self.processors[-1].start()
 
