@@ -465,6 +465,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', default=False, help='Use cuda')
     parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
     parser.add_argument('--model', default="STAR", help='Model used. Choose from {STAR, SITAR}')
+    parser.add_argument('--model_path', default="", help='Path of a stored model to use.')
     parser.add_argument('--seed', default=42, type=int, help="random seed used to generate batches and negative samples")
     parser.add_argument('--evaluate_only', type=bool, default=False, help="Set to True if you have a trained model and only want to evaluate")
     parser.add_argument('--sequence_length', type=int, default=-1, help="If set, uses the last x items from the sequence to make prediction")
