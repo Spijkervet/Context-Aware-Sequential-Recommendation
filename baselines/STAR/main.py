@@ -54,7 +54,7 @@ FLOAT_STR = 'Float'
 LOG_OF_INDEXES = None
 
 
-def pre_data():
+def pre_data(sequence_length=-1):
     global ITEM_TRAIN
     global ITEM_TEST
     global SPLIT
@@ -100,6 +100,17 @@ def pre_data():
             hour_test.append(behavior[2])
             interval_test.append(behavior[3])
 
+        # cut the first bit, of the training data, to make sequences of sequence_length
+        if sequence_length != -1:
+            # if this sequence is too short to cut anything from, skip it
+            # they're all the same length so we only check one
+            if sequence_length > len(item_train):
+                continue
+            item_train = item_train[-sequence_length:]
+            weekday_train = weekday_train[-sequence_length:]
+            hour_train = hour_train[-sequence_length:]
+            interval_train = interval_train[-sequence_length:]
+
         ITEM_TRAIN[i] = item_train
         ITEM_TEST[i] = item_test
         WEEKDAY_TRAIN[i] = weekday_train
@@ -108,14 +119,8 @@ def pre_data():
         HOUR_TEST[i] = hour_test
         INTERVAL_TRAIN[i] = interval_train
         INTERVAL_TEST[i] = interval_test
-
     print("done loading data")
 
-
-# print("ITEM_TRAIN", ITEM_TRAIN)
-# print("WEEKDAY_TRAIN", WEEKDAY_TRAIN)
-# print("HOUR_TRAIN", HOUR_TRAIN)
-# print("INTERVAL_TRAIN", INTERVAL_TRAIN)
 
 def predict(model):
     relevant = 0.0  # The total number of predictions
@@ -366,12 +371,12 @@ def usingCuda():
     return (torch.cuda.is_available() and RUN_CUDA)
 
 
-def main(evaluate_only=False):
+def main(sequence_length=-1, evaluate_only=False):
     global ITEM_TEST, ITEM_TRAIN
     print('ITEM_SIZE: ' + str(ITEM_SIZE))
     print('USER_SIZE: ' + str(USER_SIZE))
 
-    pre_data()
+    pre_data(sequence_length)
     print('ITEM_TRAIN.keys(): ' + str(len(ITEM_TRAIN.keys())))
     for i in ITEM_TRAIN.keys():
         for k in range(len(INTERVAL_TRAIN[i])):
@@ -526,7 +531,7 @@ if __name__ == '__main__':
 
     initLogOfIndexes()
     start = time.time()
-    main(args.evaluate_only)
+    main(evaluate_only=args.evaluate_only, sequence_length=args.sequence_length)
     end = time.time()
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
