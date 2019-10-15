@@ -3,9 +3,9 @@ import argparse
 
 from data_reader import DataReader
 
-def main(raw_dataset, out_dataset, dataset_type, limit, input_context):
+def main(raw_dataset, out_dataset, dataset_type, limit):
     # Start the data reader and read the dataset
-    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit, input_context=input_context)
+    dr = DataReader(raw_dataset, out_dataset, dataset_type, limit=limit)
     dr.preprocess()
 
 if __name__ == '__main__':
@@ -22,10 +22,9 @@ if __name__ == '__main__':
 
     # DATASET PARAMETERS
     parser.add_argument('--raw_dataset', help='Raw gzip dataset, Amazon Product Review data')
-    parser.add_argument('--dataset', required=True, help='Location of pre-processed dataset')
+    parser.add_argument('--output', required=True, help='Output file of the pre-processed dataset')
     parser.add_argument('--type', required=True, type=str, help='Dataset type (amazon, movielens, amazon_ratings)')
     parser.add_argument('--limit', default=None, type=int, help='Limit the number of datapoints')
-    parser.add_argument('--input_context', default=False, action='store_true', help='Incorporate input context information')
     args = parser.parse_args()
 
-    main(args.raw_dataset, args.dataset, args.type, args.limit, args.input_context)
+    main(args.raw_dataset, args.output, args.type, args.limit)

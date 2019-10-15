@@ -2,7 +2,9 @@ import os
 import argparse
 import logging
 import time
+import json
 
+from datetime import datetime
 from util import *
 from sampler import WarpSampler, sample_function
 
@@ -77,10 +79,16 @@ if __name__ == '__main__':
         sys.exit()
 
     # Check if training directory structure exists
+    now = datetime.now()
     TRAIN_FILES_PATH = os.path.join(
-        MODEL_PATH, os.path.basename(args.dataset), args.train_dir)
+        MODEL_PATH, os.path.basename(args.dataset), '{}_{}'.format(args.train_dir, now.strftime("%m-%d-%Y-%H-%M-%S")))
     if not os.path.exists(TRAIN_FILES_PATH):
         os.makedirs(TRAIN_FILES_PATH)
+
+    
+    # Save parameters to file for reproduction
+    with open(os.path.join(TRAIN_FILES_PATH, 'params.txt'), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
 
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
@@ -97,7 +105,6 @@ if __name__ == '__main__':
         tf.reset_default_graph()
         tf.set_random_seed(args.seed)
 
-    # CONFIGURATION
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
     # config.gpu_options.allow_growth = True
@@ -132,6 +139,7 @@ if __name__ == '__main__':
     writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
 
     # Allow saving of model
+
     MODEL_SAVE_PATH = os.path.join(TRAIN_FILES_PATH, 'model.ckpt')
     saver = tf.train.Saver()
     if os.path.exists(MODEL_SAVE_PATH):
@@ -142,14 +150,14 @@ if __name__ == '__main__':
     try:
         for epoch in range(1, args.num_epochs + 1):
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-                u, seq, pos, neg, timeseq, input_context_seq, orig_seq = sampler.next_batch()
+                u, seq, pos, neg, timeseq, ratings_seq, orig_seq = sampler.next_batch()
 
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
-                                                               model.input_context: input_context_seq,
+                                                               model.ratings: ratings_seq,
                                                                model.is_training: True})
 
             # writer.add_summary(summary, epoch)

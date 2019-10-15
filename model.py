@@ -15,7 +15,7 @@ class Model():
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         
-        self.input_context = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.ratings = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.max_rating = ratingnum
         
         pos = self.pos
@@ -29,30 +29,30 @@ class Model():
         
         
         # Mask of input sequence data
-        input_context_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_context, 0)), -1)
-        self.input_context_seq_mask = input_context_seq_mask 
+        ratings_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.ratings, 0)), -1)
+        self.ratings_seq_mask = ratings_seq_mask 
 
         # INPUT-CONTEXT AWARE
         if args.input_context:
             print('INPUT-CONTEXT-AWARE MODULE')
             with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
-                self.input_context_seq, item_emb_table = embedding(self.input_context,
+                self.ratings_seq, item_emb_table = embedding(self.ratings,
                                             vocab_size=self.max_rating+1,
                                             num_units=args.hidden_units,
                                             zero_pad=True,
                                             scale=True,
                                             l2_reg=args.l2_emb,
-                                            scope="input_context_embeddings",
+                                            scope="ratings_embeddings",
                                             with_t=True,
                                             reuse=reuse)
 
                 # Self-attention blocks
                 # Build blocks
                 for i in range(args.num_blocks):
-                    with tf.variable_scope("input_context_seq_num_blocks_%d" % i):
+                    with tf.variable_scope("ratings_seq_num_blocks_%d" % i):
                         # Self-attention
-                        self.input_context_seq = multihead_attention(self, queries=normalize(self.input_context_seq),
-                                                        keys=self.input_context_seq,
+                        self.ratings_seq = multihead_attention(self, queries=normalize(self.ratings_seq),
+                                                        keys=self.ratings_seq,
                                                         num_units=args.hidden_units,
                                                         num_heads=args.num_heads,
                                                         dropout_rate=args.dropout_rate,
@@ -61,51 +61,50 @@ class Model():
                                                         scope="self_attention")
 
                         # Feed forward
-                        self.input_context_seq = feedforward(normalize(self.input_context_seq), num_units=[args.hidden_units, args.hidden_units],
+                        self.ratings_seq = feedforward(normalize(self.ratings_seq), num_units=[args.hidden_units, args.hidden_units],
                                                 dropout_rate=args.dropout_rate, is_training=self.is_training)
-                        self.input_context_seq *= input_context_seq_mask
+                        self.ratings_seq *= ratings_seq_mask
                 
-                self.input_context_seq = normalize(self.input_context_seq)
+                self.ratings_seq = normalize(self.ratings_seq)
 
         # CONTEXT-AWARE
-        if not args.test_baseline:
-            print('CONTEXT-AWARE MODULE')
-            with tf.variable_scope("CONTEXT", reuse=reuse):
-                # Time sequence encoding ('timestamps -> positional vector')
-                # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
-                self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins+1)
-                # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
-                self.tseq, item_emb_table = embedding(self.time_seq,
-                                            vocab_size=args.max_bins+1,
-                                            num_units=args.hidden_units,
-                                            zero_pad=True,
-                                            scale=True,
-                                            l2_reg=args.l2_emb,
-                                            scope="time_embeddings",
-                                            with_t=True,
-                                            reuse=reuse)
+        print('CONTEXT-AWARE MODULE')
+        with tf.variable_scope("CONTEXT", reuse=reuse):
+            # Time sequence encoding ('timestamps -> positional vector')
+            # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
+            self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins+1)
+            # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
+            self.tseq, item_emb_table = embedding(self.time_seq,
+                                        vocab_size=args.max_bins+1,
+                                        num_units=args.hidden_units,
+                                        zero_pad=True,
+                                        scale=True,
+                                        l2_reg=args.l2_emb,
+                                        scope="time_embeddings",
+                                        with_t=True,
+                                        reuse=reuse)
 
-                # Self-attention blocks
-                # Build blocks
-                for i in range(args.num_blocks):
-                    with tf.variable_scope("timeseq_num_blocks_%d" % i):
-                        # Self-attention
-                        self.timeseq_queries = normalize(self.tseq)
-                        self.timeseq_keys = self.tseq
-                        self.tseq = multihead_attention(self, queries=normalize(self.tseq),
-                                                        keys=self.tseq,
-                                                        num_units=args.hidden_units,
-                                                        num_heads=args.num_heads,
-                                                        dropout_rate=args.dropout_rate,
-                                                        is_training=self.is_training,
-                                                        causality=True,
-                                                        scope="self_attention")
+            # Self-attention blocks
+            # Build blocks
+            for i in range(args.num_blocks):
+                with tf.variable_scope("timeseq_num_blocks_%d" % i):
+                    # Self-attention
+                    self.timeseq_queries = normalize(self.tseq)
+                    self.timeseq_keys = self.tseq
+                    self.tseq = multihead_attention(self, queries=normalize(self.tseq),
+                                                    keys=self.tseq,
+                                                    num_units=args.hidden_units,
+                                                    num_heads=args.num_heads,
+                                                    dropout_rate=args.dropout_rate,
+                                                    is_training=self.is_training,
+                                                    causality=True,
+                                                    scope="self_attention")
 
-                        # Feed forward
-                        self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
-                                                dropout_rate=args.dropout_rate, is_training=self.is_training)
-                        self.tseq *= time_seq_mask
-                self.tseq = normalize(self.tseq)
+                    # Feed forward
+                    self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
+                                            dropout_rate=args.dropout_rate, is_training=self.is_training)
+                    self.tseq *= time_seq_mask
+            self.tseq = normalize(self.tseq)
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -138,12 +137,11 @@ class Model():
             # TODO: Remove this(?)
             self.seq += t
 
-            if not args.test_baseline:
-                # CONTEXT-AWARE MODULE
-                self.seq += self.tseq
+            # CONTEXT-AWARE MODULE
+            self.seq += self.tseq
 
-                if args.input_context:
-                    self.seq += self.input_context_seq
+            if args.input_context:
+                self.seq += self.ratings_seq
 
             # Dropout
             self.seq = tf.layers.dropout(self.seq,
@@ -215,7 +213,7 @@ class Model():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, ratings_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.input_context: input_context_seq, self.test_item: item_idx, self.is_training: False})
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.ratings: ratings_seq, self.test_item: item_idx, self.is_training: False})
 

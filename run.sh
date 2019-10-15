@@ -34,15 +34,15 @@ sh download_data.sh
 
 ### PREPROCESSING ###
 # AMAZON BOOKS
-# python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --dataset data/Books.txt --input_context
+# python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --output data/Books.txt
 
 # AMAZON BEAUTY
-python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --dataset data/Beauty.txt --input_context
+# python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
 
 # MOVIELENS 1-M
-# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --dataset data/ml-1m.txt --maxlen 200 --input_context
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/Beauty.txt --train_dir input_c_aware_maxlen200_bin48hr_dropout0.2_numblocks3_seed42 --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 3 --seed 42 --input_context
+python3 main.py --dataset data/ml-1m.txt --model cast --train_dir time_context --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 4242
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

@@ -24,14 +24,13 @@ class DataReader():
     }
     """
 
-    def __init__(self, path, dataset_fp, type, limit=None, maxlen=None, input_context=False):
+    def __init__(self, path, dataset_fp, type, limit=None, maxlen=None):
         self.path = path
         self.limit = limit
         self.dataset_fp = dataset_fp
         self.type = type
         self.logger = logging.getLogger('ir2')
         self.maxlen = maxlen
-        self.input_context = input_context
 
     def preprocess(self):
         assert type(self.type) == str
@@ -62,17 +61,14 @@ class DataReader():
 
         countU = defaultdict(lambda: 0)
         countP = defaultdict(lambda: 0)
-        total = 100000 if not self.limit else self.limit
+        total = 1000000 if not self.limit else self.limit
 
         delim = '::'
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(delim)
+            f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
 
-            if self.input_context:
-                f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
-            else:
-                f.write('{} {} {}\n'.format(user, item, timestamp))
 
             asin = int(item) 
             rev = int(user)
@@ -121,10 +117,7 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for user in User.keys():
             for i in User[user]:
-                if self.input_context:
-                    f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
-                else:
-                    f.write('{} {} {}\n'.format(user, i[0], i[2]))
+                f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
         f.close()
 
         # tsv metadata file (index/label)
@@ -157,10 +150,7 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(',')
-            if self.input_context:
-                f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
-            else:
-                f.write('{} {} {}\n'.format(user, item, timestamp))
+            f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
 
             asin = item
             rev = user
@@ -278,10 +268,7 @@ class DataReader():
         f = open(self.dataset_fp, 'w')
         for user in tqdm(User.keys()):
             for i in User[user]:
-                if self.input_context:
-                    f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
-                else:
-                    f.write('{} {} {}\n'.format(user, i[0], i[2]))
+                f.write('{} {} {} {}\n'.format(user, i[0], i[1], i[2]))
 
         f.close()
 
