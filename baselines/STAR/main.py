@@ -36,8 +36,6 @@ HOUR_TEST = {}
 INTERVAL_TRAIN = {}
 INTERVAL_TEST = {}
 
-SPLIT = 0.8
-
 # Context Sizes
 WEEKDAY_SIZE = None
 HOUR_SIZE = None
@@ -54,10 +52,9 @@ FLOAT_STR = 'Float'
 LOG_OF_INDEXES = None
 
 
-def pre_data(sequence_length=-1):
+def pre_data(sequence_length=-1, split=0.8):
     global ITEM_TRAIN
     global ITEM_TEST
-    global SPLIT
     global DATAFILE
 
     all_cart = []
@@ -81,12 +78,13 @@ def pre_data(sequence_length=-1):
         behavior_list = all_cart[i]
 
         # ORIGINAL
-        behavior_train = behavior_list[0:int(SPLIT * len(behavior_list))]
-        behavior_test = behavior_list[int(SPLIT * len(behavior_list)):]
-
+        if split != 1:
+            behavior_train = behavior_list[0:int(split * len(behavior_list))]
+            behavior_test = behavior_list[int(split * len(behavior_list)):]
+        else:
         # use the final item as test item just like in SASRec
-        # behavior_train = behavior_list[:-1]
-        # behavior_test = behavior_list[-1:]
+            behavior_train = behavior_list[:-1]
+            behavior_test = behavior_list[-1:]
 
         for behavior in behavior_train:
             item_train.append(behavior[0])
@@ -376,7 +374,7 @@ def main(args):
     print('ITEM_SIZE: ' + str(ITEM_SIZE))
     print('USER_SIZE: ' + str(USER_SIZE))
 
-    pre_data(args.sequence_length)
+    pre_data(sequence_length=args.sequence_length, split=args.split)
     print('ITEM_TRAIN.keys(): ' + str(len(ITEM_TRAIN.keys())))
     for i in ITEM_TRAIN.keys():
         for k in range(len(INTERVAL_TRAIN[i])):
@@ -409,12 +407,15 @@ def main(args):
         model.cuda()
 
     load_model_from = MODEL_FILE if args.model_path == "" else args.model_path
+    print("Attempting to load model from:", load_model_from)
     if os.path.exists(load_model_from):
-        print("loading stored from", load_model_from, "to continue")
+        print("Stored model found. Continuing from model", load_model_from)
         checkpoint = loadCheckpoint(load_model_from)
         model.load_state_dict(checkpoint["model"])
         optimizer.load_state_dict(checkpoint["optim"])
         model.train()
+    else:
+        print("No model was found at this path. Starting from scratch.")
 
     if args.evaluate_only:
         model.eval()
@@ -469,6 +470,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', default="STAR", help='Model used. Choose from {STAR, SITAR}')
     parser.add_argument('--model_path', default="", help='Path of a stored model to use.')
     parser.add_argument('--seed', default=42, type=int, help="random seed used to generate batches and negative samples")
+    parser.add_argument('--split', default=0.8, type=float, help="Training / test split ratio. Use 1 to only predict the very last item in the sequence.")
     parser.add_argument('--evaluate_only', type=bool, default=False, help="Set to True if you have a trained model and only want to evaluate")
     parser.add_argument('--sequence_length', type=int, default=-1, help="If set, uses the last x items from the sequence to make prediction")
     args = parser.parse_args()
