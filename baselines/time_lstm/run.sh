@@ -18,8 +18,10 @@ module load cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0
 module load CUDA/8.0.44-GCCcore-5.4.0
 module load anaconda
 
+
+# source ~/miniconda2/etc/profile.d/conda.sh
 conda create --name time_lstm -y
-source deactivate time_lstm
+conda deactivate
 conda clean --lock
 conda env update --file environment.yml
 
@@ -27,5 +29,8 @@ conda activate time_lstm
 
 pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
 
+
 mkdir log
-THEANO_FLAGS='device=cuda0, gpuarray.preallocate=1, floatX=float32' python main.py --model TLSTM3 --data music
+
+# python2 --version
+THEANO_FLAGS='device=cuda0, gpuarray.preallocate=1, floatX=float32' python2 main.py --model TLSTM3 --data music
