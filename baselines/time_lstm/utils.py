@@ -9,7 +9,7 @@ import logging
 
 import lasagne
 from scipy.sparse import coo_matrix
-import _pickle as cPickle
+import _pickle as pickle
 from lasagne.utils import floatX
 from lasagne.init import Initializer
 from lasagne import nonlinearities
@@ -296,12 +296,12 @@ def save_model(filename, suffix, model, log=None, announce=True, log_only=False)
     if not log_only:
         # Acquire Data
         data = lasagne.layers.get_all_param_values(model)
-        with open(param_filename, 'w') as f:
+        with open(param_filename, 'wb') as f:
             pickle.dump(data, f)
     # Generate log filename and dump
     if log is not None:
         log_filename = '%s.log' % (filename)
-        with open(log_filename, 'w') as f:
+        with open(log_filename, 'wb') as f:
             pickle.dump(log, f)
 
 def load_model(filename, model):

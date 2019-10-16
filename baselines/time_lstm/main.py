@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python
-
 from __future__ import print_function
 import os
 import logging
@@ -11,6 +10,8 @@ import numpy as np
 import theano
 import theano.tensor as T
 import lasagne
+import math
+import random
 
 import utils
 from lstm import LSTMLayer
@@ -21,18 +22,19 @@ from plstm import PLSTMLayer, PLSTMTimeGate
 from utils import save_model, load_model
 from tgate import OutGate, TimeGate
 
+
 parser = argparse.ArgumentParser(description='Specific model, data and other params.')
-parser.add_argument('--model', type=str, default='LSTM', help='Model to train:LSTM, LSTM_T, PLSTM, TLSTM1, TLSTM2, TLSTM2.')
+parser.add_argument('--model', type=str, default='TLSTM3', help='Model to train:LSTM, LSTM_T, PLSTM, TLSTM1, TLSTM2, TLSTM3.')
 parser.add_argument('--data', type=str, default='music', help='Input data source: music, citeulike.')
-parser.add_argument('--fixed_epochs', type=int, default=10, help='Number of epochs in the first stage.')
-parser.add_argument('--num_epochs', type=int, default=100, help='Number of epochs in the first and second stage.')
+parser.add_argument('--fixed_epochs', type=int, default=49, help='Number of epochs in the first stage.')
+parser.add_argument('--num_epochs', type=int, default=50, help='Number of epochs in the first and second stage.')
 parser.add_argument('--num_hidden', type=int, default=128, help='Number of hidden unit.')
 parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning rate.')
-parser.add_argument('--sample_time', type=int, default=1, help='Sample time in the evaluate method.')
+parser.add_argument('--sample_time', type=int, default=3, help='Sample time in the evaluate method.')
 parser.add_argument('--batch_size', type=int, default=5, help='Batch size in the training phase.')
 parser.add_argument('--test_batch', type=int, default=5, help='Batch size in the testing phase')
-parser.add_argument('--vocab_size', type=int, default=3000, help='Vocabulary size')
-parser.add_argument('--max_len', type=int, default=250, help='Maximum length of the sequence.')
+parser.add_argument('--vocab_size', type=int, default=5000, help='Vocabulary size')
+parser.add_argument('--max_len', type=int, default=200, help='Maximum length of the sequence.')
 parser.add_argument('--grad_clip', type=int, default=0, help='Maximum grad step. Grad will be cliped if greater than this. 0 means no clip')
 parser.add_argument('--debug', dest='debug', action='store_true', help='If debug is set, train one time, load small dataset.')
 parser.add_argument('--bn', dest='bn', action='store_true', help='If bn is set, input data will be batch normed')
@@ -103,7 +105,7 @@ else:
     exit()
     
 # Set random seed for lasagne
-lasagne.random.set_rng(np.random.RandomState(1))
+lasagne.random.set_rng(np.random.RandomState(1000))
 
 # Initial logger
 FORMAT = "%(asctime)s - [line:%(lineno)s - %(funcName)10s() ] %(message)s"
@@ -315,6 +317,9 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
 
     def do_evaluate(test_x, test_y, test_mask, lengths, test_t=None, n=100, test_batch=5):
         # evaluate and calculate recall@10, MRR@10
+
+        logging.info("Evaluate: Start predicting")
+
         p = 0
         probs_all_time = None
         while True:
@@ -323,49 +328,66 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
                 input_var += [test_t[p:p+test_batch]]
             batch_probs = predict(*input_var)
             p += test_batch
-            probs_all_time = batch_probs if probs_all_time is None else np.concatenate([probs_all_time, batch_probs], axis=0)
+            if probs_all_time is None:
+                probs_all_time = np.zeros((test_x.shape[0]+TEST_BATCH, batch_probs.shape[2]))
+
+            probs_all_time[p:p+batch_probs.shape[0],:] = batch_probs[:,-1,:]
             if p >= test_x.shape[0]:
                 break
 
+        logging.info("Evaluate: End predicting")
         total_size = test_x.shape[0]
         recall10 = 0.
         MRR10_score = 0.
+        NDCG_score = 0.
         rate_sum = 0
 
         sample_time = SAMPLE_TIME
 
         for idx in range(total_size):
             gnd = test_y[idx]
-            probs = probs_all_time[idx, lengths[idx]-1,:]
+            probs = probs_all_time[idx,:]
             prob_index = np.argsort(probs)[-1::-1].tolist()
             gnd_rate = prob_index.index(gnd) + 1
             rate_sum += gnd_rate
             # Sample multiple times to reduce randomness
             for _ in range(sample_time):
                 samples = np.random.choice(range(vocab_size), n + 1, replace=False).tolist()
+                # for i, sample in enumerate(samples):
+                #     o = 0
+                #     while sample in test_x[idx].tolist() and o < 10:
+                #         sample = random.choice(range(vocab_size))
+                #         samples[i] = sample
+                #         o+=1
+
                 # make sure the fist element is gnd
                 try:
-                    samples.remove(gnd)
-                    samples.insert(0, gnd)
+                   samples.remove(gnd)
+                   samples.insert(0, gnd)
                 except ValueError:
-                    samples[0] = gnd
+                   samples[0] = gnd
 
                 sample_probs = probs[samples]
                 prob_index = np.argsort(sample_probs)[-1::-1].tolist()
                 rate = prob_index.index(0) + 1
 
-                # caculate Recall@10 and MRR@10
+                # caculate Recall@10, NDCG@10 and MRR@10
                 if rate <= 10:
                     recall10 += 1
                     MRR10_score += 1./rate
+                    NDCG_score += 1./math.log(rate + 1, 2)
+
+        logging.info("Evaluate: End calculating scores")
 
         count = total_size * sample_time
         recall10 = recall10 / count 
         MRR10_score = MRR10_score / count
+        NDCG_score = NDCG_score / count
         avg_rate = float(rate_sum) / total_size
 
         logging.info('Recall@10 {}'.format(recall10))
         logging.info('MRR@10 1/rate {}'.format(MRR10_score))
+        logging.info('NDCG@10 1/rate {}'.format(NDCG_score))
         logging.info('Average rate {}'.format(avg_rate))
 
 
@@ -376,8 +398,9 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
             ret.append(onehot.tolist().index(1))
         return ret
 
-            
+
     def get_short_test_data(length):
+        print("Get short test data")
         # generate short sequence in the test_data.
         test_x = test_data['x'][:,:length]
         test_mask = test_data['mask'][:,:length]
@@ -389,7 +412,7 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
             whole_length = test_data['lengths'][idx]
             if length  < whole_length:
                 test_y[idx] = test_data['x'][idx, length,:].tolist().index(1) if ONE_HOT else test_data['x'][idx, length,0]
-
+        logging.info("Finished getting short test data")
         return test_x, test_y, test_mask, lengths, test_t
 
 
@@ -400,10 +423,9 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         test_y = test_data['y']
         test_mask = test_data['mask']
         lengths = test_data['lengths']
-        #logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
-        #do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
+        logging.info('-----------Evaluate Normal:{},{},{}-------------------'.format(MODEL_TYPE, DATA_TYPE, N_HIDDEN))
+        do_evaluate(test_x, test_y, test_mask, lengths, test_data['t'] if USE_TIME_INPUT else None, test_batch=TEST_BATCH)
         # Evaluate the model on short data
-        additional_test_length = 500
         if additional_test_length > 0:
             logging.info('-----------Evaluate Additional---------------')
             test_x, test_y, test_mask, lengths, test_t = get_short_test_data(additional_test_length)
@@ -411,6 +433,8 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         logging.info('-----------Evaluate End----------------------')
         if not DEBUG:
             utils.save_model('{}-{}-{}-{}'.format(MODEL_TYPE,current_epoch, DATA_TYPE,N_HIDDEN), str(datetime.datetime.now()), model,'_new')
+
+        logging.info("Done saving")
 
     def add_test_to_train(length):
         logging.info('Length {} test cases added to train set'.format(length))
@@ -455,6 +479,7 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
     avg_seq_len = 0
     try:
         while True:
+            #logging.info("Load batch")
             batch_data = gen_data(p, train_data, batch_size=BATCH_SIZE)
             x = batch_data['x']
             y = batch_data['y']
@@ -462,12 +487,16 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
             avg_seq_len += x.shape[1]
             input_var = [x, mask, y]
 
+            #logging.info("Train batch")
+
             if USE_TIME_INPUT:
                 t = batch_data['t']
                 input_var.insert(2, t)
             avg_cost += train(*input_var)
             it += 1
             p += BATCH_SIZE
+            #logging.info("Done bitch")
+            #if True:
             if(p >= data_size):
                 p = 0
                 last_it = it
@@ -475,8 +504,10 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
                 # First stage: Using original train data to train model in #FIXED_EPOCHS
                 # Second stage: After that add part of test data to train data. 
                 # The first stage is using user information with similar interest, and the second stage is using history information
-                additional_length = int((current_epoch - FIXED_EPOCHS) * test_data_length/(NUM_EPOCHS - FIXED_EPOCHS))
+                additional_length = int((current_epoch - FIXED_EPOCHS) * test_data_length / (NUM_EPOCHS - FIXED_EPOCHS))
+                #if current_epoch % 2 == 0:
                 evaluate(l_out,current_epoch=current_epoch,additional_test_length=additional_length)
+
                 if current_epoch  >= num_epochs:
                     break
                 if current_epoch > FIXED_EPOCHS:
