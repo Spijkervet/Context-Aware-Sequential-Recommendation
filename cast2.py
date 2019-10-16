@@ -14,46 +14,49 @@ class CAST2():
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        
+
         self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        
+
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
 
         # Mask of time sequence data
-        time_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
+        time_seq_mask = tf.expand_dims(
+            tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
         self.time_seq_mask = time_seq_mask
 
-        hours_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.hours, 0)), -1)
-        self.hours_seq_mask = hours_seq_mask 
-        
+        hours_seq_mask = tf.expand_dims(
+            tf.to_float(tf.not_equal(self.hours, 0)), -1)
+        self.hours_seq_mask = hours_seq_mask
+
         # INPUT-CONTEXT AWARE
         # Hours
         print('INPUT-CONTEXT-AWARE MODULE')
         with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
             self.hours_seq, _ = embedding(self.hours,
-                                        vocab_size=25, # anton's magic number (24 hours + zero padding)
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="hours_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
+                                          # anton's magic number (24 hours + zero padding)
+                                          vocab_size=25,
+                                          num_units=args.hidden_units,
+                                          zero_pad=True,
+                                          scale=True,
+                                          l2_reg=args.l2_emb,
+                                          scope="hours_embeddings",
+                                          with_t=True,
+                                          reuse=reuse)
 
             self.days_seq, _ = embedding(self.days,
-                                        vocab_size=8, # anton's magic number (7 days + zero padding)
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="hours_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
-
+                                         # anton's magic number (7 days + zero padding)
+                                         vocab_size=8,
+                                         num_units=args.hidden_units,
+                                         zero_pad=True,
+                                         scale=True,
+                                         l2_reg=args.l2_emb,
+                                         scope="days_embeddings",
+                                         with_t=True,
+                                         reuse=reuse)
 
         # CONTEXT-AWARE
         print('CONTEXT-AWARE MODULE')
@@ -62,14 +65,14 @@ class CAST2():
             # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
             # self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins+1)
             self.tseq, item_emb_table = embedding(self.time_seq,
-                                        vocab_size=args.max_bins+1,
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="time_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
+                                                  vocab_size=args.max_bins+1,
+                                                  num_units=args.hidden_units,
+                                                  zero_pad=True,
+                                                  scale=True,
+                                                  l2_reg=args.l2_emb,
+                                                  scope="time_embeddings",
+                                                  with_t=True,
+                                                  reuse=reuse)
 
             # Self-attention blocks
             # Build blocks
@@ -110,7 +113,8 @@ class CAST2():
 
             # Positional Encoding
             t, pos_emb_table = embedding(
-                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
+                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [
+                        tf.shape(self.input_seq)[0], 1]),
                 vocab_size=args.maxlen,
                 num_units=args.hidden_units,
                 zero_pad=False,
@@ -126,15 +130,19 @@ class CAST2():
 
             # CONTEXT-AWARE MODULE
             self.seq += self.tseq
+
+            # INPUT-CONTEXT MODULE
             self.seq += self.hours_seq
             self.seq += self.days_seq
+            # self.seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=1)
+            # self.seq = tf.sequential(self.seq)
 
             # Dropout
             self.seq = tf.layers.dropout(self.seq,
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
             self.seq *= mask
-            
+
             # Self-attention blocks
             # Build blocks
             for i in range(args.num_blocks):
@@ -163,12 +171,14 @@ class CAST2():
         neg = tf.reshape(neg, [tf.shape(self.input_seq)[0] * args.maxlen])
         pos_emb = tf.nn.embedding_lookup(item_emb_table, pos)
         neg_emb = tf.nn.embedding_lookup(item_emb_table, neg)
-        seq_emb = tf.reshape(self.seq, [tf.shape(self.input_seq)[0] * args.maxlen, args.hidden_units])
+        seq_emb = tf.reshape(self.seq, [tf.shape(self.input_seq)[
+                             0] * args.maxlen, args.hidden_units])
 
         self.test_item = tf.placeholder(tf.int32, shape=(101))
         test_item_emb = tf.nn.embedding_lookup(item_emb_table, self.test_item)
         self.test_logits = tf.matmul(seq_emb, tf.transpose(test_item_emb))
-        self.test_logits = tf.reshape(self.test_logits, [tf.shape(self.input_seq)[0], args.maxlen, 101])
+        self.test_logits = tf.reshape(
+            self.test_logits, [tf.shape(self.input_seq)[0], args.maxlen, 101])
         self.test_logits = self.test_logits[:, -1, :]
 
         # prediction layer
@@ -176,7 +186,8 @@ class CAST2():
         self.neg_logits = tf.reduce_sum(neg_emb * seq_emb, -1)
 
         # ignore padding items (0)
-        istarget = tf.reshape(tf.to_float(tf.not_equal(pos, 0)), [tf.shape(self.input_seq)[0] * args.maxlen])
+        istarget = tf.reshape(tf.to_float(tf.not_equal(pos, 0)), [
+                              tf.shape(self.input_seq)[0] * args.maxlen])
         self.loss = tf.reduce_sum(
             - tf.log(tf.sigmoid(self.pos_logits) + 1e-24) * istarget -
             tf.log(1 - tf.sigmoid(self.neg_logits) + 1e-24) * istarget
@@ -191,15 +202,19 @@ class CAST2():
 
         if reuse is None:
             tf.summary.scalar('TRAIN/auc', self.auc)
-            self.global_step = tf.Variable(0, name='global_step', trainable=False)
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=args.lr, beta2=0.98)
-            self.train_op = self.optimizer.minimize(self.loss, global_step=self.global_step)
+            self.global_step = tf.Variable(
+                0, name='global_step', trainable=False)
+            self.optimizer = tf.train.AdamOptimizer(
+                learning_rate=args.lr, beta2=0.98)
+            self.train_op = self.optimizer.minimize(
+                self.loss, global_step=self.global_step)
         else:
             tf.summary.scalar('TEST/test_auc', self.auc)
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx, timeseq=None, ratings_seq=None):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.ratings: ratings_seq, self.test_item: item_idx, self.is_training: False})
-
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq,
+                         self.hours: hours_seq, self.days: days_seq, self.test_item: item_idx,
+                         self.is_training: False})

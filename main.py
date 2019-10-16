@@ -156,15 +156,14 @@ if __name__ == '__main__':
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
 
-                print('yo')
-
                 # print(u[0], ratings_seq[0])
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
-                                                               model.ratings: ratings_seq,
+                                                               model.hours: hours_seq,
+                                                               model.days: days_seq,
                                                                model.is_training: True})
 
             writer.add_summary(summary, epoch)

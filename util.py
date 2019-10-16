@@ -232,12 +232,14 @@ def evaluate(model, dataset, args, sess):
         seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
-        ratings_seq = np.zeros([args.maxlen], dtype=np.int32)
+        hours_seq = np.zeros([args.maxlen], dtype=np.int32)
+        days_seq = np.zeros([args.maxlen], dtype=np.int32)
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
         orig_seq[idx] = valid[u][0]
-        ratings_seq[idx] = valid[u][0].rating
+        hours_seq[idx] = valid[u][0].ts.hour
+        days_seq[idx] = valid[u][0].ts.day
 
         valid_to_test_delta = (
             test[u][0].timestamp - valid[u][0].timestamp).total_seconds()
@@ -247,8 +249,8 @@ def evaluate(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
-            ratings_seq[idx] = i.rating
-            # timeseq[idx] = i.time_bin
+            hours_seq[idx] = i.ts.hour
+            days_seq[idx] = i.ts.day
             idx -= 1
             if idx == -1:
                 break
@@ -273,7 +275,7 @@ def evaluate(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], ratings_seq=[ratings_seq])
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -305,7 +307,8 @@ def evaluate_valid(model, dataset, args, sess):
             continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
-        ratings_seq = np.zeros([args.maxlen], dtype=np.int32)
+        hours_seq = np.zeros([args.maxlen], dtype=np.int32)
+        days_seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         # for test data, the most recent item is always in the 0 bin
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
@@ -313,7 +316,8 @@ def evaluate_valid(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
-            ratings_seq[idx] = i.rating
+            hours_seq[idx] = i.ts.hour
+            days_seq[idx] = i.ts.day
             idx -= 1
             if idx == -1:
                 break
@@ -337,7 +341,7 @@ def evaluate_valid(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], ratings_seq=[ratings_seq])
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
