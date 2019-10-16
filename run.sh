@@ -44,5 +44,5 @@ sh download_data.sh
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --model cast --train_dir cast_base --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
+python3 main.py --dataset data/ml-1m.txt --model cast2 --train_dir cast2 --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

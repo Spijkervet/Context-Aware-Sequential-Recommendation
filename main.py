@@ -69,7 +69,8 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=None, type=int)
     parser.add_argument('--log_scale', default=False, action='store_true')
     parser.add_argument('--input_context', default=False, action='store_true')
-    parser.add_argument('--model', default="cast", required=True, help="model to use from {cast, sasrec, castsp}")
+    parser.add_argument('--model', default="cast", required=True,
+                        help="model to use from {cast, sasrec, castsp}")
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -86,7 +87,6 @@ if __name__ == '__main__':
     if not os.path.exists(TRAIN_FILES_PATH):
         os.makedirs(TRAIN_FILES_PATH)
 
-    
     # Save parameters to file for reproduction
     with open(os.path.join(TRAIN_FILES_PATH, 'params.txt'), 'w') as f:
         json.dump(args.__dict__, f, indent=2)
@@ -155,8 +155,14 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
+                # concat_seq = sess.run([model.concat_seq],
+                #                             {model.u: u, model.input_seq: seq, model.pos: pos,
+                #                              model.neg: neg, model.time_seq: timeseq,
+                #                              model.hours: hours_seq,
+                #                              model.days: days_seq,
+                #                              model.is_training: True})
+                # print(concat_seq[0].shape)
 
-                # print(u[0], ratings_seq[0])
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
 

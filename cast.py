@@ -209,7 +209,7 @@ class CAST():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx, timeseq=None, ratings_seq=None):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
                         {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.ratings: ratings_seq, self.test_item: item_idx, self.is_training: False})
 

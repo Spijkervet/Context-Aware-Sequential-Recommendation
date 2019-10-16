@@ -28,9 +28,13 @@ class CAST2():
             tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
         self.time_seq_mask = time_seq_mask
 
-        hours_seq_mask = tf.expand_dims(
+        hours_mask = tf.expand_dims(
             tf.to_float(tf.not_equal(self.hours, 0)), -1)
-        self.hours_seq_mask = hours_seq_mask
+        self.hours_mask = hours_mask 
+        
+        days_mask = tf.expand_dims(
+            tf.to_float(tf.not_equal(self.days, 0)), -1)
+        self.days_mask = days_mask 
 
         # INPUT-CONTEXT AWARE
         # Hours
@@ -134,14 +138,24 @@ class CAST2():
             # INPUT-CONTEXT MODULE
             self.seq += self.hours_seq
             self.seq += self.days_seq
-            # self.seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=1)
+            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=1)
+            self.concat_mask = tf.concat([mask, hours_mask, days_mask], axis=1)
             # self.seq = tf.sequential(self.seq)
 
             # Dropout
-            self.seq = tf.layers.dropout(self.seq,
+            # self.seq = tf.layers.dropout(self.seq,
+            #                              rate=args.dropout_rate,
+            #                              training=tf.convert_to_tensor(self.is_training))
+            
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
-            self.seq *= mask
+            # self.seq *= mask
+            self.concat_seq *= self.concat_mask
+            self.seq = self.concat_seq
+                    
+            self.seq = feedforward(normalize(self.seq), num_units=[args.maxlen * 3, args.hidden_units],
+                                    dropout_rate=args.dropout_rate, is_training=self.is_training)
 
             # Self-attention blocks
             # Build blocks

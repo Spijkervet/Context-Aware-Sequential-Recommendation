@@ -167,7 +167,7 @@ class CASTSP():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
                         {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.input_context: input_context_seq, self.test_item: item_idx, self.is_training: False})
 
