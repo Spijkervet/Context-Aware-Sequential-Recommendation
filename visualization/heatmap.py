@@ -4,7 +4,7 @@ import csv
 from collections import defaultdict
 import numpy as np
 
-def main():
+def main(filename='dummydata_heatmap.csv'):
 
     '''
     Creating heatmap plots from attention vectors.
@@ -12,10 +12,8 @@ def main():
 
     data = defaultdict(list)
 
-    maxlen = 0
-
     # get data from file
-    with open('dummydata_heatmap.csv', 'r') as file:
+    with open(filename, 'r') as file:
 
         reader = csv.reader(file)
 
@@ -24,9 +22,7 @@ def main():
             # group data by sequence length
             data[len(line)].append([float(x) for x in line])
 
-            # store largest length
-            if len(line) > maxlen:
-                maxlen = len(line)
+    maxlen = max(data.keys())
 
     # average vectors at each sequence length
     averaged_vectors = [average(data[k]) for k in sorted(data, reverse=True)]
@@ -38,7 +34,7 @@ def main():
 
     print(averaged_arr)
 
-    sns.heatmap(averaged_arr.T, linewidth=0.5)
+    sns.heatmap(averaged_arr.T, linewidth=0.5, square=True, cmap="YlGnBu")
     plt.xlabel("Position")
     plt.ylabel("Time step")
     plt.title("Attention weights over time steps")

@@ -9,7 +9,7 @@ import logging
 
 import lasagne
 from scipy.sparse import coo_matrix
-import _pickle as pickle
+import pickle as pickle
 from lasagne.utils import floatX
 from lasagne.init import Initializer
 from lasagne import nonlinearities
