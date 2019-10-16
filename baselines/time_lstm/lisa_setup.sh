@@ -2,6 +2,7 @@ module purge
 module load pre2019
 module load Anaconda2
 
+#rm -rf ~/.conda/envs/time_lstm
 conda create --name time_lstm -y
 source activate time_lstm
 conda install theano=0.9
