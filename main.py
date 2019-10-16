@@ -8,7 +8,8 @@ from datetime import datetime
 from util import *
 from sampler import WarpSampler, sample_function
 
-from model import Model as CAST
+from cast import CAST
+from cast2 import CAST2
 from sasrec import SASRec
 from cast_sp import CASTSP
 
@@ -114,13 +115,15 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast", "sasrec", "castsp"]
+    MODELS = ["cast", "cast2", "sasrec", "castsp"]
     if args.model.lower() not in MODELS:
         print("provide model from {CAST, SASRec, FutureCAST}")
         sys.exit(0)
 
     if args.model == "cast":
         model = CAST(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast2":
+        model = CAST2(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
     elif args.model == "castsp":
@@ -150,8 +153,12 @@ if __name__ == '__main__':
     try:
         for epoch in range(1, args.num_epochs + 1):
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-                u, seq, pos, neg, timeseq, ratings_seq, orig_seq = sampler.next_batch()
+                u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
+
+                print('yo')
+
+                # print(u[0], ratings_seq[0])
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations],
 
@@ -160,8 +167,8 @@ if __name__ == '__main__':
                                                                model.ratings: ratings_seq,
                                                                model.is_training: True})
 
-            # writer.add_summary(summary, epoch)
-            # writer.flush()
+            writer.add_summary(summary, epoch)
+            writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)

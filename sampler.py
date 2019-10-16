@@ -27,6 +27,9 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         nxt = user_train[user][-1].item
         timeseq = np.zeros([maxlen], dtype=np.int32)
         ratings_seq = np.zeros([maxlen], dtype=np.int32)
+        hours_seq = np.zeros([maxlen], dtype=np.int32)
+        days_seq = np.zeros([maxlen], dtype=np.int32)
+        
         orig_seq = [0] * maxlen
         idx = maxlen - 1
         
@@ -42,7 +45,8 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             # print('idx', idx, 'i', i, 'nxt', nxt)
             seq[idx] = i.item
             ratings_seq[idx] = i.rating
-            # timeseq[idx] = i.time_bin # NOTE: CONTEXT SCOPE IS CHANGED HERE
+            hours_seq[idx] = i.ts.hour
+            days_seq[idx] = i.ts.day
             orig_seq[idx] = i
             pos[idx] = nxt
             if nxt != 0: # TODO: What does nxt != 0 mean?
@@ -70,11 +74,7 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             else:
                 timeseq[idx] = 0
 
-        # print('user_id', user)
-        # print('sequence', seq)
-        # print('positive examples (incl. recent)', pos)
-        # print('negative examples', neg)
-        return (user, seq, pos, neg, timeseq, ratings_seq, orig_seq)
+        return (user, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq)
 
     np.random.seed(SEED)
     # TODO: I have no idea what this while loop does?

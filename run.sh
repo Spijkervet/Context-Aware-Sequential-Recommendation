@@ -40,9 +40,9 @@ sh download_data.sh
 # python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
 
 # MOVIELENS 1-M
-python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
+# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --model cast --train_dir time_context --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 4242
+python3 main.py --dataset data/ml-1m.txt --model cast --train_dir cast_base --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

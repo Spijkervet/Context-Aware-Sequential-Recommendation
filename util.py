@@ -6,13 +6,22 @@ import math
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
+dayDict = {
+	"Monday":1,
+	"Tuesday":2,
+	"Wednesday":3,
+	"Thursday":4,
+	"Friday":5,
+	"Saturday":6,
+	"Sunday":7
+}
 
 class TimeStamp():
 
     def __init__(self, timestamp):
-        self.day = timestamp.strftime("%-d")
-        self.hour = timestamp.strftime("%-H")
-        self.date = timestamp.strftime("%c")
+        self.day = dayDict[timestamp.strftime("%A")]
+        self.hour = int(timestamp.strftime("%H")) + 1
+        # self.date = timestamp.strftime("%c")
 
 
 class UserItems():
@@ -24,6 +33,7 @@ class UserItems():
         self.timestamp_raw = timestamp
         self.timestamp = datetime.fromtimestamp(
             timestamp).astimezone(timezone.utc)
+            
         self.ts = TimeStamp(self.timestamp)
         self.day = self.ts.day
 
@@ -222,12 +232,12 @@ def evaluate(model, dataset, args, sess):
         seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
-        input_context_seq = np.zeros([args.maxlen], dtype=np.int32)
+        ratings_seq = np.zeros([args.maxlen], dtype=np.int32)
 
         idx = args.maxlen - 1
         seq[idx] = valid[u][0].item
         orig_seq[idx] = valid[u][0]
-        input_context_seq[idx] = valid[u][0].rating
+        ratings_seq[idx] = valid[u][0].rating
 
         valid_to_test_delta = (
             test[u][0].timestamp - valid[u][0].timestamp).total_seconds()
@@ -237,7 +247,7 @@ def evaluate(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
-            input_context_seq[idx] = i.rating
+            ratings_seq[idx] = i.rating
             # timeseq[idx] = i.time_bin
             idx -= 1
             if idx == -1:
@@ -263,7 +273,7 @@ def evaluate(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], input_context_seq=[input_context_seq])
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], ratings_seq=[ratings_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -295,7 +305,7 @@ def evaluate_valid(model, dataset, args, sess):
             continue
 
         seq = np.zeros([args.maxlen], dtype=np.int32)
-        input_context_seq = np.zeros([args.maxlen], dtype=np.int32)
+        ratings_seq = np.zeros([args.maxlen], dtype=np.int32)
         orig_seq = [0] * args.maxlen
         # for test data, the most recent item is always in the 0 bin
         timeseq = np.zeros([args.maxlen], dtype=np.int32)
@@ -303,7 +313,7 @@ def evaluate_valid(model, dataset, args, sess):
         for i in reversed(train[u]):
             seq[idx] = i.item
             orig_seq[idx] = i
-            input_context_seq[idx] = i.rating
+            ratings_seq[idx] = i.rating
             idx -= 1
             if idx == -1:
                 break
@@ -327,7 +337,7 @@ def evaluate_valid(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], input_context_seq=[input_context_seq])
+        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], ratings_seq=[ratings_seq])
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
