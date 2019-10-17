@@ -4,10 +4,10 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=12:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 
 module purge
@@ -20,7 +20,6 @@ module load cuDNN/7.6.3-CUDA-10.0.130
 
 # Mail
 mail_template "IR2" $SLURM_JOBID "STARTED" "$1"
-
 
 pip3 install virtualenv 
 python3 -m virtualenv ir2
@@ -40,9 +39,9 @@ sh download_data.sh
 # python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
 
 # MOVIELENS 1-M
-python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt #--limit 100000
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --model cast_2 --train_dir cast2_concat_input_log_scale --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
+python3 run_experiments.py
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"

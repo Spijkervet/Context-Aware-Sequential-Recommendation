@@ -195,8 +195,6 @@ def data_partition(fpath, log_scale=False):
     user_test = {}
     User, usernum, itemnum, ratingnum = get_users(fpath)
 
-    # User = add_time_bin(User, log_scale)
-
     # Partition data into three parts: train, valid, test.
     for user in User:
         nfeedback = len(User[user])
@@ -216,6 +214,8 @@ def data_partition(fpath, log_scale=False):
 def evaluate(model, dataset, args, sess):
 
     [train, valid, test, usernum, itemnum, ratingnum] = copy.deepcopy(dataset)
+    
+    min_timedelta, max_timedelta = get_delta_range(train)
 
     NDCG = 0.0
     HT = 0.0
@@ -260,9 +260,14 @@ def evaluate(model, dataset, args, sess):
         for idx, s in enumerate(orig_seq):
             if s != 0:
                 time_delta = (most_recent_timestamp -
-                              s.timestamp).total_seconds()
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
-                                                 log_scale=False)
+                            s.timestamp).total_seconds()
+
+                if args.log_scale:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
+                                                   log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
+                else:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
+                                                    log_scale=False)
             else:
                 timeseq[idx] = 0
 
@@ -294,6 +299,8 @@ def evaluate(model, dataset, args, sess):
 
 def evaluate_valid(model, dataset, args, sess):
     [train, valid, _, usernum, itemnum, ratingnum] = copy.deepcopy(dataset)
+
+    min_timedelta, max_timedelta = get_delta_range(train)
 
     NDCG = 0.0
     valid_user = 0.0
@@ -327,8 +334,13 @@ def evaluate_valid(model, dataset, args, sess):
             if s != 0:
                 time_delta = (most_recent_timestamp -
                               s.timestamp).total_seconds()
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
-                                                 log_scale=False)
+
+                if args.log_scale:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
+                                                   log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
+                else:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=args.bin_in_hours, max_bins=args.max_bins,
+                                                log_scale=False)
             else:
                 timeseq[idx] = 0
 

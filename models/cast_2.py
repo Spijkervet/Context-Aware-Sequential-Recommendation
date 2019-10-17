@@ -15,6 +15,11 @@ class CAST2():
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        
+        # placeholders
+        self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
 
         pos = self.pos
         neg = self.neg

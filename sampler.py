@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 import multiprocessing
 multiprocessing.set_start_method('spawn', True)
 
-from util import get_timedelta_bin
+from util import get_timedelta_bin, get_delta_range
 
 def random_neq(l, r, s):
     t = np.random.randint(l, r)
@@ -13,7 +13,7 @@ def random_neq(l, r, s):
         t = np.random.randint(l, r)
     return t
 
-def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, bin_in_hours, max_bins, SEED):
+def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_queue, bin_in_hours, max_bins, log_scale, min_timedelta, max_timedelta, SEED):
     def sample():
         # Get a random user_id, make sure it has more than x interactions (which we already checked?):
         user = np.random.randint(1, usernum + 1)
@@ -57,19 +57,16 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
             idx -= 1
             if idx == -1: break
 
-        # log_scale = False
-        # if log_scale:
-        #     min_timedelta, max_timedelta = get_delta_range(User)
+
         most_recent_timestamp = orig_seq[-1].timestamp
         for idx, s in enumerate(orig_seq):
             if s != 0:
                 time_delta = (most_recent_timestamp - s.timestamp).total_seconds()
-                # if log_scale:
-                #     s.time_bin = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
-                #                                    log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
-                # else:
-                
-                timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=max_bins,
+                if log_scale:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=48, max_bins=200,
+                                                   log_scale=True, min_ts=min_timedelta, max_ts=max_timedelta)
+                else:
+                    timeseq[idx] = get_timedelta_bin(time_delta, bin_in_hours=bin_in_hours, max_bins=max_bins,
                                                 log_scale=False)
             else:
                 timeseq[idx] = 0
@@ -77,7 +74,6 @@ def sample_function(user_train, usernum, itemnum, batch_size, maxlen, result_que
         return (user, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq)
 
     np.random.seed(SEED)
-    # TODO: I have no idea what this while loop does?
     while True:
         one_batch = []
         for i in range(batch_size):
@@ -106,6 +102,8 @@ class WarpSampler(object):
     def __init__(self, args, User, usernum, itemnum, sample_func=sample_function, batch_size=64, maxlen=10, n_workers=1):
         self.result_queue = Queue(maxsize=n_workers * 10)
         self.processors = []
+        
+        min_timedelta, max_timedelta = get_delta_range(User)
 
         if args.seed:
             seed = args.seed
@@ -121,6 +119,9 @@ class WarpSampler(object):
                                                   self.result_queue,
                                                   args.bin_in_hours,
                                                   args.max_bins,
+                                                  args.log_scale,
+                                                  min_timedelta,
+                                                  max_timedelta,
                                                   seed
                                                   )))
             self.processors[-1].daemon = True

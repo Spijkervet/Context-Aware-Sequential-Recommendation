@@ -191,6 +191,6 @@ class CAST3():
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours_seq: hours_seq,
-                         self.days_seq: days_seq, self.test_item: item_idx, self.is_training: False})
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
+                         self.days: days_seq, self.test_item: item_idx, self.is_training: False})
 

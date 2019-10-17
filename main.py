@@ -23,7 +23,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
 if __name__ == '__main__':
 
-    MODEL_PATH = os.path.abspath('models')
+    MODEL_PATH = os.path.abspath('saved_models')
     logger = logging.getLogger('ir2')
     logging.basicConfig(
         level=logging.DEBUG,
@@ -118,20 +118,20 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast","cast1","cast2", "cast3", "cast4", "sasrec"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4", "sasrec"]
     if args.model.lower() not in MODELS:
         print("provide model from {CAST, SASRec, FutureCAST}")
         sys.exit(0)
 
-    if args.model == "cast1":
+    if args.model == "cast_1":
         model = CAST1(usernum, itemnum, ratingnum, args)
-    elif args.model == "cast2":
+    elif args.model == "cast_2":
         model = CAST2(usernum, itemnum, ratingnum, args)
-    elif args.model == "cast3":
+    elif args.model == "cast_3":
         model = CAST3(usernum, itemnum, ratingnum, args)
-    elif args.model == "cast4":
+    elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
-    elif args.model == "cast5":
+    elif args.model == "cast_5":
         model = CAST2(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
@@ -148,7 +148,6 @@ if __name__ == '__main__':
     writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
 
     # Allow saving of model
-
     MODEL_SAVE_PATH = os.path.join(TRAIN_FILES_PATH, 'model.ckpt')
     saver = tf.train.Saver()
     if os.path.exists(MODEL_SAVE_PATH):
@@ -161,14 +160,15 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations, days, hours, concat_seq = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations, model.days_seq, model.hours_seq, model.concat_seq],
+                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.activations], 
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.hours: hours_seq,
                                                                model.days: days_seq,
                                                                model.is_training: True})
+            
             if summary is not None:
                 writer.add_summary(summary, epoch)
                 writer.flush()
@@ -199,6 +199,7 @@ if __name__ == '__main__':
                                   simple_value=float(t_test[1]))
                 writer.add_summary(summary, epoch)
                 t0 = time.time()
+
     except Exception as e:
         sampler.close()
         f.close()
