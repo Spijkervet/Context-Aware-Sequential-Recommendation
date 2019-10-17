@@ -33,7 +33,7 @@ parser.add_argument('--learning_rate', type=float, default=0.01, help='Learning 
 parser.add_argument('--sample_time', type=int, default=3, help='Sample time in the evaluate method.')
 parser.add_argument('--batch_size', type=int, default=5, help='Batch size in the training phase.')
 parser.add_argument('--test_batch', type=int, default=5, help='Batch size in the testing phase')
-parser.add_argument('--vocab_size', type=int, default=5000, help='Vocabulary size')
+parser.add_argument('--vocab_size', type=int, default=3200, help='Vocabulary size')
 parser.add_argument('--max_len', type=int, default=200, help='Maximum length of the sequence.')
 parser.add_argument('--grad_clip', type=int, default=0, help='Maximum grad step. Grad will be cliped if greater than this. 0 means no clip')
 parser.add_argument('--debug', dest='debug', action='store_true', help='If debug is set, train one time, load small dataset.')
