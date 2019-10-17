@@ -1,5 +1,5 @@
 from modules import *
-
+import tensorflow as tf
 
 class CAST2():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
@@ -124,33 +124,15 @@ class CAST2():
             self.seq += self.tseq
 
             # INPUT-CONTEXT MODULE
-            # ADDITION
-            # self.seq += self.hours_seq
-            # self.seq += self.days_seq
-
             self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
-
-            # self.seq = tf.sequential(self.seq)
-
-            # Dropout
-            # self.seq = tf.layers.dropout(self.seq,
-            #                              rate=args.dropout_rate,
-            #                              training=tf.convert_to_tensor(self.is_training))
-            
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
-            # # self.seq *= mask
             self.concat_seq *= self.mask
-            self.seq = self.concat_seq
 
             ### INSERT MLP HERE
-            # Go from 150 to 100
-            self.seq = feedforward_MLP(normalize(self.seq), scope="mlp", num_units=[self.seq.get_shape()[2], 100],
-                                    dropout_rate=args.dropout_rate, is_training=self.is_training)
-            # Go from 100 to original embedding dimension
-            self.seq = feedforward_MLP(normalize(self.seq), scope="mlp", num_units=[100, args.hidden_units],
-                                   dropout_rate=args.dropout_rate, is_training=self.is_training)
+            # Go from 150x100 -> 100x original embedding dimension
+            self.seq = mlp(self.concat_seq, [100, args.hidden_units])
 
             # Self-attention blocks
             # Build blocks

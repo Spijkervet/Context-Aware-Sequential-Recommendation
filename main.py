@@ -158,14 +158,6 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
-                # concat_seq = sess.run([model.concat_seq],
-                #                             {model.u: u, model.input_seq: seq, model.pos: pos,
-                #                              model.neg: neg, model.time_seq: timeseq,
-                #                              model.hours: hours_seq,
-                #                              model.days: days_seq,
-                #                              model.is_training: True})
-                # print(concat_seq[0].shape)
-
                 auc, loss, _, summary, activations, days, hours, concat_seq = sess.run([model.auc, model.loss, model.train_op,
                                                                model.merged, model.activations, model.days_seq, model.hours_seq, model.concat_seq],
 
@@ -175,9 +167,9 @@ if __name__ == '__main__':
                                                                model.days: days_seq,
                                                                model.is_training: True})
 
-            print(days[0].shape)
-            print(hours[0].shape)
-            print(concat_seq[0].shape)
+            # print(days[0].shape)
+            # print(hours[0].shape)
+            # print(concat_seq[0].shape)
             writer.add_summary(summary, epoch)
             writer.flush()
 
