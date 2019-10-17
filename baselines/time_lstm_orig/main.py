@@ -341,6 +341,7 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
         total_size = test_x.shape[0]
         recall10 = 0.
         MRR10_score = 0.
+        NDCG_score = 0.
         rate_sum = 0
 
         sample_time = SAMPLE_TIME
@@ -369,18 +370,21 @@ def main(num_epochs=NUM_EPOCHS, vocab_size=VOCAB_SIZE):
                 if rate <= 10:
                     recall10 += 1
                     MRR10_score += 1./rate
+                    NDCG_score += 1./np.log2(rate + 1)
 
         count = total_size * sample_time
         recall10 = recall10 / count 
         MRR10_score = MRR10_score / count
+        NDCG_score = NDCG_score / count
         avg_rate = float(rate_sum) / total_size
 
         logging.info('Recall@10 {}'.format(recall10))
         logging.info('MRR@10 1/rate {}'.format(MRR10_score))
+        logging.info('NDCG@10 {}'.format(NDCG_score))
         logging.info('Average rate {}'.format(avg_rate))
 
         from log import log_results
-        log_results(result_dir, current_epoch, recall10, MRR10_score, avg_rate, cost, name)
+        log_results(result_dir, current_epoch, recall10, MRR10_score, NDCG_score, avg_rate, cost, name)
 
 
     def onehot2int(onehot_vec):
