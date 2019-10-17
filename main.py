@@ -4,14 +4,14 @@ import logging
 import time
 import json
 
-from datetime import datetime
 from util import *
 from sampler import WarpSampler, sample_function
 
-from cast import CAST
-from cast2 import CAST2
-from sasrec import SASRec
-from cast_sp import CASTSP
+from models.cast_1 import CAST1
+from models.cast_2 import CAST2
+from models.cast_3 import CAST3
+from models.cast_4 import CAST4
+from models.sasrec import SASRec
 
 from tqdm import tqdm
 import numpy as np
@@ -94,7 +94,10 @@ if __name__ == '__main__':
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
     [train, valid, test, usernum, itemnum, ratingnum] = dataset
+    print(len(train[1]))
+    print(train[1])
     num_batch = round(len(train) / args.batch_size)
+    print('usernum', usernum, 'itemnum', itemnum)
 
     cc = sum([len(v) for v in train.values()])
     logger.info('Average sequence length: {:.2f}'.format(cc / len(train)))
@@ -115,20 +118,23 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast", "cast2", "sasrec", "castsp"]
+    MODELS = ["cast","cast1","cast2", "cast3", "cast4", "sasrec"]
     if args.model.lower() not in MODELS:
         print("provide model from {CAST, SASRec, FutureCAST}")
         sys.exit(0)
 
-    if args.model == "cast":
-        model = CAST(usernum, itemnum, ratingnum, args)
+    if args.model == "cast1":
+        model = CAST1(usernum, itemnum, ratingnum, args)
     elif args.model == "cast2":
+        model = CAST2(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast3":
+        model = CAST3(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast4":
+        model = CAST4(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast5":
         model = CAST2(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
-    elif args.model == "castsp":
-        model = CASTSP(usernum, itemnum, args)
-        # sample_function = future_sample_function
 
     # SAMPLER
     print('usernum', usernum, 'itemnum', itemnum)
@@ -155,25 +161,17 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
-                # concat_seq = sess.run([model.concat_seq],
-                #                             {model.u: u, model.input_seq: seq, model.pos: pos,
-                #                              model.neg: neg, model.time_seq: timeseq,
-                #                              model.hours: hours_seq,
-                #                              model.days: days_seq,
-                #                              model.is_training: True})
-                # print(concat_seq[0].shape)
-
-                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations],
+                auc, loss, _, summary, activations, days, hours, concat_seq = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.activations, model.days_seq, model.hours_seq, model.concat_seq],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.hours: hours_seq,
                                                                model.days: days_seq,
                                                                model.is_training: True})
-
-            writer.add_summary(summary, epoch)
-            writer.flush()
+            if summary is not None:
+                writer.add_summary(summary, epoch)
+                writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)

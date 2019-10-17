@@ -1,8 +1,10 @@
 from modules import *
 
-#Context Aware Sequential Transformer using a Sinusoidal Positional embedding
-class CASTSP():
-    def __init__(self, usernum, itemnum, args, reuse=None):
+# Context Aware Sequential Transformer using a Sinusoidal Positional embedding
+# Addition of the transition context
+# Concatenation of the input-context
+class CAST3():
+    def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
         if args.seed:
             tf.set_random_seed(args.seed)
@@ -14,38 +16,53 @@ class CASTSP():
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        
-        self.input_context = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
 
-        # Mask of time sequence data
-        time_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
-        self.time_seq_mask = time_seq_mask
 
-        # Mask of input sequence data
-        input_context_seq_mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_context, 0)), -1)
-        self.input_context_seq_mask = input_context_seq_mask 
+        # INPUT-CONTEXT AWARE
+        print('INPUT-CONTEXT-AWARE MODULE')
+        with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
+            self.hours_seq, _ = embedding(self.hours,
+                                          # anton's magic number (24 hours + zero padding)
+                                          vocab_size=25,
+                                          num_units=args.hidden_units,
+                                          zero_pad=True,
+                                          scale=True,
+                                          l2_reg=args.l2_emb,
+                                          scope="hours_embeddings",
+                                          with_t=True,
+                                          reuse=reuse)
+
+            self.days_seq, _ = embedding(self.days,
+                                         # anton's magic number (7 days + zero padding)
+                                         vocab_size=8,
+                                         num_units=args.hidden_units,
+                                         zero_pad=True,
+                                         scale=True,
+                                         l2_reg=args.l2_emb,
+                                         scope="days_embeddings",
+                                         with_t=True,
+                                         reuse=reuse)
 
         # CONTEXT-AWARE
         print('CONTEXT-AWARE MODULE')
         with tf.variable_scope("CONTEXT", reuse=reuse):
-            # Time sequence encoding ('timestamps -> positional vector')
-            # TODO: Either set encoding dims to args.max_time_interval or hidden_units, or use embedding()
-            self.tseq_enc = timeseq_encoding(self.time_seq, args.max_bins+1)
-            # self.tseq = timeseq_encoding(self.time_seq, args.hidden_units)
             self.tseq, item_emb_table = embedding(self.time_seq,
-                                        vocab_size=args.max_bins+1,
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="time_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
+                                                  vocab_size=args.max_bins+1,
+                                                  num_units=args.hidden_units,
+                                                  zero_pad=True,
+                                                  scale=True,
+                                                  l2_reg=args.l2_emb,
+                                                  scope="time_embeddings",
+                                                  with_t=True,
+                                                  reuse=reuse)
 
             # Self-attention blocks
             # Build blocks
@@ -66,7 +83,7 @@ class CASTSP():
                     # Feed forward
                     self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
                                             dropout_rate=args.dropout_rate, is_training=self.is_training)
-                    self.tseq *= time_seq_mask
+                    self.tseq *= mask
             self.tseq = normalize(self.tseq)
 
         with tf.variable_scope("SASRec", reuse=reuse):
@@ -86,23 +103,28 @@ class CASTSP():
 
             # Positional Encoding
             # positional_encoding(dim, sentence_length, dtype=tf.float32)
-            t = positional_encoding(
+            positional_embedding = positional_encoding(
                 args.hidden_units,
                 args.maxlen,
             )
 
             # Sinusoidal Positional Embedding
-            self.seq += t
+            self.seq += positional_embedding
 
-            # CONTEXT-AWARE MODULE
-            self.seq += self.tseq
+            # CONCATENATE TRANSITION CONTEXT
+            self.seq = tf.concat([self.seq, self.tseq], axis=2)
 
-            # Dropout
-            self.seq = tf.layers.dropout(self.seq,
-                                         rate=args.dropout_rate,
-                                         training=tf.convert_to_tensor(self.is_training))
-            self.seq *= mask
-            
+            # INPUT-CONTEXT MODULE
+            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
+                                                rate=args.dropout_rate,
+                                                training=tf.convert_to_tensor(self.is_training))
+            self.concat_seq *= self.mask
+
+
+            # Go from concat -> 100x original embedding dimension
+            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
+
             # Self-attention blocks
             # Build blocks
             for i in range(args.num_blocks):
@@ -169,5 +191,6 @@ class CASTSP():
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.input_context: input_context_seq, self.test_item: item_idx, self.is_training: False})
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours_seq: hours_seq,
+                         self.days_seq: days_seq, self.test_item: item_idx, self.is_training: False})
 
