@@ -1,0 +1,2 @@
+epoch,recall10,mrr10,ndcg,avg_rate,loss,name
+1,1.0,0.968460648148,0.976705800998,2.83333333333,1.53313529491,additional

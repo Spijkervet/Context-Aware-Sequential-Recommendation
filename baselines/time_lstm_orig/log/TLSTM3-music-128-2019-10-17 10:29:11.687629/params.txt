@@ -1,0 +1,17 @@
+{
+  "grad_clip": 1, 
+  "num_hidden": 128, 
+  "vocab_size": 500, 
+  "sample_time": 3, 
+  "learning_rate": 0.075, 
+  "test_batch": 5, 
+  "batch_size": 5, 
+  "max_len": 200, 
+  "sigmoid_on": 1, 
+  "num_epochs": 50, 
+  "debug": false, 
+  "model": "TLSTM3", 
+  "fixed_epochs": 10, 
+  "data": "music", 
+  "bn": 1
+}
