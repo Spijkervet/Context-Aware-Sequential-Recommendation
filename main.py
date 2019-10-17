@@ -94,7 +94,10 @@ if __name__ == '__main__':
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
     [train, valid, test, usernum, itemnum, ratingnum] = dataset
+    print(len(train[1]))
+    print(train[1])
     num_batch = round(len(train) / args.batch_size)
+    print('usernum', usernum, 'itemnum', itemnum)
 
     cc = sum([len(v) for v in train.values()])
     logger.info('Average sequence length: {:.2f}'.format(cc / len(train)))
@@ -163,8 +166,8 @@ if __name__ == '__main__':
                 #                              model.is_training: True})
                 # print(concat_seq[0].shape)
 
-                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations],
+                auc, loss, _, summary, activations, days, hours, concat_seq = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.activations, model.days_seq, model.hours_seq, model.concat_seq],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
@@ -172,6 +175,9 @@ if __name__ == '__main__':
                                                                model.days: days_seq,
                                                                model.is_training: True})
 
+            print(days[0].shape)
+            print(hours[0].shape)
+            print(concat_seq[0].shape)
             writer.add_summary(summary, epoch)
             writer.flush()
 

@@ -138,8 +138,8 @@ class CAST2():
             # INPUT-CONTEXT MODULE
             self.seq += self.hours_seq
             self.seq += self.days_seq
-            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=1)
-            self.concat_mask = tf.concat([mask, hours_mask, days_mask], axis=1)
+            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
+            self.concat_mask = tf.concat([mask, hours_mask, days_mask], axis=2)
             # self.seq = tf.sequential(self.seq)
 
             # Dropout
@@ -150,10 +150,14 @@ class CAST2():
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
-            # self.seq *= mask
+            # # self.seq *= mask
             self.concat_seq *= self.concat_mask
+
+            ### INSERT MLP HERE
+
             self.seq = self.concat_seq
-                    
+
+     
             self.seq = feedforward(normalize(self.seq), num_units=[args.maxlen * 3, args.hidden_units],
                                     dropout_rate=args.dropout_rate, is_training=self.is_training)
 
