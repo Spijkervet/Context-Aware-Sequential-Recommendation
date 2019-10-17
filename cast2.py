@@ -20,21 +20,10 @@ class CAST2():
 
         pos = self.pos
         neg = self.neg
+
+        # Masking of data, according to the padding
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
-
-        # Mask of time sequence data
-        time_seq_mask = tf.expand_dims(
-            tf.to_float(tf.not_equal(self.time_seq, 0)), -1)
-        self.time_seq_mask = time_seq_mask
-
-        hours_mask = tf.expand_dims(
-            tf.to_float(tf.not_equal(self.hours, 0)), -1)
-        self.hours_mask = hours_mask 
-        
-        days_mask = tf.expand_dims(
-            tf.to_float(tf.not_equal(self.days, 0)), -1)
-        self.days_mask = days_mask 
 
         # INPUT-CONTEXT AWARE
         # Hours
@@ -97,7 +86,7 @@ class CAST2():
                     # Feed forward
                     self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
                                             dropout_rate=args.dropout_rate, is_training=self.is_training)
-                    self.tseq *= time_seq_mask
+                    self.tseq *= mask
             self.tseq = normalize(self.tseq)
 
         with tf.variable_scope("SASRec", reuse=reuse):
@@ -117,8 +106,7 @@ class CAST2():
 
             # Positional Encoding
             t, pos_emb_table = embedding(
-                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [
-                        tf.shape(self.input_seq)[0], 1]),
+                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
                 vocab_size=args.maxlen,
                 num_units=args.hidden_units,
                 zero_pad=False,
@@ -136,10 +124,12 @@ class CAST2():
             self.seq += self.tseq
 
             # INPUT-CONTEXT MODULE
-            self.seq += self.hours_seq
-            self.seq += self.days_seq
+            # ADDITION
+            # self.seq += self.hours_seq
+            # self.seq += self.days_seq
+
             self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
-            self.concat_mask = tf.concat([mask, hours_mask, days_mask], axis=2)
+
             # self.seq = tf.sequential(self.seq)
 
             # Dropout
@@ -151,15 +141,16 @@ class CAST2():
                                          rate=args.dropout_rate,
                                          training=tf.convert_to_tensor(self.is_training))
             # # self.seq *= mask
-            self.concat_seq *= self.concat_mask
-
-            ### INSERT MLP HERE
-
+            self.concat_seq *= self.mask
             self.seq = self.concat_seq
 
-     
-            self.seq = feedforward(normalize(self.seq), num_units=[args.maxlen * 3, args.hidden_units],
+            ### INSERT MLP HERE
+            # Go from 150 to 100
+            self.seq = feedforward_MLP(normalize(self.seq), scope="mlp", num_units=[self.seq.get_shape()[2], 100],
                                     dropout_rate=args.dropout_rate, is_training=self.is_training)
+            # Go from 100 to original embedding dimension
+            self.seq = feedforward_MLP(normalize(self.seq), scope="mlp", num_units=[100, args.hidden_units],
+                                   dropout_rate=args.dropout_rate, is_training=self.is_training)
 
             # Self-attention blocks
             # Build blocks
@@ -189,14 +180,12 @@ class CAST2():
         neg = tf.reshape(neg, [tf.shape(self.input_seq)[0] * args.maxlen])
         pos_emb = tf.nn.embedding_lookup(item_emb_table, pos)
         neg_emb = tf.nn.embedding_lookup(item_emb_table, neg)
-        seq_emb = tf.reshape(self.seq, [tf.shape(self.input_seq)[
-                             0] * args.maxlen, args.hidden_units])
+        seq_emb = tf.reshape(self.seq, [tf.shape(self.input_seq)[0] * args.maxlen, args.hidden_units])
 
         self.test_item = tf.placeholder(tf.int32, shape=(101))
         test_item_emb = tf.nn.embedding_lookup(item_emb_table, self.test_item)
         self.test_logits = tf.matmul(seq_emb, tf.transpose(test_item_emb))
-        self.test_logits = tf.reshape(
-            self.test_logits, [tf.shape(self.input_seq)[0], args.maxlen, 101])
+        self.test_logits = tf.reshape(self.test_logits, [tf.shape(self.input_seq)[0], args.maxlen, 101])
         self.test_logits = self.test_logits[:, -1, :]
 
         # prediction layer
