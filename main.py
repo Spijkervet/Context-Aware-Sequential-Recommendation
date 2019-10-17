@@ -4,14 +4,14 @@ import logging
 import time
 import json
 
-from datetime import datetime
 from util import *
 from sampler import WarpSampler, sample_function
 
-from cast import CAST
-from cast2 import CAST2
-from sasrec import SASRec
-from cast_sp import CASTSP
+from models.cast_1 import CAST1
+from models.cast_2 import CAST2
+from models.cast_3 import CAST3
+from models.cast_4 import CAST4
+from models.sasrec import SASRec
 
 from tqdm import tqdm
 import numpy as np
@@ -118,20 +118,23 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast", "cast2", "sasrec", "castsp"]
+    MODELS = ["cast","cast1","cast2", "cast3", "cast4", "sasrec"]
     if args.model.lower() not in MODELS:
         print("provide model from {CAST, SASRec, FutureCAST}")
         sys.exit(0)
 
-    if args.model == "cast":
-        model = CAST(usernum, itemnum, ratingnum, args)
+    if args.model == "cast1":
+        model = CAST1(usernum, itemnum, ratingnum, args)
     elif args.model == "cast2":
+        model = CAST2(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast3":
+        model = CAST3(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast4":
+        model = CAST4(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast5":
         model = CAST2(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
-    elif args.model == "castsp":
-        model = CASTSP(usernum, itemnum, args)
-        # sample_function = future_sample_function
 
     # SAMPLER
     print('usernum', usernum, 'itemnum', itemnum)
@@ -166,12 +169,9 @@ if __name__ == '__main__':
                                                                model.hours: hours_seq,
                                                                model.days: days_seq,
                                                                model.is_training: True})
-
-            # print(days[0].shape)
-            # print(hours[0].shape)
-            # print(concat_seq[0].shape)
-            writer.add_summary(summary, epoch)
-            writer.flush()
+            if summary is not None:
+                writer.add_summary(summary, epoch)
+                writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)
