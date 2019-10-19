@@ -119,9 +119,9 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4", "sasrec"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5", "sasrec"]
     if args.model.lower() not in MODELS:
-        print("provide model from {CAST, SASRec, FutureCAST}")
+        print("provide model from", MODELS)
         sys.exit(0)
 
     if args.model == "cast_1":
