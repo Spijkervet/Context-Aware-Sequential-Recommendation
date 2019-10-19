@@ -7,7 +7,7 @@
 #SBATCH --time=12:00:00
 #SBATCH --mem=12000M
 #SBATCH --partition=gpu_shared_course
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 
 
 module purge
@@ -44,5 +44,5 @@ python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --ou
 
 
 ### PROGRAM ###
-python3 main.py --dataset data/ml-1m.txt --model cast_2 --train_dir cast2_concat_input_log_scale --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
+python3 main.py --dataset data/ml-1m.txt --model cast_6 --train_dir cast6_test --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
 mail_template "IR2" $SLURM_JOBID "FINISHED" "$1"
