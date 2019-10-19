@@ -12,6 +12,13 @@ class SASRec():
         self.input_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.pos = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
