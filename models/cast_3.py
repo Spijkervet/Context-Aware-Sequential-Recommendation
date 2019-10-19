@@ -109,10 +109,9 @@ class CAST3():
             )
 
             # Sinusoidal Positional Embedding
+            # ADD TRANSITION CONTEXT
             self.seq += positional_embedding
-
-            # CONCATENATE TRANSITION CONTEXT
-            self.seq = tf.concat([self.seq, self.tseq], axis=2)
+            self.seq += self.tseq
 
             # INPUT-CONTEXT MODULE
             self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)

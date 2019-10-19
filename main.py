@@ -11,6 +11,7 @@ from models.cast_1 import CAST1
 from models.cast_2 import CAST2
 from models.cast_3 import CAST3
 from models.cast_4 import CAST4
+from models.cast_5 import CAST5
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
-        model = CAST2(usernum, itemnum, ratingnum, args)
+        model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
 

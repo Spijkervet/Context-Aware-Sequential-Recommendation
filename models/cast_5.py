@@ -2,7 +2,9 @@ from modules import *
 
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
 # Concatenation of the transition context
-class CAST2():
+# Concatenation of the input-context
+# The concatenation is done AFTER the user sequence is passed through the transformer
+class CAST5():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
         if args.seed:
@@ -15,16 +17,40 @@ class CAST2():
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
         self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-        
-        # placeholders
+
         self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
-
 
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
+
+
+        # INPUT-CONTEXT AWARE
+        print('INPUT-CONTEXT-AWARE MODULE')
+        with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
+            self.hours_seq, _ = embedding(self.hours,
+                                          # anton's magic number (24 hours + zero padding)
+                                          vocab_size=25,
+                                          num_units=args.hidden_units,
+                                          zero_pad=True,
+                                          scale=True,
+                                          l2_reg=args.l2_emb,
+                                          scope="hours_embeddings",
+                                          with_t=True,
+                                          reuse=reuse)
+
+            self.days_seq, _ = embedding(self.days,
+                                         # anton's magic number (7 days + zero padding)
+                                         vocab_size=8,
+                                         num_units=args.hidden_units,
+                                         zero_pad=True,
+                                         scale=True,
+                                         l2_reg=args.l2_emb,
+                                         scope="days_embeddings",
+                                         with_t=True,
+                                         reuse=reuse)
 
         # CONTEXT-AWARE
         print('CONTEXT-AWARE MODULE')
@@ -84,17 +110,9 @@ class CAST2():
             )
 
             # Sinusoidal Positional Embedding
+            # ADD TRANSITION CONTEXT
             self.seq += positional_embedding
-
-            # CONCATENATE TRANSITION CONTEXT
-            self.concat_seq = tf.concat([self.seq, self.tseq], axis=2)
-            self.concat_seq = tf.layers.dropout(self.concat_seq,
-                                                rate=args.dropout_rate,
-                                                training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
-
-            # Go from concat -> 100x original embedding dimension
-            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
+            self.seq += self.tseq
 
             # Self-attention blocks
             # Build blocks
@@ -119,6 +137,19 @@ class CAST2():
                     self.seq *= mask
 
             self.seq = normalize(self.seq)
+
+            # CONCATENATE AND REDUCE
+            # INPUT-CONTEXT MODULE
+            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
+                                                rate=args.dropout_rate,
+                                                training=tf.convert_to_tensor(self.is_training))
+            self.concat_seq *= self.mask
+
+
+            # Go from concat -> 100x original embedding dimension
+            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
+
 
         pos = tf.reshape(pos, [tf.shape(self.input_seq)[0] * args.maxlen])
         neg = tf.reshape(neg, [tf.shape(self.input_seq)[0] * args.maxlen])
@@ -162,5 +193,5 @@ class CAST2():
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.test_item: item_idx, self.is_training: False})
-
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
+                         self.days: days_seq, self.test_item: item_idx, self.is_training: False})
