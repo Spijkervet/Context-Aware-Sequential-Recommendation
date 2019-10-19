@@ -12,6 +12,7 @@ from models.cast_2 import CAST2
 from models.cast_3 import CAST3
 from models.cast_4 import CAST4
 from models.cast_5 import CAST5
+from models.cast_6 import CAST6
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5", "sasrec"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec"]
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -134,6 +135,8 @@ if __name__ == '__main__':
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
         model = CAST5(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast_6":
+        model = CAST6(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
 

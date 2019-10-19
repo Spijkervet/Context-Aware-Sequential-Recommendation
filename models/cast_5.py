@@ -1,7 +1,7 @@
 from modules import *
 
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
-# Concatenation of the transition context
+# Addition of the transition context
 # Concatenation of the input-context
 # The concatenation is done AFTER the user sequence is passed through the transformer
 class CAST5():

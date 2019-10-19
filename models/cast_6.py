@@ -3,7 +3,8 @@ from modules import *
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
 # Concatenation of the transition context
 # Concatenation of the input-context
-class CAST4():
+# The concatenation is done AFTER the user sequence is passed through the transformer
+class CAST6():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
         if args.seed:
@@ -109,25 +110,8 @@ class CAST4():
             )
 
             # Sinusoidal Positional Embedding
+            # ADD TRANSITION CONTEXT
             self.seq += positional_embedding
-
-            # CONCATENATE TRANSITION CONTEXT
-            self.concat_seq = tf.concat([self.seq, self.tseq], axis=2)
-            self.concat_seq = tf.layers.dropout(self.concat_seq,
-                                                rate=args.dropout_rate,
-                                                training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
-
-            # INPUT-CONTEXT MODULE
-            self.concat_seq = tf.concat([self.concat_seq, self.hours_seq, self.days_seq], axis=2)
-            self.concat_seq = tf.layers.dropout(self.concat_seq,
-                                                rate=args.dropout_rate,
-                                                training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
-
-
-            # Go from concat -> 100x original embedding dimension
-            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
 
             # Self-attention blocks
             # Build blocks
@@ -152,6 +136,26 @@ class CAST4():
                     self.seq *= mask
 
             self.seq = normalize(self.seq)
+
+            # CONCATENATE AND REDUCE
+            # CONCATENATE TRANSITION CONTEXT
+            self.concat_seq = tf.concat([self.seq, self.tseq], axis=2)
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
+                                                rate=args.dropout_rate,
+                                                training=tf.convert_to_tensor(self.is_training))
+            self.concat_seq *= self.mask
+
+            # INPUT-CONTEXT MODULE
+            self.concat_seq = tf.concat([self.concat_seq, self.hours_seq, self.days_seq], axis=2)
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
+                                                rate=args.dropout_rate,
+                                                training=tf.convert_to_tensor(self.is_training))
+            self.concat_seq *= self.mask
+
+
+            # Go from concat -> 100x original embedding dimension
+            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
+
 
         pos = tf.reshape(pos, [tf.shape(self.input_seq)[0] * args.maxlen])
         neg = tf.reshape(neg, [tf.shape(self.input_seq)[0] * args.maxlen])
