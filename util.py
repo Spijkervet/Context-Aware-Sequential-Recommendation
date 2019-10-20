@@ -325,16 +325,17 @@ def evaluate(model, dataset, args, sess):
         if rank < 10:
             NDCG += 1 / np.log2(rank + 2)
             HT += 1
+
+        if args.test_model: 
+            attention_weights = attention_weights[0]
+            attn_weights.append(attention_weights)
         
-        attention_weights = attention_weights[0]
-        attn_weights.append(attention_weights)
-        
-    avg_attn_weights = np.mean(np.array(attn_weights), axis=0)
 
     if args.test_model:
+        avg_attn_weights = np.mean(np.array(attn_weights), axis=0)
         plot_attention_weights(avg_attn_weights, args.test_model)
-    else:
-        plot_attention_weights(avg_attn_weights, args.train_files_path)
+    # else:
+    #     plot_attention_weights(avg_attn_weights, args.train_files_path)
     return NDCG / valid_user, HT / valid_user
 
 
