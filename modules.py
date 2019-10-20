@@ -242,7 +242,7 @@ def multihead_attention(model, queries,
 
         # Activation
         outputs = tf.nn.softmax(outputs)  # (h*N, T_q, T_k)
-        model.activations = outputs
+        attention_weights = outputs
 
         # Query Masking
         query_masks = tf.sign(
@@ -272,7 +272,7 @@ def multihead_attention(model, queries,
     if with_qk:
         return Q, K
     else:
-        return outputs
+        return outputs, attention_weights
 
 
 def feedforward(inputs,

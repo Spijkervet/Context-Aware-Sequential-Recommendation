@@ -21,6 +21,8 @@ class CAST6():
         self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
+        self.attention_weights = tf.Variable(np.empty((3, 3), dtype=np.float32))
+        
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
@@ -72,7 +74,7 @@ class CAST6():
                     # Self-attention
                     self.timeseq_queries = normalize(self.tseq)
                     self.timeseq_keys = self.tseq
-                    self.tseq = multihead_attention(self, queries=normalize(self.tseq),
+                    self.tseq, attention_weights = multihead_attention(self, queries=normalize(self.tseq),
                                                     keys=self.tseq,
                                                     num_units=args.hidden_units,
                                                     num_heads=args.num_heads,
@@ -121,7 +123,7 @@ class CAST6():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(self, queries=self.queries,
+                    self.seq, attention_weights = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
@@ -198,6 +200,6 @@ class CAST6():
         self.merged = tf.summary.merge_all()
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
-        return sess.run(self.test_logits,
+        return sess.run([self.test_logits, self.attention_weights],
                         {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
                          self.days: days_seq, self.test_item: item_idx, self.is_training: False})

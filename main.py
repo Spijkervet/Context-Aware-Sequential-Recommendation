@@ -158,8 +158,8 @@ if __name__ == '__main__':
 
             # Start testing
             u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
-            auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                           model.merged, model.activations],
+            auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op,
+                                                           model.merged],
 
                                                           {model.u: u, model.input_seq: seq, model.pos: pos,
                                                            model.neg: neg, model.time_seq: timeseq,
@@ -201,14 +201,15 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations],
+                auc, loss, _, summary, attention_weights = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.attention_weights],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.hours: hours_seq,
                                                                model.days: days_seq,
                                                                model.is_training: True})
+
 
             if summary is not None:
                 writer.add_summary(summary, epoch)

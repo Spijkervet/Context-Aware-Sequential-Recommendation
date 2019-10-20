@@ -298,7 +298,8 @@ def evaluate(model, dataset, args, sess):
             hours_seq[:-test_seq_len] = 0
             days_seq[:-test_seq_len] = 0
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
+        predictions, attention_weights = model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
+        predictions = -predictions
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
@@ -387,7 +388,8 @@ def evaluate_valid(model, dataset, args, sess):
 
 
 
-        predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
+        predictions, attention_weights = model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
+        predictions = -predictions
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
