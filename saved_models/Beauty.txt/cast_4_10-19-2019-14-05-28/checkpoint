@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/lgpu0220/git/information_retrieval_2/saved_models/Beauty.txt/cast_4_10-19-2019-14-05-28/model.ckpt"
+all_model_checkpoint_paths: "/home/lgpu0220/git/information_retrieval_2/saved_models/Beauty.txt/cast_4_10-19-2019-14-05-28/model.ckpt"
