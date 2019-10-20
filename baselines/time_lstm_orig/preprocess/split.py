@@ -33,8 +33,6 @@ for name in files:
     count = 0
     for idx, line in enumerate(loaded_lines):
         splitted_line = line.split()
-        if(len(splitted_line) < 7):
-            continue
 
         count += 1
 

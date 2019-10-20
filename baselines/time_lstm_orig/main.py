@@ -164,7 +164,7 @@ def gen_data(p, data, batch_size = 1):
     ret = utils.prepare_data(batch_data, VOCAB_SIZE, one_hot=ONE_HOT, sigmoid_on=SIGMOID_ON)
     return ret
 
-test_data = gen_data(0,test_data, batch_size = len(test_data['x'])) # len(test_data['x'])) / 500
+test_data = gen_data(0,test_data, batch_size = 500) # len(test_data['x'])) / 500
 test_data_length = test_data['x'].shape[1]
 
 

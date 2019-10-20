@@ -107,14 +107,15 @@ class CAST7():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq, self.attention_weights = multihead_attention(self, queries=self.queries,
-                                                   keys=self.keys,
-                                                   num_units=args.hidden_units,
-                                                   num_heads=args.num_heads,
-                                                   dropout_rate=args.dropout_rate,
-                                                   is_training=self.is_training,
-                                                   causality=True,
-                                                   scope="self_attention")
+                    self.seq, self.attention_weights = multihead_attention(self,
+                                                                           queries=self.queries,
+                                                                           keys=self.keys,
+                                                                           num_units=args.hidden_units,
+                                                                           num_heads=args.num_heads,
+                                                                           dropout_rate=args.dropout_rate,
+                                                                           is_training=self.is_training,
+                                                                           causality=True,
+                                                                           scope="self_attention")
 
                     # Feed forward
                     self.seq = feedforward(normalize(self.seq), num_units=[args.hidden_units, args.hidden_units],

@@ -1,0 +1,2 @@
+model_checkpoint_path: "/home/jspijkervet/git/information_retrieval_2/saved_models/Beauty.txt/sasrec_static_baseline_10-20-2019-12-36-07/model.ckpt"
+all_model_checkpoint_paths: "/home/jspijkervet/git/information_retrieval_2/saved_models/Beauty.txt/sasrec_static_baseline_10-20-2019-12-36-07/model.ckpt"

@@ -69,16 +69,15 @@ class CAST3():
             for i in range(args.num_blocks):
                 with tf.variable_scope("timeseq_num_blocks_%d" % i):
                     # Self-attention
-                    self.timeseq_queries = normalize(self.tseq)
-                    self.timeseq_keys = self.tseq
-                    self.tseq, self.attention_weights = multihead_attention(self, queries=normalize(self.tseq),
-                                                    keys=self.tseq,
-                                                    num_units=args.hidden_units,
-                                                    num_heads=args.num_heads,
-                                                    dropout_rate=args.dropout_rate,
-                                                    is_training=self.is_training,
-                                                    causality=True,
-                                                    scope="self_attention")
+                    self.tseq, self.attention_weights = multihead_attention(self,
+                                                                            queries=normalize(self.tseq),
+                                                                            keys=self.tseq,
+                                                                            num_units=args.hidden_units,
+                                                                            num_heads=args.num_heads,
+                                                                            dropout_rate=args.dropout_rate,
+                                                                            is_training=self.is_training,
+                                                                            causality=True,
+                                                                            scope="self_attention")
 
                     # Feed forward
                     self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
@@ -132,14 +131,15 @@ class CAST3():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq, self.sasrec_attention_weights = multihead_attention(self, queries=self.queries,
-                                                   keys=self.keys,
-                                                   num_units=args.hidden_units,
-                                                   num_heads=args.num_heads,
-                                                   dropout_rate=args.dropout_rate,
-                                                   is_training=self.is_training,
-                                                   causality=True,
-                                                   scope="self_attention")
+                    self.seq, self.sasrec_attention_weights = multihead_attention(self,
+                                                                                  queries=self.queries,
+                                                                                  keys=self.keys,
+                                                                                  num_units=args.hidden_units,
+                                                                                  num_heads=args.num_heads,
+                                                                                  dropout_rate=args.dropout_rate,
+                                                                                  is_training=self.is_training,
+                                                                                  causality=True,
+                                                                                  scope="self_attention")
 
                     # Feed forward
                     self.seq = feedforward(normalize(self.seq), num_units=[args.hidden_units, args.hidden_units],

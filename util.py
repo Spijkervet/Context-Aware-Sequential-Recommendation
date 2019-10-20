@@ -425,4 +425,5 @@ def evaluate_valid(model, dataset, args, sess):
             NDCG += 1 / np.log2(rank + 2)
             HT += 1
 
+
     return NDCG / valid_user, HT / valid_user
