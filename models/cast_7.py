@@ -1,7 +1,7 @@
 from modules import *
 
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
-# Addition of the static positional encoding and learned positional encoding
+# Addition of the static positional encoding
 # Concatenation of input context before the transformer
 class CAST7():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
