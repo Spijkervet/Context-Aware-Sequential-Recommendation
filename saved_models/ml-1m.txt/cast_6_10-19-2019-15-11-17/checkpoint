@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/jspijkervet/git/information_retrieval_2/saved_models/ml-1m.txt/cast_6_10-19-2019-15-11-17/model.ckpt"
-all_model_checkpoint_paths: "/home/jspijkervet/git/information_retrieval_2/saved_models/ml-1m.txt/cast_6_10-19-2019-15-11-17/model.ckpt"
