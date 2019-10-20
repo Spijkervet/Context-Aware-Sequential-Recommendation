@@ -143,14 +143,12 @@ class CAST6():
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                                 rate=args.dropout_rate,
                                                 training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
 
             # INPUT-CONTEXT MODULE
             self.concat_seq = tf.concat([self.concat_seq, self.hours_seq, self.days_seq], axis=2)
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                                 rate=args.dropout_rate,
                                                 training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
 
 
             # Go from concat -> 100x original embedding dimension

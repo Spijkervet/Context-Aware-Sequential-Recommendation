@@ -51,18 +51,6 @@ class CAST7():
                                          reuse=reuse)
 
         with tf.variable_scope("SASRec", reuse=reuse):
-            # learned_positional_embedding, pos_emb_table = embedding(
-            #     tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
-            #     vocab_size=args.maxlen,
-            #     num_units=args.hidden_units,
-            #     zero_pad=False,
-            #     scale=False,
-            #     l2_reg=args.l2_emb,
-            #     scope="dec_pos",
-            #     reuse=reuse,
-            #     with_t=True
-            # )
-
             # sequence embedding, item embedding table
             self.seq, item_emb_table = embedding(self.input_seq,
                                                  vocab_size=itemnum + 1,
@@ -87,14 +75,13 @@ class CAST7():
             # Sinusoidal Positional Embedding
             # ADD TRANSITION CONTEXT
             self.seq += static_positional_embedding
-            # self.seq += learned_positional_embedding
+            self.seq *= mask
 
             # INPUT-CONTEXT MODULE
             self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                                 rate=args.dropout_rate,
                                                 training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
 
             # Go from concat -> 100x original embedding dimension
             self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
