@@ -1,10 +1,10 @@
 BATCH=5
 TEST_BATCH=5
-VOCAB=3416 #beauty: 50000, movielens: 3416, music: 5000
+VOCAB=57289 #beauty: 50000, movielens: 3416, music: 5000
 MLEN=200
 #DATA='music'
-#DATA='beauty'
-DATA='movielens'
+DATA='beauty'
+#DATA='movielens'
 FIXED_EPOCHS=49
 NUM_EPOCHS=50
 NHIDDEN=128
@@ -16,7 +16,7 @@ GRAD_CLIP=1
 BATCH_NORM=1
 SIGMOID=1
 
-FLAGS="floatX=float32,device=cuda0"
+FLAGS="floatX=float32,device=cuda1"
 THEANO_FLAGS="${FLAGS}" python main.py --model TLSTM3 --data ${DATA} \
     --batch_size ${BATCH} --vocab_size ${VOCAB} --max_len ${MLEN} \
     --fixed_epochs ${FIXED_EPOCHS} --num_epochs ${NUM_EPOCHS} \
