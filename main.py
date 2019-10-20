@@ -109,15 +109,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec"]
-=======
-    MODELS = ["cast_1", "cast_2", "cast_3", "cast_4", "sasrec"]
->>>>>>> Stashed changes
-=======
     MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec", "sasrec_static"]
->>>>>>> 42ba0a366e9751f4531ecae22c28b2aecfba2719
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
