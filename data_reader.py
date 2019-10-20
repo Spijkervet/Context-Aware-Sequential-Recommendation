@@ -63,7 +63,7 @@ class DataReader():
         countP = defaultdict(lambda: 0)
         total = 1000000 if not self.limit else self.limit
 
-        delim = '::'
+        delim = ','
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(delim)

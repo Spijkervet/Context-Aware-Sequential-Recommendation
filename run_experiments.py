@@ -46,9 +46,9 @@ args = parser.parse_args()
 
 # Experiment
 
-args.dataset = 'data/ml-1m.txt'
+args.dataset = 'data/ml-20m.txt'
 # args.dataset = 'data/Beauty.txt'
-for i in range(4, 8):
+for i in range(1, 8):
     model = 'cast_{}'.format(i)
     args.train_dir = model # + '_log'
     args.model = model
