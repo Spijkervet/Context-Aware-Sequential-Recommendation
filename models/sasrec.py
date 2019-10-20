@@ -12,6 +12,13 @@ class SASRec():
         self.input_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.pos = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.neg = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.time_seq = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+        self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+        self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
+
+
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
@@ -118,7 +125,6 @@ class SASRec():
 
         self.merged = tf.summary.merge_all()
 
-    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None):
+    def predict(self, sess, u, seq, item_idx, timeseq=None, input_context_seq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
                         {self.u: u, self.input_seq: seq, self.test_item: item_idx, self.is_training: False})
-
