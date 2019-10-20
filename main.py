@@ -13,6 +13,7 @@ from models.cast_3 import CAST3
 from models.cast_4 import CAST4
 from models.cast_5 import CAST5
 from models.cast_6 import CAST6
+from models.cast_7 import CAST7
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_dir', required=True)
 
     # TRAIN PARAMETERS
-    parser.add_argument('--batch_size', default=128,
+    parser.add_argument('--batch_size', default=2,
                         type=int, help='Batch size')
     parser.add_argument('--lr', type=float, default=1e-3, help='Learning rate')
     parser.add_argument('--num_epochs', type=int,
@@ -96,8 +97,8 @@ if __name__ == '__main__':
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
     [train, valid, test, usernum, itemnum, ratingnum] = dataset
-    print(len(train[1]))
-    print(train[1])
+    # print(len(train[1]))
+    # print(train[1])
     num_batch = round(len(train) / args.batch_size)
     print('usernum', usernum, 'itemnum', itemnum)
 
@@ -120,7 +121,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec", "sasrec_static"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6","cast_7", "sasrec", "sasrec_static"]
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -134,9 +135,11 @@ if __name__ == '__main__':
     elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
-            model = CAST5(usernum, itemnum, ratingnum, args)
+        model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_6":
         model = CAST6(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast_7":
+        model = CAST7(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
     elif args.model == "sasrec_static":
@@ -175,9 +178,9 @@ if __name__ == '__main__':
                                                                model.days: days_seq,
                                                                model.is_training: True})
             
-            if summary is not None:
-                writer.add_summary(summary, epoch)
-                writer.flush()
+            # if summary is not None:
+            #     writer.add_summary(summary, epoch)
+            #     writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)
