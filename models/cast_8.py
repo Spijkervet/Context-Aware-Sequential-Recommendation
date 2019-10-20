@@ -56,15 +56,15 @@ class CAST8():
             for i in range(args.num_blocks):
                 with tf.variable_scope("hours_seq_num_blocks_%d" % i):
                     # Self-attention
-                    self.hours_seq = multihead_attention(self,
-                                                         queries=normalize(self.hours_seq),
-                                                         keys=self.hours_seq,
-                                                         num_units=args.hidden_units,
-                                                         num_heads=args.num_heads,
-                                                         dropout_rate=args.dropout_rate,
-                                                         is_training=self.is_training,
-                                                         causality=True,
-                                                         scope="self_attention")
+                    self.hours_seq, self.hours_weights = multihead_attention(self,
+                                                                             queries=normalize(self.hours_seq),
+                                                                             keys=self.hours_seq,
+                                                                             num_units=args.hidden_units,
+                                                                             num_heads=args.num_heads,
+                                                                             dropout_rate=args.dropout_rate,
+                                                                             is_training=self.is_training,
+                                                                             causality=True,
+                                                                             scope="self_attention")
 
                     # Feed forward
                     self.hours_seq = feedforward(normalize(self.hours_seq), num_units=[args.hidden_units, args.hidden_units],
@@ -78,15 +78,15 @@ class CAST8():
             for i in range(args.num_blocks):
                 with tf.variable_scope("days_seq_num_blocks_%d" % i):
                     # Self-attention
-                    self.days_seq = multihead_attention(self,
-                                                         queries=normalize(self.days_seq),
-                                                         keys=self.days_seq,
-                                                         num_units=args.hidden_units,
-                                                         num_heads=args.num_heads,
-                                                         dropout_rate=args.dropout_rate,
-                                                         is_training=self.is_training,
-                                                         causality=True,
-                                                         scope="self_attention")
+                    self.days_seq, self.days_weights = multihead_attention(self,
+                                                                           queries=normalize(self.days_seq),
+                                                                           keys=self.days_seq,
+                                                                           num_units=args.hidden_units,
+                                                                           num_heads=args.num_heads,
+                                                                           dropout_rate=args.dropout_rate,
+                                                                           is_training=self.is_training,
+                                                                           causality=True,
+                                                                           scope="self_attention")
 
                     # Feed forward
                     self.days_seq = feedforward(normalize(self.days_seq), num_units=[args.hidden_units, args.hidden_units],
@@ -128,14 +128,15 @@ class CAST8():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(self, queries=self.queries,
-                                                   keys=self.keys,
-                                                   num_units=args.hidden_units,
-                                                   num_heads=args.num_heads,
-                                                   dropout_rate=args.dropout_rate,
-                                                   is_training=self.is_training,
-                                                   causality=True,
-                                                   scope="self_attention")
+                    self.seq, self.attention_weights = multihead_attention(self,
+                                                                           queries=self.queries,
+                                                                           keys=self.keys,
+                                                                           num_units=args.hidden_units,
+                                                                           num_heads=args.num_heads,
+                                                                           dropout_rate=args.dropout_rate,
+                                                                           is_training=self.is_training,
+                                                                           causality=True,
+                                                                           scope="self_attention")
 
                     # Feed forward
                     self.seq = feedforward(normalize(self.seq), num_units=[args.hidden_units, args.hidden_units],
@@ -186,6 +187,5 @@ class CAST8():
         self.merged = tf.summary.merge_all()
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
-        return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
-                         self.days: days_seq, self.test_item: item_idx, self.is_training: False})
+        return sess.run([self.test_logits, self.attention_weights],
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.test_item: item_idx, self.is_training: False})

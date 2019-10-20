@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
             # Start testing
             u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
-            auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op,
+            auc, loss, _, summary, _ = sess.run([model.auc, model.loss, model.train_op,
                                                            model.merged],
 
                                                           {model.u: u, model.input_seq: seq, model.pos: pos,
