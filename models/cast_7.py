@@ -1,8 +1,8 @@
 from modules import *
 
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
-# Addition of the transition context
-# This is simulating the unit distance, to see whether we can mimic SASRec
+# Addition of the static positional encoding and learned positional encoding
+# Concatenation of input context before the transformer
 class CAST7():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
@@ -25,43 +25,44 @@ class CAST7():
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
 
-        # CONTEXT-AWARE
-        print('CONTEXT-AWARE MODULE')
-        with tf.variable_scope("CONTEXT", reuse=reuse):
-            timeseq = constant_timeseq_encoding(args.maxlen)
-            self.tseq, item_emb_table = embedding(timeseq,
-                                                  vocab_size=args.max_bins+1,
-                                                  num_units=args.hidden_units,
-                                                  zero_pad=True,
-                                                  scale=True,
-                                                  l2_reg=args.l2_emb,
-                                                  scope="time_embeddings",
-                                                  with_t=True,
-                                                  reuse=reuse)
+        # INPUT-CONTEXT AWARE
+        print('INPUT-CONTEXT-AWARE MODULE')
+        with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
+            self.hours_seq, _ = embedding(self.hours,
+                                          # anton's magic number (24 hours + zero padding)
+                                          vocab_size=25,
+                                          num_units=args.hidden_units,
+                                          zero_pad=True,
+                                          scale=True,
+                                          l2_reg=args.l2_emb,
+                                          scope="hours_embeddings",
+                                          with_t=True,
+                                          reuse=reuse)
 
-            # Self-attention blocks
-            # Build blocks
-            for i in range(args.num_blocks):
-                with tf.variable_scope("timeseq_num_blocks_%d" % i):
-                    # Self-attention
-                    self.timeseq_queries = normalize(self.tseq)
-                    self.timeseq_keys = self.tseq
-                    self.tseq = multihead_attention(self, queries=normalize(self.tseq),
-                                                    keys=self.tseq,
-                                                    num_units=args.hidden_units,
-                                                    num_heads=args.num_heads,
-                                                    dropout_rate=args.dropout_rate,
-                                                    is_training=self.is_training,
-                                                    causality=True,
-                                                    scope="self_attention")
-
-                    # Feed forward
-                    self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
-                                            dropout_rate=args.dropout_rate, is_training=self.is_training)
-                    self.tseq *= mask
-            self.tseq = normalize(self.tseq)
+            self.days_seq, _ = embedding(self.days,
+                                         # anton's magic number (7 days + zero padding)
+                                         vocab_size=8,
+                                         num_units=args.hidden_units,
+                                         zero_pad=True,
+                                         scale=True,
+                                         l2_reg=args.l2_emb,
+                                         scope="days_embeddings",
+                                         with_t=True,
+                                         reuse=reuse)
 
         with tf.variable_scope("SASRec", reuse=reuse):
+            learned_positional_embedding, pos_emb_table = embedding(
+                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
+                vocab_size=args.maxlen,
+                num_units=args.hidden_units,
+                zero_pad=False,
+                scale=False,
+                l2_reg=args.l2_emb,
+                scope="dec_pos",
+                reuse=reuse,
+                with_t=True
+            )
+
             # sequence embedding, item embedding table
             self.seq, item_emb_table = embedding(self.input_seq,
                                                  vocab_size=itemnum + 1,
@@ -78,15 +79,25 @@ class CAST7():
 
             # Positional Encoding
             # positional_encoding(dim, sentence_length, dtype=tf.float32)
-            positional_embedding = positional_encoding(
+            static_positional_embedding = positional_encoding(
                 args.hidden_units,
                 args.maxlen,
             )
 
             # Sinusoidal Positional Embedding
             # ADD TRANSITION CONTEXT
-            self.seq += positional_embedding
-            self.seq += self.tseq
+            self.seq += static_positional_embedding
+            self.seq += learned_positional_embedding
+
+            # INPUT-CONTEXT MODULE
+            self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
+            self.concat_seq = tf.layers.dropout(self.concat_seq,
+                                                rate=args.dropout_rate,
+                                                training=tf.convert_to_tensor(self.is_training))
+            self.concat_seq *= self.mask
+
+            # Go from concat -> 100x original embedding dimension
+            self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
 
             # Self-attention blocks
             # Build blocks
