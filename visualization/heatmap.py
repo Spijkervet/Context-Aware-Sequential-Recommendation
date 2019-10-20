@@ -29,17 +29,15 @@ def main(filename='dummydata_heatmap.csv'):
 
     # append 0 to those vectors not of maximum length and store as np array
     averaged_arr = np.array([[0]*(maxlen-len(vec)) + vec for vec in averaged_vectors])
+    
 
     # moet vec hier nog omgedraaid worden????
-
-    print(averaged_arr)
-
     sns.heatmap(averaged_arr.T, linewidth=0.5, square=True, cmap="YlGnBu")
     plt.xlabel("Position")
     plt.ylabel("Time step")
     plt.title("Attention weights over time steps")
     plt.show()
-
+    plt.savefig('test.png')
 
 def average(data_list):
 
@@ -48,7 +46,6 @@ def average(data_list):
     '''
 
     arr = np.array(data_list)
-
     return list(arr.mean(0))
 
 

@@ -37,15 +37,15 @@ sh download_data.sh
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --output data/Books.txt
 
 # AMAZON BEAUTY
-# python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
+python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
 
 # MOVIELENS 1-M
-# python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
+python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt
 
 
 ### PROGRAM ###
 # Movielens
-python3 main.py --dataset data/ml-1m.txt --model cast_1 --train_dir sandbox --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
+# python3 main.py --dataset data/ml-1m.txt --model cast_1 --train_dir sandbox --maxlen 200 --bin_in_hours 48 --dropout_rate 0.2 --num_blocks 2 --seed 42
 
 # Beauty
 # python3 main.py --dataset data/Beauty.txt --model sasrec_static --train_dir sasrec_static_baseline --maxlen 50 --bin_in_hours 48 --dropout_rate 0.5 --num_blocks 2 --seed 42

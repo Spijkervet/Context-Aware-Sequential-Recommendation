@@ -1,7 +1,7 @@
 cd data
 
 # Amazon Product Review data
-wget -nc http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Books_5.json.gz
+# wget -nc http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Books_5.json.gz
 # curl http://snap.stanford.edu/data/amazon/productGraph/metadata.json.gz -O
 
 wget -nc http://snap.stanford.edu/data/amazon/productGraph/categoryFiles/reviews_Beauty.json.gz

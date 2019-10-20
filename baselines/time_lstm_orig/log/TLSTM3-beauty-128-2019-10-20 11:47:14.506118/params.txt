@@ -1,7 +1,7 @@
 {
   "grad_clip": 1, 
   "num_hidden": 128, 
-  "vocab_size": 47468, 
+  "vocab_size": 57289, 
   "sample_time": 3, 
   "learning_rate": 0.01, 
   "test_batch": 5, 

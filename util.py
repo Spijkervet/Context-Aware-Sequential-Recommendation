@@ -1,4 +1,5 @@
 import sys
+import os
 import copy
 import random
 import numpy as np
@@ -6,6 +7,9 @@ import math
 from tqdm import tqdm
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
+
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 dayDict = {
 	"Monday":1,
@@ -37,6 +41,17 @@ class UserItems():
             
         self.ts = TimeStamp(self.timestamp)
         self.day = self.ts.day
+
+
+def plot_attention_weights(attention_weights, path):
+    plt.figure(dpi=300)
+    plt.imshow(attention_weights, cmap='hot', interpolation='nearest')
+    # sns.heatmap(attention_weights, linewidth=0.5, square=True, cmap="YlGnBu")
+    # plt.xlabel("Position")
+    # plt.ylabel("Time step")
+    plt.title("Attention weights")
+    # plt.show()
+    plt.savefig(os.path.join(path, 'attention_weights.png'), format='png')
 
 
 def get_bin_size(min_ts, max_ts, max_bins):
@@ -221,6 +236,7 @@ def evaluate(model, dataset, args, sess):
     NDCG = 0.0
     HT = 0.0
     valid_user = 0.0
+    attn_weights = []
 
     if usernum > 10000:
         users = random.sample(range(1, usernum + 1), 10000)
@@ -309,7 +325,16 @@ def evaluate(model, dataset, args, sess):
         if rank < 10:
             NDCG += 1 / np.log2(rank + 2)
             HT += 1
+        
+        attention_weights = attention_weights[0]
+        attn_weights.append(attention_weights)
 
+    avg_attn_weights = np.mean(np.array(attn_weights), axis=0)
+
+    if args.test_model:
+        plot_attention_weights(avg_attn_weights, args.test_model)
+    else:
+        plot_attention_weights(avg_attn_weights, args.train_files_path)
     return NDCG / valid_user, HT / valid_user
 
 
