@@ -21,8 +21,6 @@ class CAST5():
         self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
-        self.attention_weights = tf.Variable(np.empty((3, 3), dtype=np.float32))
-        
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
@@ -74,7 +72,7 @@ class CAST5():
                     # Self-attention
                     self.timeseq_queries = normalize(self.tseq)
                     self.timeseq_keys = self.tseq
-                    self.tseq, attention_weights = multihead_attention(self, queries=normalize(self.tseq),
+                    self.tseq, self.attention_weights = multihead_attention(self, queries=normalize(self.tseq),
                                                     keys=self.tseq,
                                                     num_units=args.hidden_units,
                                                     num_heads=args.num_heads,
@@ -124,7 +122,7 @@ class CAST5():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq, attention_weights = multihead_attention(self, queries=self.queries,
+                    self.seq, self.attention_weights = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
