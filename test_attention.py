@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 
-pathlist = Path('saved_models/ml-1m.txt').glob('*/')
+pathlist = Path('saved_models/Beauty.txt').glob('*/')
 for p in pathlist:
     for ms in [200]: # [10, 50, 60, 160]:
         print('Testing model {}'.format(p))
@@ -16,7 +16,7 @@ for p in pathlist:
         cmd = ['python3', 'main.py']
 
         for k, v in params.items():
-            if k in ['test_model', 'test_seq_len']:
+            if k in ['test_model', 'test_seq_len', 'limit', 'test_baseline']:
                 continue
             cmd.append('--{}={}'.format(k,v))
 

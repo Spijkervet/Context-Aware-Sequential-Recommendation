@@ -46,25 +46,25 @@ args = parser.parse_args()
 
 # Experiment
 
-# args.dataset = 'data/ml-1m.txt'
-args.dataset = 'data/Beauty.txt'
-for i in range(3, 7):
+args.dataset = 'data/ml-1m.txt'
+# args.dataset = 'data/Beauty.txt'
+for i in range(4, 8):
     model = 'cast_{}'.format(i)
     args.train_dir = model # + '_log'
     args.model = model
 
     try:
         # movielens params
-        # c = ['python3', 'main.py', '--dataset', args.dataset, 
-        #     '--train_dir', args.train_dir, '--model', args.model,
-        #     '--maxlen', '200', '--bin_in_hours', '48', '--dropout_rate', '0.2', 
-        #     '--num_blocks', '2', '--seed', '42']
-
-        # beauty params 
         c = ['python3', 'main.py', '--dataset', args.dataset, 
             '--train_dir', args.train_dir, '--model', args.model,
-            '--maxlen', '50', '--bin_in_hours', '48', '--dropout_rate', '0.5', 
-            '--num_blocks', '2', '--seed', '42']#, '--log_scale']
+            '--maxlen', '200', '--bin_in_hours', '48', '--dropout_rate', '0.2', 
+            '--num_blocks', '2', '--seed', '42']
+
+        # beauty params 
+        # c = ['python3', 'main.py', '--dataset', args.dataset, 
+        #     '--train_dir', args.train_dir, '--model', args.model,
+        #     '--maxlen', '50', '--bin_in_hours', '48', '--dropout_rate', '0.5', 
+        #     '--num_blocks', '2', '--seed', '42']#, '--log_scale']
 
         subprocess.call(c)
     except Exception as e:
