@@ -15,6 +15,7 @@ from models.cast_5 import CAST5
 from models.cast_6 import CAST6
 from models.cast_7 import CAST7
 from models.cast_8 import CAST8
+from models.cast_9 import CAST9
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -24,7 +25,7 @@ import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
-MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6","cast_7", "cast_8","sasrec", "sasrec_static"]
+MODELS = ["cast_1","cast_2", "cast_3", "cast_4", "cast_5", "cast_6", "cast_7", "cast_8", "cast_9", "sasrec", "sasrec_static"]
 
 if __name__ == '__main__':
 
@@ -66,6 +67,7 @@ if __name__ == '__main__':
     parser.add_argument('--l2_emb', default=0.0, type=float)
     parser.add_argument('--bin_in_hours', default=24, type=int)
     parser.add_argument('--max_bins', default=200, type=int)
+    parser.add_argument('--num_context_blocks', default=2, type=int)
 
     # MISC.
     parser.add_argument('--test_model', type=str, default=None,
@@ -132,6 +134,8 @@ if __name__ == '__main__':
         model = CAST7(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_8":
         model = CAST8(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast_9":
+        model = CAST9(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec":
         model = SASRec(usernum, itemnum, args)
     elif args.model == "sasrec_static":
