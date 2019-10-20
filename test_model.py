@@ -5,10 +5,12 @@ import json
 from pathlib import Path
 
 
-pathlist = Path('saved_models/').glob('*/*/')
+pathlist = Path('saved_models/ml-1m.txt').glob('*/')
 for p in pathlist:
+    # if 'cast_1' in str(p):
+    #     continue
 
-    for ms in [10, 50, 60, 160, 200]:
+    for ms in [10, 50, 60, 160]:
         print('Testing model {}'.format(p))
 
         with open(os.path.join(p, 'params.txt'), 'r') as f:

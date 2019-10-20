@@ -161,8 +161,8 @@ if __name__ == '__main__':
 
             # Start testing
             u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
-            auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                           model.merged, model.activations],
+            auc, loss, _, summary = sess.run([model.auc, model.loss, model.train_op,
+                                                           model.merged],
 
                                                           {model.u: u, model.input_seq: seq, model.pos: pos,
                                                            model.neg: neg, model.time_seq: timeseq,
@@ -193,6 +193,7 @@ if __name__ == '__main__':
         json.dump(args.__dict__, f, indent=2)
 
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
+    args.train_files_path = TRAIN_FILES_PATH
 
     # Add TensorBoard
     writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
@@ -204,8 +205,8 @@ if __name__ == '__main__':
             for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
-                auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations],
+                auc, loss, _, summary, attention_weights = sess.run([model.auc, model.loss, model.train_op,
+                                                               model.merged, model.attention_weights],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
@@ -213,9 +214,10 @@ if __name__ == '__main__':
                                                                model.days: days_seq,
                                                                model.is_training: True})
 
-            # if summary is not None:
-            #     writer.add_summary(summary, epoch)
-            #     writer.flush()
+
+            if summary is not None:
+                writer.add_summary(summary, epoch)
+                writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)

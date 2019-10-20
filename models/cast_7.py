@@ -107,7 +107,7 @@ class CAST7():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(self, queries=self.queries,
+                    self.seq, self.attention_weights = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
@@ -165,6 +165,6 @@ class CAST7():
         self.merged = tf.summary.merge_all()
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
-        return sess.run(self.test_logits,
+        return sess.run([self.test_logits, self.attention_weights],
                         {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
                          self.days: days_seq, self.test_item: item_idx, self.is_training: False})
