@@ -92,7 +92,7 @@ def load_data(data_attr):
                         _dt.append(pre_time + delta)
                         pre_time = 0
                     else:
-                        pre_time += delta
+                       pre_time += delta
                 assert(len(_sent) == len(_dt))
                 sents_ret.append(_sent)
                 dt_ret.append(_dt)
@@ -156,8 +156,14 @@ def load_data(data_attr):
         if os.path.exists(user_record_path):
             with open(user_record_path, 'r') as f:
                 count = 0
-                for line in f:
-                    userid, item_seq = line.strip().split(',')
+                for idx, line in enumerate(f):
+
+                    try:
+                        userid, item_seq = line.strip().split(',')
+                    except:
+                        continue
+                        pass
+
                     item_seq = [int(x) for x in item_seq.split(' ')]
                     sentences.append(item_seq)
                     count += 1
@@ -178,7 +184,12 @@ def load_data(data_attr):
             with open(time_file_path, 'r') as f:
                 count = 0
                 for line in f:
-                    userid, delta = line.strip().split(',')
+                    try:
+                        userid, delta = line.strip().split(',')
+                    except:
+                        continue
+                        pass
+                    
                     delta = [float(x) for x in delta.split(' ')]
                     if len(delta) != len(sentences[count]):
                         logging.info('Data conflict at line {}, delete'.format(count))
@@ -198,8 +209,13 @@ def load_data(data_attr):
 
     logging.info('Remove large word')
     if vocab_size:
+        orig = sum([len(t) for t in train_data])
+
         train_data, train_time_seq = remove_large_word(train_data, vocab_size, train_time_seq)
         test_data, test_time_seq = remove_large_word(test_data, vocab_size, test_time_seq)
+
+        new = sum([len(t) for t in train_data])
+        print(orig, new, orig-new)
 
     # remove data which is too short
     train_data = filter(lambda sent: len(sent) > 1, train_data) 

@@ -1,5 +1,4 @@
 name: time_lstm
 dependencies:
-  - theano=0.9.0=py35_0
-  - pygpu
+  - theano=0.9.0
   - pandas=0.18.1

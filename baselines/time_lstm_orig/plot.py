@@ -23,20 +23,24 @@ if __name__ == '__main__':
                 with open(f, 'r'):
                     df = pd.read_csv(f)
 
-                    out_dir = os.path.join('plots', os.path.dirname(f).split('/')[1])
-                    if not os.path.exists(out_dir):
-                        os.makedirs(out_dir)
+                    if 'name' in df.columns:
+                        df = df[df['name'] != 'additional_test']
 
-                    plt.figure()
-                    plt.plot(df['epoch'], df['recall10'])
-                    plt.title('recalll10')
-                    plt.xlabel('epoch')
-                    plt.ylabel('recall10')
-                    plt.savefig(os.path.join(out_dir, 'recall10.png'))
 
-                    plt.figure()
-                    plt.plot(df['epoch'], df['mrr10'])
-                    plt.title('mrr10')
-                    plt.xlabel('epoch')
-                    plt.ylabel('mrr10')
-                    plt.savefig(os.path.join(out_dir, 'mrr10.png'))
+                        out_dir = os.path.join('plots', os.path.dirname(f).split('/')[1])
+                        if not os.path.exists(out_dir):
+                            os.makedirs(out_dir)
+                            
+                        plt.figure()
+                        plt.plot(df['epoch'], df['recall10'])
+                        plt.title('recalll10')
+                        plt.xlabel('epoch')
+                        plt.ylabel('recall10')
+                        plt.savefig(os.path.join(out_dir, 'recall10.png'))
+
+                        plt.figure()
+                        plt.plot(df['epoch'], df['mrr10'])
+                        plt.title('mrr10')
+                        plt.xlabel('epoch')
+                        plt.ylabel('mrr10')
+                        plt.savefig(os.path.join(out_dir, 'mrr10.png'))
