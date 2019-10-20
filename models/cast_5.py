@@ -144,8 +144,6 @@ class CAST5():
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                                 rate=args.dropout_rate,
                                                 training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
-
 
             # Go from concat -> 100x original embedding dimension
             self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])

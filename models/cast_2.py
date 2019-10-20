@@ -83,13 +83,13 @@ class CAST2():
 
             # Sinusoidal Positional Embedding
             self.seq += positional_embedding
+            self.seq *= mask
 
             # CONCATENATE TRANSITION CONTEXT
             self.concat_seq = tf.concat([self.seq, self.tseq], axis=2)
             self.concat_seq = tf.layers.dropout(self.concat_seq,
                                                 rate=args.dropout_rate,
                                                 training=tf.convert_to_tensor(self.is_training))
-            self.concat_seq *= self.mask
 
             # Go from concat -> 100x original embedding dimension
             self.seq = mlp(self.concat_seq, [self.concat_seq.get_shape()[2], args.hidden_units])
