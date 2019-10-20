@@ -51,17 +51,17 @@ class CAST7():
                                          reuse=reuse)
 
         with tf.variable_scope("SASRec", reuse=reuse):
-            learned_positional_embedding, pos_emb_table = embedding(
-                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
-                vocab_size=args.maxlen,
-                num_units=args.hidden_units,
-                zero_pad=False,
-                scale=False,
-                l2_reg=args.l2_emb,
-                scope="dec_pos",
-                reuse=reuse,
-                with_t=True
-            )
+            # learned_positional_embedding, pos_emb_table = embedding(
+            #     tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
+            #     vocab_size=args.maxlen,
+            #     num_units=args.hidden_units,
+            #     zero_pad=False,
+            #     scale=False,
+            #     l2_reg=args.l2_emb,
+            #     scope="dec_pos",
+            #     reuse=reuse,
+            #     with_t=True
+            # )
 
             # sequence embedding, item embedding table
             self.seq, item_emb_table = embedding(self.input_seq,
@@ -87,7 +87,7 @@ class CAST7():
             # Sinusoidal Positional Embedding
             # ADD TRANSITION CONTEXT
             self.seq += static_positional_embedding
-            self.seq += learned_positional_embedding
+            # self.seq += learned_positional_embedding
 
             # INPUT-CONTEXT MODULE
             self.concat_seq = tf.concat([self.seq, self.hours_seq, self.days_seq], axis=2)
