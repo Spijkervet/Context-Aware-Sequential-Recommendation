@@ -1,6 +1,5 @@
 {
   "dataset": "data/ml-1m.txt",
-  "limit": null,
   "maxlen": 200,
   "train_dir": "sasrec_baseline",
   "batch_size": 128,
@@ -15,7 +14,6 @@
   "bin_in_hours": 48,
   "max_bins": 200,
   "saved_model": "model.pt",
-  "test_baseline": false,
   "seed": 42,
   "log_scale": false,
   "input_context": false,

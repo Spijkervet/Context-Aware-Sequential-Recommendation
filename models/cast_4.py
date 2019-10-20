@@ -137,7 +137,7 @@ class CAST4():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq, self.attention_weights = multihead_attention(self, queries=self.queries,
+                    self.seq, self.sasrec_attention_weights = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,

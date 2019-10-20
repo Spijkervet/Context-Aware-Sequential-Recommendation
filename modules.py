@@ -242,7 +242,7 @@ def multihead_attention(model, queries,
 
         # Activation
         outputs = tf.nn.softmax(outputs)  # (h*N, T_q, T_k)
-        attention_weights = outputs
+        # attention_weights = outputs
 
         # Query Masking
         query_masks = tf.sign(
@@ -255,6 +255,8 @@ def multihead_attention(model, queries,
         # Dropouts
         outputs = tf.layers.dropout(
             outputs, rate=dropout_rate, training=tf.convert_to_tensor(is_training))
+
+        attention_weights = outputs
 
         # Weighted sum
         outputs = tf.matmul(outputs, V_)  # ( h*N, T_q, C/h)

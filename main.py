@@ -190,6 +190,7 @@ if __name__ == '__main__':
         json.dump(args.__dict__, f, indent=2)
 
     f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
+    args.train_files_path = TRAIN_FILES_PATH
 
     # Add TensorBoard
     writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
