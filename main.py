@@ -126,7 +126,7 @@ if __name__ == '__main__':
             model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_6":
         model = CAST6(usernum, itemnum, ratingnum, args)
-    elif args.model == "sasrec" or args.test_baseline:
+    elif args.model == "sasrec": 
         model = SASRec(usernum, itemnum, args)
     elif args.model == "sasrec_static":
         model = SASRec(usernum, itemnum, args, static=True)
