@@ -2,7 +2,7 @@ from modules import *
 
 
 class SASRec():
-    def __init__(self, usernum, itemnum, args, reuse=None):
+    def __init__(self, usernum, itemnum, args, static=False, reuse=None):
 
         if args.seed:
             tf.set_random_seed(args.seed)
@@ -37,18 +37,24 @@ class SASRec():
                                                  )
 
             # Positional Encoding
-            t, pos_emb_table = embedding(
-                tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
-                vocab_size=args.maxlen,
-                num_units=args.hidden_units,
-                zero_pad=False,
-                scale=False,
-                l2_reg=args.l2_emb,
-                scope="dec_pos",
-                reuse=reuse,
-                with_t=True
-            )
-            self.seq += t
+            if not static:
+                positional_embedding, pos_emb_table = embedding(
+                    tf.tile(tf.expand_dims(tf.range(tf.shape(self.input_seq)[1]), 0), [tf.shape(self.input_seq)[0], 1]),
+                    vocab_size=args.maxlen,
+                    num_units=args.hidden_units,
+                    zero_pad=False,
+                    scale=False,
+                    l2_reg=args.l2_emb,
+                    scope="dec_pos",
+                    reuse=reuse,
+                    with_t=True
+                )
+            else:
+                positional_embedding = positional_encoding(
+                    args.hidden_units,
+                    args.maxlen,
+                )
+            self.seq += positional_embedding
 
             # Dropout
             self.seq = tf.layers.dropout(self.seq,

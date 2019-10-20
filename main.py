@@ -109,11 +109,15 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec"]
 =======
     MODELS = ["cast_1", "cast_2", "cast_3", "cast_4", "sasrec"]
 >>>>>>> Stashed changes
+=======
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec", "sasrec_static"]
+>>>>>>> 42ba0a366e9751f4531ecae22c28b2aecfba2719
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -127,11 +131,13 @@ if __name__ == '__main__':
     elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
-        model = CAST5(usernum, itemnum, ratingnum, args)
+            model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_6":
         model = CAST6(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
+    elif args.model == "sasrec_static":
+        model = SASRec(usernum, itemnum, args, static=True)
 
     # SAMPLER
     print('usernum', usernum, 'itemnum', itemnum)
