@@ -51,7 +51,7 @@ def plot_attention_weights(attention_weights, path):
     # plt.ylabel("Time step")
     plt.title("Attention weights")
     # plt.show()
-    plt.savefig(os.path.join(path, 'attention_weights.png'), format='png')
+    plt.savefig(os.path.join(path, 'attention_weights.svg'), format='svg')
 
 
 def get_bin_size(min_ts, max_ts, max_bins):
@@ -328,7 +328,7 @@ def evaluate(model, dataset, args, sess):
         
         attention_weights = attention_weights[0]
         attn_weights.append(attention_weights)
-
+        
     avg_attn_weights = np.mean(np.array(attn_weights), axis=0)
 
     if args.test_model:

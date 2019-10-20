@@ -63,14 +63,14 @@ class DataReader():
         countP = defaultdict(lambda: 0)
         total = 1000000 if not self.limit else self.limit
 
-        delim = '::'
+        delim = ','
         f = open(self.dataset_fp, 'w')
         for l in tqdm(self.parse_movielens(), total=total):
             user, item, rating, timestamp = l.split(delim)
             f.write('{} {} {} {}\n'.format(user, item, rating, timestamp))
 
 
-            asin = int(item) 
+            asin = int(item)
             rev = int(user)
             countU[rev] += 1
             countP[asin] += 1
@@ -86,7 +86,7 @@ class DataReader():
             rev, asin, rating, time = l.split(delim)
             rev = int(rev)
             asin = int(asin)
-            rating = int(rating)
+            rating = int(float(rating)*10) # Ratings * 10 for half-division star ratings (e.g. 3.5)
             time = int(time)
 
             # Minimum of 5:
@@ -126,7 +126,7 @@ class DataReader():
         bn = os.path.basename(self.dataset_fp)
 
         movies_dict = {}
-        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.dat')
+        movies_labels_path = os.path.join(os.path.dirname(self.path), 'movies.csv')
         with open(movies_labels_path, 'r', encoding='ISO-8859-1') as f:
             for l in f:
                 key, movie, genre, = tuple(l.rstrip().split(delim))

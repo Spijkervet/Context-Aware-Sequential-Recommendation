@@ -29,18 +29,20 @@ python3 -m virtualenv ir2
 pip3 install -r requirements.txt
 
 ### DOWNLOAD DATA ###
-sh download_data.sh
+# sh download_data.sh
 
 ### PREPROCESSING ###
 # AMAZON BOOKS
 # python3 preprocess.py --raw_dataset data/reviews_Books_5.json.gz --type amazon --output data/Books.txt
 
 # AMAZON BEAUTY
-python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
+# python3 preprocess.py --raw_dataset data/reviews_Beauty.json.gz --type amazon --output data/Beauty.txt
 
 # MOVIELENS 1-M
 # python3 preprocess.py --raw_dataset data/ml-1m/ratings.dat --type movielens --output data/ml-1m.txt #--limit 100000
 
+# MOVIELENS 20-M
+python3 preprocess.py --raw_dataset data/ml-20m/ratings.csv --type movielens --output data/ml-20m.txt #--limit 100000
 
 ### PROGRAM ###
 python3 run_experiments.py
