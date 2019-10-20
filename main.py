@@ -13,6 +13,7 @@ from models.cast_3 import CAST3
 from models.cast_4 import CAST4
 from models.cast_5 import CAST5
 from models.cast_6 import CAST6
+from models.cast_7 import CAST7
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -71,7 +72,7 @@ if __name__ == '__main__':
                         help='Test the specified model with another sequence length')
     parser.add_argument('--saved_model', default='model.pt',
                         type=str, help='File to save model checkpoints')
-    parser.add_argument('--seed', default=None, type=int)
+    parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--log_scale', type=bool, default=False)
     parser.add_argument('--input_context', type=bool, default=False)
     parser.add_argument('--model', default="cast", required=True,
@@ -109,7 +110,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec", "sasrec_static"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6","cast_7", "sasrec", "sasrec_static"]
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -123,10 +124,12 @@ if __name__ == '__main__':
     elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
-            model = CAST5(usernum, itemnum, ratingnum, args)
+        model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_6":
         model = CAST6(usernum, itemnum, ratingnum, args)
-    elif args.model == "sasrec": 
+    elif args.model == "cast_7":
+        model = CAST7(usernum, itemnum, ratingnum, args)
+    elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
     elif args.model == "sasrec_static":
         model = SASRec(usernum, itemnum, args, static=True)

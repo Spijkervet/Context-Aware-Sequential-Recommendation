@@ -12,6 +12,11 @@ import numpy as np
 import math
 
 
+def constant_timeseq_encoding(maxlen):
+    timeseq = np.array([i for i in range(maxlen, 0, -1)], dtype=np.int32) # oldest value is largest, most recent is 0
+    timeseq = tf.convert_to_tensor(timeseq.reshape(1, maxlen), dtype=tf.int32)
+    return timeseq
+
 def timeseq_encoding(timeseq, max_interval):
     # Add one to include the zero padding, which will be sliced:
     timeseq = tf.one_hot(timeseq, depth=max_interval)
