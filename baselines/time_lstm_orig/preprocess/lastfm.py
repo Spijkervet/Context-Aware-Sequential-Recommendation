@@ -25,8 +25,6 @@ def generate_data():
                        header=None,
                        names=['userid', 'timestamp', 'artid', 'artname', 'traid', 'tranname'])
 
-    print(data)
-    exit()
     if os.path.exists(index2item_path) and os.path.exists(item2index_path):
         index2item = pickle.load(open(index2item_path, 'rb'))
         item2index = pickle.load(open(item2index_path, 'rb'))

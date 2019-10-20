@@ -1,0 +1,23 @@
+{
+  "dataset": "data/ml-1m.txt",
+  "limit": null,
+  "maxlen": 200,
+  "train_dir": "cast_6",
+  "batch_size": 128,
+  "lr": 0.001,
+  "num_epochs": 201,
+  "max_norm": 5.0,
+  "hidden_units": 50,
+  "num_blocks": 2,
+  "num_heads": 1,
+  "dropout_rate": 0.2,
+  "l2_emb": 0.0,
+  "bin_in_hours": 48,
+  "max_bins": 200,
+  "saved_model": "model.pt",
+  "test_baseline": false,
+  "seed": 42,
+  "log_scale": false,
+  "input_context": false,
+  "model": "cast_6"
+}

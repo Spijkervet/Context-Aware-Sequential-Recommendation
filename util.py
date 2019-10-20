@@ -3,6 +3,7 @@ import copy
 import random
 import numpy as np
 import math
+from tqdm import tqdm
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 
@@ -225,7 +226,7 @@ def evaluate(model, dataset, args, sess):
         users = random.sample(range(1, usernum + 1), 10000)
     else:
         users = range(1, usernum + 1)
-    for u in users:
+    for u in tqdm(users):
         if len(train[u]) < 1 or len(test[u]) < 1:
             continue
 
@@ -279,6 +280,23 @@ def evaluate(model, dataset, args, sess):
             while t in rated:
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
+        
+        if args.test_model:
+
+            if not args.test_seq_len:
+                raise Exception('test_seq_len is not provided')
+             
+            max_seq_len = args.maxlen
+            test_seq_len = args.test_seq_len
+
+            # If test sequence length is larger than max, then set it equal to (sanity check)
+            if test_seq_len > max_seq_len:
+                test_seq_len = max_seq_len
+
+            seq[:-test_seq_len] = 0
+            timeseq[:-test_seq_len] = 0
+            hours_seq[:-test_seq_len] = 0
+            days_seq[:-test_seq_len] = 0
 
         predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
         predictions = predictions[0]
@@ -290,9 +308,6 @@ def evaluate(model, dataset, args, sess):
         if rank < 10:
             NDCG += 1 / np.log2(rank + 2)
             HT += 1
-        if valid_user % 100 == 0:
-            print('.', end='')
-            sys.stdout.flush()
 
     return NDCG / valid_user, HT / valid_user
 
@@ -309,7 +324,7 @@ def evaluate_valid(model, dataset, args, sess):
         users = random.sample(list(range(1, usernum + 1)), 10000)
     else:
         users = list(range(1, usernum + 1))
-    for u in users:
+    for u in tqdm(users):
         if len(train[u]) < 1 or len(valid[u]) < 1:
             continue
 
@@ -353,6 +368,25 @@ def evaluate_valid(model, dataset, args, sess):
                 t = np.random.randint(1, itemnum + 1)
             item_idx.append(t)
 
+        if args.test_model:
+
+            if not args.test_seq_len:
+                raise Exception('test_seq_len is not provided')
+             
+            max_seq_len = args.maxlen
+            test_seq_len = args.test_seq_len
+
+            # If test sequence length is larger than max, then set it equal to (sanity check)
+            if test_seq_len > max_seq_len:
+                test_seq_len = max_seq_len
+
+            seq[:-test_seq_len] = 0
+            timeseq[:-test_seq_len] = 0
+            hours_seq[:-test_seq_len] = 0
+            days_seq[:-test_seq_len] = 0
+
+
+
         predictions = -model.predict(sess, [u], [seq], item_idx, timeseq=[timeseq], hours_seq=[hours_seq], days_seq=[days_seq])
         predictions = predictions[0]
 
@@ -363,8 +397,5 @@ def evaluate_valid(model, dataset, args, sess):
         if rank < 10:
             NDCG += 1 / np.log2(rank + 2)
             HT += 1
-        if valid_user % 100 == 0:
-            print('.', end='')
-            sys.stdout.flush()
 
     return NDCG / valid_user, HT / valid_user

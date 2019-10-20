@@ -40,8 +40,8 @@ if __name__ == '__main__':
     # DATASET PARAMETERS
     parser.add_argument('--dataset', required=True,
                         help='Location of pre-processed dataset')
-    parser.add_argument('--limit', default=None, type=int,
-                        help='Limit the number of datapoints')
+    # parser.add_argument('--limit', default=None, type=int,
+    #                     help='Limit the number of datapoints')
     parser.add_argument('--maxlen', default=50, type=int,
                         help='Maximum length of user item sequence, for zero-padding')
 
@@ -65,12 +65,15 @@ if __name__ == '__main__':
     parser.add_argument('--max_bins', default=200, type=int)
 
     # MISC.
+    parser.add_argument('--test_model', type=str, default=None,
+                        help='Test the specified model with saved parameters')
+    parser.add_argument('--test_seq_len', type=int, default=None,
+                        help='Test the specified model with another sequence length')
     parser.add_argument('--saved_model', default='model.pt',
                         type=str, help='File to save model checkpoints')
-    parser.add_argument('--test_baseline', default=False, action='store_true')
     parser.add_argument('--seed', default=None, type=int)
-    parser.add_argument('--log_scale', default=False, action='store_true')
-    parser.add_argument('--input_context', default=False, action='store_true')
+    parser.add_argument('--log_scale', type=bool, default=False)
+    parser.add_argument('--input_context', type=bool, default=False)
     parser.add_argument('--model', default="cast", required=True,
                         help="model to use from {cast, sasrec, castsp}")
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
@@ -82,22 +85,9 @@ if __name__ == '__main__':
         logger.info('Pre-process the data first using the --preprocess flag')
         sys.exit()
 
-    # Check if training directory structure exists
-    now = datetime.now()
-    TRAIN_FILES_PATH = os.path.join(
-        MODEL_PATH, os.path.basename(args.dataset), '{}_{}'.format(args.train_dir, now.strftime("%m-%d-%Y-%H-%M-%S")))
-    if not os.path.exists(TRAIN_FILES_PATH):
-        os.makedirs(TRAIN_FILES_PATH)
-
-    # Save parameters to file for reproduction
-    with open(os.path.join(TRAIN_FILES_PATH, 'params.txt'), 'w') as f:
-        json.dump(args.__dict__, f, indent=2)
-
     # Partition data
     dataset = data_partition(args.dataset, args.log_scale)
     [train, valid, test, usernum, itemnum, ratingnum] = dataset
-    print(len(train[1]))
-    print(train[1])
     num_batch = round(len(train) / args.batch_size)
     print('usernum', usernum, 'itemnum', itemnum)
 
@@ -111,7 +101,6 @@ if __name__ == '__main__':
         tf.reset_default_graph()
         tf.set_random_seed(args.seed)
 
-    f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
     config = tf.ConfigProto()
     # config.gpu_options.allow_growth = True
     # config.allow_soft_placement = True
@@ -120,7 +109,11 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
+<<<<<<< Updated upstream
     MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec"]
+=======
+    MODELS = ["cast_1", "cast_2", "cast_3", "cast_4", "sasrec"]
+>>>>>>> Stashed changes
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -148,14 +141,57 @@ if __name__ == '__main__':
 
     sess.run(tf.global_variables_initializer())
 
-    # Add TensorBoard
-    writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
+    # Set train dir
+    now = datetime.now()
+    TRAIN_FILES_PATH = os.path.join(
+        MODEL_PATH, os.path.basename(args.dataset), '{}_{}'.format(args.train_dir, now.strftime("%m-%d-%Y-%H-%M-%S")))
 
     # Allow saving of model
     MODEL_SAVE_PATH = os.path.join(TRAIN_FILES_PATH, 'model.ckpt')
     saver = tf.train.Saver()
-    if os.path.exists(MODEL_SAVE_PATH):
-        saver.restore(sess, MODEL_SAVE_PATH)
+
+    if args.test_model:
+        if os.path.exists(args.test_model):
+            print('loaded saved model {}'.format(args.test_model))
+            saver.restore(sess, tf.train.latest_checkpoint(args.test_model))
+
+            # Start testing
+            u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
+            auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
+                                                           model.merged, model.activations],
+
+                                                          {model.u: u, model.input_seq: seq, model.pos: pos,
+                                                           model.neg: neg, model.time_seq: timeseq,
+                                                           model.hours: hours_seq,
+                                                           model.days: days_seq,
+                                                           model.is_training: True})
+
+            print(auc)
+            print(loss)
+
+            t_test = evaluate(model, dataset, args, sess)
+            logger.info('test (NDCG@10: %.4f, HR@10: %.4f)' %
+                        (t_test[0], t_test[1]))
+
+            with open(os.path.join(args.test_model, 'test_seq_len.txt'), 'a') as f:
+                f.write('{},{},{}\n'.format(args.test_seq_len, t_test[0], t_test[1]))
+
+        else:
+            print('{} not found'.format(args.test_model))
+        exit(0)
+
+    # Check if training directory structure exists
+    if not os.path.exists(TRAIN_FILES_PATH):
+        os.makedirs(TRAIN_FILES_PATH)
+
+    # Save parameters to file for reproduction
+    with open(os.path.join(TRAIN_FILES_PATH, 'params.txt'), 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
+
+    f = open(os.path.join(TRAIN_FILES_PATH, 'log.txt'), 'w')
+
+    # Add TensorBoard
+    writer = tf.summary.FileWriter(TRAIN_FILES_PATH, sess.graph)
 
     T = 0.0
     t0 = time.time()
@@ -165,14 +201,14 @@ if __name__ == '__main__':
                 u, seq, pos, neg, timeseq, ratings_seq, hours_seq, days_seq, orig_seq = sampler.next_batch()
 
                 auc, loss, _, summary, activations = sess.run([model.auc, model.loss, model.train_op,
-                                                               model.merged, model.activations], 
+                                                               model.merged, model.activations],
 
                                                               {model.u: u, model.input_seq: seq, model.pos: pos,
                                                                model.neg: neg, model.time_seq: timeseq,
                                                                model.hours: hours_seq,
                                                                model.days: days_seq,
                                                                model.is_training: True})
-            
+
             if summary is not None:
                 writer.add_summary(summary, epoch)
                 writer.flush()
