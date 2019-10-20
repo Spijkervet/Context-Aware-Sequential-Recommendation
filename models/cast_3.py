@@ -69,9 +69,8 @@ class CAST3():
             for i in range(args.num_blocks):
                 with tf.variable_scope("timeseq_num_blocks_%d" % i):
                     # Self-attention
-                    self.timeseq_queries = normalize(self.tseq)
-                    self.timeseq_keys = self.tseq
-                    self.tseq = multihead_attention(self, queries=normalize(self.tseq),
+                    self.tseq = multihead_attention(self,
+                                                    queries=normalize(self.tseq),
                                                     keys=self.tseq,
                                                     num_units=args.hidden_units,
                                                     num_heads=args.num_heads,
@@ -132,7 +131,8 @@ class CAST3():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(self, queries=self.queries,
+                    self.seq = multihead_attention(self,
+                                                   queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,

@@ -73,14 +73,9 @@ def writePreprocessedData(inputFile,finalCart):
 	with open(idConverterFile,'w') as the_file:
 		json.dump(itemIdConverter,the_file)
 
-# OUTPUT_FILE = "STAR_Books.txt"
-# OUTPUT_FILE = "STAR_ml-1m.txt"
-OUTPUT_FILE = "STAR_sample_Books.txt"
-
 def writeAWSData(inputFile,finalCart):
 	# Clear file
-	outputFile = inputFile.split("/")[-1]
-	outputFile = "STAR_"+outputFile
+	outputFile = OUTPUT_FILE.split("/")[-1]
 	idConverterFile = "../../data/idConv_"+outputFile
 	outputFile = "../../data/"+outputFile
 	with open(outputFile, 'w') as the_file:
@@ -149,7 +144,8 @@ def processCart(cart):
 		# day = dayDict[date.fromtimestamp(curSet[TIMESTAMP_STR]).strftime('%A')]
 		day = dayDict[(time.strftime('%A', time.localtime(curSet[TIMESTAMP_STR])))]
 		# Hours context (24hr)
-		hour = int(time.strftime('%H', time.localtime(curSet[TIMESTAMP_STR])))
+		hour = int(time.strftime('%H', time.localtime(curSet[TIMESTAMP_STR]))) + 1
+
 		# Interval context (30 or greater) (32 in total)
 		# Note we start interval context with 1 (do this model code, here just start with 0)
 		interval = None
@@ -180,7 +176,7 @@ def initialProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,timestamp = line.split(',')
+			user,item,rating,timestamp = line.split(',')
 			isDup = isDuplicate(item,user,timestamp)
 			if(not isDup):
 				addToDict(item,originalItemFreq)
@@ -196,7 +192,7 @@ def processFile(inputFile):
 		for line in infile:
 			LineCount+=1
 			line = line.replace('\n','')
-			user,item,timestamp = line.split(',')
+			user,item,rating,timestamp = line.split(',')
 			isDup = isDuplicate(item,user,timestamp)
 			if(originalItemFreq[item] >= ITEM_LIMIT):
 				addToDict(user,originalUserFreq)
@@ -215,7 +211,7 @@ def reProcessFile(inputFile):
 		p('filename: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,timestamp = line.split(',')
+			user,item,rating,timestamp = line.split(',')
 			if(user in originalUserFreq and 
 				originalUserFreq[user] >= LIMIT):
 				addToDict(item,itemFreq)
@@ -275,7 +271,7 @@ def n_initProcess(inputFile,userRate,itemRate):
 		p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,timestamp = line.split(' ')
+			user,item,rating,timestamp = line.split(' ')
 			addToDict(user,userRate)
 			addToDict(item,itemRate)
 			totalRating+=1
@@ -309,7 +305,7 @@ def n_reprocess(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,timestamp= line.split(' ')
+			user,item,rating,timestamp = line.split(' ')
 			if user in userRate and item in itemRate:
 				if(userRate[user] < LIMIT):
 					print('user: '+str(user))
@@ -331,7 +327,7 @@ def n_finalRun(inputFile,userRate,itemRate):
 		# p('inputFile: '+str(inputFile))
 		for line in infile:
 			line = line.replace('\n','')
-			user,item,timestamp = line.split(' ')
+			user,item,rating,timestamp = line.split(' ')
 			if user in userRate and item in itemRate:
 				if user not in userData:
 					userData[user] = []
@@ -387,22 +383,24 @@ def run(inputFile):
 
 if __name__ == "__main__":
 	# STARTING POINT
-	# OUTPUT_FILE = "STAR_Books.txt"
-	OUTPUT_FILE = "STAR_Beauty.txt"
-	# OUTPUT_FILE = "STAR_ml-1m_5_200.txt"
+	# dataset="Books.txt"
+	# dataset="Beauty.txt"
+	dataset="ml-1m"
 
 	LIMIT = 5
 	ITEM_LIMIT = LIMIT
 	# 200 for MovieLens
-	MAX_LIMIT = 50
+	MAX_LIMIT = 200
+	dataset_name = dataset.split(".")[0]
+	OUTPUT_FILE = f"STAR_{dataset_name}_{LIMIT}_{MAX_LIMIT}.txt"
 
 	gStart = time.time()
 	for i in range(len(inputFileList)):
 		# analyseFile('../../AWS/'+str(inputFileList[i]))
 		start_time = time.time()
 		# run('../../data/Books.txt')
-		run('../../data/Beauty.txt')
-		# run('../../data/ml-1m.txt')
+		# run('../../data/Beauty.txt')
+		run('../../data/ml-1m.txt')
 		# run('../../data/sample_Books_2.txt')
 		e = time.time() - start_time
 		print('{:02d}:{:02d}:{:02d}'.format(int(e // 3600), int((e % 3600 // 60)), int(e % 60)))

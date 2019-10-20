@@ -1,8 +1,10 @@
 from modules import *
 
 # Context Aware Sequential Transformer using a Sinusoidal Positional embedding
-# Elementwise addition of the transition context
-class CAST1():
+# Addition of the static positional encoding
+# Concatenation of input context before the transformer
+# Input context is also fed through a transformer before concatenation
+class CAST8():
     def __init__(self, usernum, itemnum, ratingnum, args, reuse=None):
 
         if args.seed:
@@ -19,46 +21,78 @@ class CAST1():
         self.hours = tf.placeholder(tf.int32, shape=(None, args.maxlen))
         self.days = tf.placeholder(tf.int32, shape=(None, args.maxlen))
 
-
-
         pos = self.pos
         neg = self.neg
         mask = tf.expand_dims(tf.to_float(tf.not_equal(self.input_seq, 0)), -1)
         self.mask = mask
 
-        # CONTEXT-AWARE
-        print('CONTEXT-AWARE MODULE')
-        with tf.variable_scope("CONTEXT", reuse=reuse):
-            self.tseq, item_emb_table = embedding(self.time_seq,
-                                        vocab_size=args.max_bins+1,
-                                        num_units=args.hidden_units,
-                                        zero_pad=True,
-                                        scale=True,
-                                        l2_reg=args.l2_emb,
-                                        scope="time_embeddings",
-                                        with_t=True,
-                                        reuse=reuse)
+        # INPUT-CONTEXT AWARE
+        print('INPUT-CONTEXT-AWARE MODULE')
+        with tf.variable_scope("INPUT-CONTEXT", reuse=reuse):
+            self.hours_seq, _ = embedding(self.hours,
+                                          # anton's magic number (24 hours + zero padding)
+                                          vocab_size=25,
+                                          num_units=args.hidden_units,
+                                          zero_pad=True,
+                                          scale=True,
+                                          l2_reg=args.l2_emb,
+                                          scope="hours_embeddings",
+                                          with_t=True,
+                                          reuse=reuse)
+
+            self.days_seq, _ = embedding(self.days,
+                                         # anton's magic number (7 days + zero padding)
+                                         vocab_size=8,
+                                         num_units=args.hidden_units,
+                                         zero_pad=True,
+                                         scale=True,
+                                         l2_reg=args.l2_emb,
+                                         scope="days_embeddings",
+                                         with_t=True,
+                                         reuse=reuse)
 
             # Self-attention blocks
             # Build blocks
             for i in range(args.num_blocks):
-                with tf.variable_scope("timeseq_num_blocks_%d" % i):
+                with tf.variable_scope("hours_seq_num_blocks_%d" % i):
                     # Self-attention
-                    self.tseq = multihead_attention(self,
-                                                    queries=normalize(self.tseq),
-                                                    keys=self.tseq,
-                                                    num_units=args.hidden_units,
-                                                    num_heads=args.num_heads,
-                                                    dropout_rate=args.dropout_rate,
-                                                    is_training=self.is_training,
-                                                    causality=True,
-                                                    scope="self_attention")
+                    self.hours_seq = multihead_attention(self,
+                                                         queries=normalize(self.hours_seq),
+                                                         keys=self.hours_seq,
+                                                         num_units=args.hidden_units,
+                                                         num_heads=args.num_heads,
+                                                         dropout_rate=args.dropout_rate,
+                                                         is_training=self.is_training,
+                                                         causality=True,
+                                                         scope="self_attention")
 
                     # Feed forward
-                    self.tseq = feedforward(normalize(self.tseq), num_units=[args.hidden_units, args.hidden_units],
+                    self.hours_seq = feedforward(normalize(self.hours_seq), num_units=[args.hidden_units, args.hidden_units],
                                             dropout_rate=args.dropout_rate, is_training=self.is_training)
-                    self.tseq *= mask
-            self.tseq = normalize(self.tseq)
+                    self.hours_seq *= mask
+
+            self.hours_seq = normalize(self.hours_seq)
+
+            # Self-attention blocks
+            # Build blocks
+            for i in range(args.num_blocks):
+                with tf.variable_scope("days_seq_num_blocks_%d" % i):
+                    # Self-attention
+                    self.days_seq = multihead_attention(self,
+                                                         queries=normalize(self.days_seq),
+                                                         keys=self.days_seq,
+                                                         num_units=args.hidden_units,
+                                                         num_heads=args.num_heads,
+                                                         dropout_rate=args.dropout_rate,
+                                                         is_training=self.is_training,
+                                                         causality=True,
+                                                         scope="self_attention")
+
+                    # Feed forward
+                    self.days_seq = feedforward(normalize(self.days_seq), num_units=[args.hidden_units, args.hidden_units],
+                                                 dropout_rate=args.dropout_rate, is_training=self.is_training)
+                    self.days_seq *= mask
+            self.days_seq = normalize(self.days_seq)
 
         with tf.variable_scope("SASRec", reuse=reuse):
             # sequence embedding, item embedding table
@@ -77,19 +111,14 @@ class CAST1():
 
             # Positional Encoding
             # positional_encoding(dim, sentence_length, dtype=tf.float32)
-            positional_embedding = positional_encoding(
+            static_positional_embedding = positional_encoding(
                 args.hidden_units,
                 args.maxlen,
             )
 
             # Sinusoidal Positional Embedding
             # ADD TRANSITION CONTEXT
-            self.seq += positional_embedding
-            self.seq += self.tseq
-            self.seq = tf.layers.dropout(self.seq,
-                                         rate=args.dropout_rate,
-                                         training=tf.convert_to_tensor(self.is_training))
-            self.seq *= self.mask
+            self.seq += static_positional_embedding
 
             # Self-attention blocks
             # Build blocks
@@ -99,8 +128,7 @@ class CAST1():
                     # Self-attention
                     self.queries = normalize(self.seq)
                     self.keys = self.seq
-                    self.seq = multihead_attention(self,
-                                                   queries=self.queries,
+                    self.seq = multihead_attention(self, queries=self.queries,
                                                    keys=self.keys,
                                                    num_units=args.hidden_units,
                                                    num_heads=args.num_heads,
@@ -115,6 +143,7 @@ class CAST1():
                     self.seq *= mask
 
             self.seq = normalize(self.seq)
+
 
         pos = tf.reshape(pos, [tf.shape(self.input_seq)[0] * args.maxlen])
         neg = tf.reshape(neg, [tf.shape(self.input_seq)[0] * args.maxlen])
@@ -158,5 +187,5 @@ class CAST1():
 
     def predict(self, sess, u, seq, item_idx, timeseq=None, hours_seq=None, days_seq=None):
         return sess.run(self.test_logits,
-                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.test_item: item_idx, self.is_training: False})
-
+                        {self.u: u, self.input_seq: seq, self.time_seq: timeseq, self.hours: hours_seq,
+                         self.days: days_seq, self.test_item: item_idx, self.is_training: False})

@@ -14,6 +14,7 @@ from models.cast_4 import CAST4
 from models.cast_5 import CAST5
 from models.cast_6 import CAST6
 from models.cast_7 import CAST7
+from models.cast_8 import CAST8
 from models.sasrec import SASRec
 
 from tqdm import tqdm
@@ -23,6 +24,7 @@ import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
 
+MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6","cast_7", "cast_8","sasrec", "sasrec_static"]
 
 if __name__ == '__main__':
 
@@ -75,8 +77,8 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--log_scale', type=bool, default=False)
     parser.add_argument('--input_context', type=bool, default=False)
-    parser.add_argument('--model', default="cast", required=True,
-                        help="model to use from {cast, sasrec, castsp}")
+    parser.add_argument('--model', default="cast_1", required=True,
+                        help="model to use from"+str(MODELS))
     # parser.add_argument('--device', default='cuda', type=str, help='Device to run model on') #TODO: GPU
 
     args = parser.parse_args()
@@ -110,7 +112,6 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6","cast_7", "sasrec", "sasrec_static"]
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -129,6 +130,8 @@ if __name__ == '__main__':
         model = CAST6(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_7":
         model = CAST7(usernum, itemnum, ratingnum, args)
+    elif args.model == "cast_8":
+        model = CAST8(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
     elif args.model == "sasrec_static":
@@ -210,9 +213,9 @@ if __name__ == '__main__':
                                                                model.days: days_seq,
                                                                model.is_training: True})
 
-            if summary is not None:
-                writer.add_summary(summary, epoch)
-                writer.flush()
+            # if summary is not None:
+            #     writer.add_summary(summary, epoch)
+            #     writer.flush()
 
             if epoch % 20 == 0:
                 save_path = saver.save(sess, MODEL_SAVE_PATH)
