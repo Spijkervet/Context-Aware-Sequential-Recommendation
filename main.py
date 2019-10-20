@@ -68,7 +68,7 @@ if __name__ == '__main__':
     parser.add_argument('--saved_model', default='model.pt',
                         type=str, help='File to save model checkpoints')
     parser.add_argument('--test_baseline', default=False, action='store_true')
-    parser.add_argument('--seed', default=None, type=int)
+    parser.add_argument('--seed', default=42, type=int)
     parser.add_argument('--log_scale', default=False, action='store_true')
     parser.add_argument('--input_context', default=False, action='store_true')
     parser.add_argument('--model', default="cast", required=True,
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
 
     # MODEL
-    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec"]
+    MODELS = ["cast_1","cast_2", "cast_3", "cast_4","cast_5","cast_6", "sasrec", "sasrec_static"]
     if args.model.lower() not in MODELS:
         print("provide model from", MODELS)
         sys.exit(0)
@@ -134,11 +134,13 @@ if __name__ == '__main__':
     elif args.model == "cast_4":
         model = CAST4(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_5":
-        model = CAST5(usernum, itemnum, ratingnum, args)
+            model = CAST5(usernum, itemnum, ratingnum, args)
     elif args.model == "cast_6":
         model = CAST6(usernum, itemnum, ratingnum, args)
     elif args.model == "sasrec" or args.test_baseline:
         model = SASRec(usernum, itemnum, args)
+    elif args.model == "sasrec_static":
+        model = SASRec(usernum, itemnum, args, static=True)
 
     # SAMPLER
     print('usernum', usernum, 'itemnum', itemnum)

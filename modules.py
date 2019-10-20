@@ -9,6 +9,7 @@ https://www.github.com/kyubyong/transformer
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+import math
 
 
 def timeseq_encoding(timeseq, max_interval):
@@ -22,10 +23,26 @@ def positional_encoding(dim, sentence_length, dtype=tf.float32):
 
     encoded_vec = np.array([pos/np.power(10000, 2*i/dim)
                             for pos in range(sentence_length) for i in range(dim)])
+
+    # encoded_vec = np.array([pos/np.power(10000, 2*i/dim)
+    #                        for i in range(dim) for pos in range(sentence_length)])
     encoded_vec[::2] = np.sin(encoded_vec[::2])
     encoded_vec[1::2] = np.cos(encoded_vec[1::2])
+    encoding = tf.convert_to_tensor(encoded_vec.reshape([sentence_length, dim]), dtype=dtype)
+    return encoding
 
-    return tf.convert_to_tensor(encoded_vec.reshape([sentence_length, dim]), dtype=dtype)
+# def positional_encoding(
+#         hidden_size, length, min_timescale=1.0, max_timescale=1.0e4):
+#     position = tf.cast(tf.range(length), tf.float32)
+#     num_timescales = hidden_size // 2
+#     log_timescale_increment = (
+#             math.log(float(max_timescale) / float(min_timescale)) /
+#             (tf.cast(num_timescales, tf.float32) - 1))
+#     inv_timescales = min_timescale * tf.exp(
+#         tf.cast(tf.range(num_timescales), tf.float32) * -log_timescale_increment)
+#     scaled_time = tf.expand_dims(position, 1) * tf.expand_dims(inv_timescales, 0)
+#     signal = tf.concat([tf.sin(scaled_time), tf.cos(scaled_time)], axis=1)
+#     return signal
 
 
 def normalize(inputs,
