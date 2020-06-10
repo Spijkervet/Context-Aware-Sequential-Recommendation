@@ -1,4 +1,4 @@
-# Information Retrieval 2
+# Context-Aware Sequential Recommendation
 This is the Github repository containing the code for the Context-Aware Sequential Recommendation project for the Information Retrieval 2 course at the University of Amsterdam
 
 <img src="model.png" height=800/>
